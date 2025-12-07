@@ -1,11 +1,10 @@
 const mongoose = require('mongoose')
-const User = require('./models/user-model')
-const Team = require('./models/team-model')
-const { mongodbUri } = require('./config')
-const pointService = require('./services/point-service')
-
-const teamService = require('./services/team-service')
-const userService = require('./services/user-service')
+const User = require('../src/models/user-model')
+const Team = require('../src/models/team-model')
+const { mongodbUri } = require('../src/config')
+const pointService = require('../src/services/point-service')
+const teamService = require('../src/services/team-service')
+const userService = require('../src/services/user-service')
 
 async function populateData() {
   try {
@@ -26,7 +25,7 @@ async function populateData() {
         let team = await Team.findOne({ name: teamName })
         if (!team) {
           team = await teamService.createTeam(teamName, guild)
-          console.log(`Created team ${teamName} for guild ${guild}`)
+          // console.log(`Created team ${teamName} for guild ${guild}`)
         }
         teams.push(team)
       }
@@ -46,7 +45,7 @@ async function populateData() {
           await user.save()
           randomTeam.members.push(user._id)
           await randomTeam.save()
-          console.log(`Created user ${userId} in guild ${guild} and assigned to team ${randomTeam.name}`)
+          // console.log(`Created user ${userId} in guild ${guild} and assigned to team ${randomTeam.name}`)
         }
         
         // Award random points for several events.
@@ -70,11 +69,14 @@ async function populateData() {
         
         try {
           await pointService.addPoints(user.userId, randomPoints)
-          console.log(`Awarded random points to user ${user.userId}`)
+          // console.log(`Awarded random points to user ${user.userId}`)
         } catch (error) {
           console.error(`Error awarding points to user ${user.userId}:`, error)
         }
       }
+
+      // log confirmation message when the whole guild is done
+      console.log(`✓ Completed guild: ${guild} (${numberOfUsers} users, ${numberOfTeams} teams)`)
     }
     console.log("Test data population complete.")
     process.exit(0)
