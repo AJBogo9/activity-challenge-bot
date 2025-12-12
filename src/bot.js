@@ -1,5 +1,5 @@
 const { Telegraf, Scenes, session } = require('telegraf')
-const { telegramToken, commands, responses, maxUsage } = require('./config')
+const { telegramToken } = require('./config')
 const flows = require('./flows')
 const https = require('https')
 const commandScenes = require('./config/commands')
@@ -21,30 +21,6 @@ commandScenes.forEach(({ command, scene, private: isPrivate }) => {
   } else {
     bot.command(command, (ctx) => ctx.scene.enter(scene))
   }
-})
-
-const usedCommands = {}
-commands.forEach(cmd => {
-  usedCommands[cmd] = new Set()
-})
-
-commands.forEach(cmd => {
-  bot.command(cmd, async (ctx) => {
-    try {
-      await ctx.deleteMessage()
-    } catch (error) {
-      console.error("Failed to delete message:", error)
-    }
-    const userId = ctx.from.id
-    if (usedCommands[cmd].size >= maxUsage) {
-      return 
-    }
-    if (usedCommands[cmd].has(userId)) {
-      return
-    }
-    usedCommands[cmd].add(userId)
-    return ctx.replyWithSticker(responses[cmd])
-  })
 })
 
 bot.catch((err, ctx) => { 
