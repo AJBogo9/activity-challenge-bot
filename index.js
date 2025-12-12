@@ -1,6 +1,6 @@
-const { connectDatabase, disconnectDatabase } = require('./database')
-const bot = require('./bot')
-const scheduleReminders = require('./utils/schedule-reminders')
+const { connectDatabase, disconnectDatabase } = require('./src/database')
+const bot = require('./src/bot')
+const scheduleReminders = require('./src/utils/schedule-reminders')
 
 async function handleError(error) {
   console.error('Unexpected error occurred:', error)

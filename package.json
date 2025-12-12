@@ -5,9 +5,11 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "populate": "node populateTestData.js",
-    "generate-stats": "node generateStatsPDF.js",
-    "generate-charts": "node generateCharts.js"
+    "populate": "node scripts/populateTestData.js",
+    "clear": "node scripts/clear.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -26,7 +28,7 @@
     "bot"
   ],
   "author": "Eppu Ruotsalainen",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/EppuRuotsalainen/summer-body-bot/issues"
   },
