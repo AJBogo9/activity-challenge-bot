@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { GUILDS, POINT_CATEGORIES } = require('../config/constants')
 
 const teamSchema = new mongoose.Schema({
   name: {
@@ -12,19 +13,10 @@ const teamSchema = new mongoose.Schema({
   }],
   guild: {
     type: String, 
-    enum: ['TiK', 'DG', 'FK', 'PT', 'AS', 'SIK', 'KIK', 'MK', 'IK', 'Athene', 'Prodeko', 'Inkubio', 'KY', 'TOKYO', 'AK', 'TF', 'PJK', 'VK', 'KK'], 
+    enum: GUILDS, 
     required: true 
   },
-  points: {
-    exercise: { type: Number, default: 0 },
-    sportsTurn: { type: Number, default: 0 },
-    trySport: { type: Number, default: 0 },
-    tryRecipe: { type: Number, default: 0 },
-    goodSleep: { type: Number, default: 0 },
-    meditate: { type: Number, default: 0 },
-    lessAlc: { type: Number, default: 0 },
-    total: { type: Number, default: 0 },
-  },
+  points: POINT_CATEGORIES,
 })
 
 teamSchema.methods.addUserPoints = function(userPoints) {
