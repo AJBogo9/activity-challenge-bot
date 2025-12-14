@@ -1,0 +1,24 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: summer-body-db
+    restart: always
+
+  metabase:
+    image: metabase/metabase:latest
+    container_name: summer-body-metabase
+    ports:
+      - "3000:3000"
+    environment:
+      MB_DB_TYPE: h2
+      MB_DB_FILE: /metabase.db
+    restart: always
+
+  app:
+    build: .
+    container_name: summer-body-bot
+    restart: always
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/summer-body-bot
+    depends_on:
+      - mongodb

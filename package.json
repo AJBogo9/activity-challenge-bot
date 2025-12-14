@@ -4,9 +4,13 @@
   "description": "A Telegram bot for tracking competition scores among Aalto guilds and teams.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "populate": "node scripts/populateTestData.js",
-    "clear": "node scripts/clear.js",
+    "start": "bun index.ts",
+    "populate": "bun scripts/populateTestData.ts",
+    "clear": "bun scripts/clear.ts",
+    "pod:populate": "podman exec -it summer-body-bot bun scripts/populateTestData.ts",
+    "pod:clear": "podman exec -it summer-body-bot bun scripts/clear.ts",
+    "pod:start": "podman-compose up -d --build",
+    "pod:remove": "podman-compose down",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
@@ -46,6 +50,12 @@
     "d3-node": "^4.0.1"
   },
   "devDependencies": {
-    "jest": "^29.7.0"
+    "@types/mongoose": "^5.11.97",
+    "@types/node": "^25.0.2",
+    "@types/node-cron": "^3.0.11",
+    "@types/node-schedule": "^2.1.8",
+    "@types/pdfkit": "^0.17.4",
+    "jest": "^29.7.0",
+    "typescript": "^5.9.3"
   }
 }
