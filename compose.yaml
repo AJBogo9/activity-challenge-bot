@@ -3,6 +3,9 @@ services:
     image: mongo:latest
     container_name: summer-body-db
     restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
 
   metabase:
     image: metabase/metabase:latest
@@ -19,6 +22,6 @@ services:
     container_name: summer-body-bot
     restart: always
     environment:
-      MONGODB_URI: mongodb://mongodb:27017/summer-body-bot
+      MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongodb:27017/summer-body-bot?authSource=admin
     depends_on:
       - mongodb

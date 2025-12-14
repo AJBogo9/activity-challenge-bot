@@ -12,11 +12,11 @@ SummerBodyBot is a Telegram bot designed to track and record competition scores 
 
 ## Tech Stack
 
-- **Node.js** - Runtime environment
+- **Bun** - Runtime environment
 - **Telegraf** - Telegram bot framework
 - **MongoDB** - Database
 - **Mongoose** - ODM for MongoDB
-- **Docker** - Containerization (optional)
+- **Podman** - Containerization
 - **Metabase** - Analytics and dashboard
 
 ## Quick Start
@@ -32,10 +32,14 @@ Full development setup: [CONTRIBUTING.md](docs/CONTRIBUTING.md)
 
 ## Available Commands
 ```bash
-npm start                   # Start the bot
-npm run populate            # Add test data
-npm run clear               # Remove test data
-npm test                    # Run tests
+bun start                   # Start the bot
+bun run populate            # Add test data
+bun run clear               # Remove test data
+bun test                    # Run tests
+bun run pod:start           # Start the Podman pod
+bun run pod:remove          # Remove the Podman pod
+bun run pod:populate        # Add test data to the pod
+bun run pod:clear           # Remove test data from the pod
 ```
 ## Project Structure
 ```
