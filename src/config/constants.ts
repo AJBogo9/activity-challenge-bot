@@ -1,4 +1,4 @@
-require('dotenv').config()
+import 'dotenv/config'
 
 export const telegramToken = process.env.TELEGRAM_TOKEN
 export const mongodbUri = process.env.MONGODB_URI

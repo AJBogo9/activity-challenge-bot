@@ -1,4 +1,4 @@
-import { Telegraf, Scenes, session, Context } from 'telegraf'
+import { Telegraf, Scenes, session } from 'telegraf'
 import { telegramToken } from './config'
 import * as flows from './flows'
 import https from 'https'
@@ -6,7 +6,7 @@ import commandScenes from './config/commands'
 import onlyPrivate from './utils/check-private'
 import texts from './utils/texts'
 
-interface MyContext extends Scenes.SceneContext { }
+type MyContext = Scenes.SceneContext
 
 if (!telegramToken) {
   throw new Error('TELEGRAM_TOKEN is not defined in environment variables')
