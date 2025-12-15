@@ -1,8 +1,20 @@
 import js from "@eslint/js";
+import tseslint from "typescript-eslint";
 import globals from "globals";
-import { defineConfig } from "eslint/config";
 
-export default defineConfig([
-  { files: ["**/*.{js,mjs,cjs}"], plugins: { js }, extends: ["js/recommended"], languageOptions: { globals: globals.node } },
-  { files: ["**/*.js"], languageOptions: { sourceType: "commonjs" } },
-]);
+export default tseslint.config(
+    { ignores: ["dist", "node_modules", "coverage"] },
+    {
+        extends: [js.configs.recommended, ...tseslint.configs.recommended],
+        files: ["**/*.{ts,tsx}"],
+        languageOptions: {
+            ecmaVersion: 2020,
+            globals: globals.node,
+        },
+        rules: {
+            "@typescript-eslint/no-explicit-any": "warn",
+            "@typescript-eslint/no-unused-vars": "warn",
+            "no-console": "warn",
+        },
+    }
+);

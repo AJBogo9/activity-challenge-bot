@@ -12,10 +12,11 @@ SummerBodyBot is a Telegram bot designed to track and record competition scores 
 
 ## Tech Stack
 
-- **Node.js** - Runtime environment
+- **Bun** - Runtime environment
 - **Telegraf** - Telegram bot framework
 - **MongoDB** - Database
-- **Docker** - Containerization
+- **Mongoose** - ODM for MongoDB
+- **Podman** - Containerization
 - **Metabase** - Analytics and dashboard
 
 ## Quick Start
@@ -31,10 +32,43 @@ Full development setup: [CONTRIBUTING.md](docs/CONTRIBUTING.md)
 
 ## Available Commands
 ```bash
-npm start                   # Start the bot
-npm run populate            # Add test data
-npm run clear               # Remove test data
-npm test                    # Run tests
+bun start                   # Start the bot
+bun run populate            # Add test data
+bun run clear               # Remove test data
+bun test                    # Run tests
+bun test:watch              # Run tests in watch mode
+bun test:coverage           # Run tests with coverage report
+bun run pod:up              # Start the Podman pod
+bun run pod:down            # Remove the Podman pod
+bun run pod:populate        # Add test data to the pod
+bun run pod:clear           # Remove test data from the pod
+```
+
+## Testing
+
+This project uses [Bun's native test framework](https://bun.sh/docs/test/). Tests are located in the `tests/` directory and mirror the structure of `src/`.
+
+### Running Tests
+
+```bash
+bun test                    # Run all tests
+bun test tests/utils        # Run tests in a specific directory
+bun test:watch              # Run tests in watch mode for development
+```
+
+### Writing Tests
+
+We use Bun's `test` module which is Jest-compatible. Example:
+
+```typescript
+import { describe, expect, test } from "bun:test";
+import { myFunction } from "../src/utils/my-function";
+
+describe("myFunction", () => {
+  test("should return true", () => {
+    expect(myFunction()).toBe(true);
+  });
+});
 ```
 ## Project Structure
 ```

@@ -1,0 +1,26 @@
+import { Context } from 'telegraf'
+
+const onlyPrivate = async (ctx: Context | any, next: () => Promise<void>) => {
+  if (ctx.update && ctx.update.message && ctx.update.message.chat.type === 'private') {
+    return next()
+  }
+
+  try {
+    if (ctx.deleteMessage) {
+      await ctx.deleteMessage()
+    }
+  } catch (err) {
+    console.error("Failed to delete message:", err)
+  }
+
+  try {
+    await ctx.telegram.sendMessage(
+      ctx.from.id,
+      "The command you just sent can only be used in private messages. Use command /help to see available commands."
+    )
+  } catch (err) {
+    console.error("Failed to send private message:", err)
+  }
+}
+
+export default onlyPrivate
