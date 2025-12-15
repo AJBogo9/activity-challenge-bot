@@ -33,11 +33,11 @@ export const feedbackWizard = new Scenes.WizardScene(
       `How many hours do you typically train per week? ${hours} hours.`
     )
 
-    let ratingButtons = []
+    const ratingButtons = []
     for (let i = 1; i <= 10; i++) {
       ratingButtons.push(Markup.button.callback(String(i), `rating_${i}`))
     }
-    let rows = []
+    const rows = []
     for (let i = 0; i < ratingButtons.length; i += 5) {
       rows.push(ratingButtons.slice(i, i + 5))
     }

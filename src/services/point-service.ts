@@ -45,7 +45,7 @@ export const adjustPoints = async (username: string, category: string, quantity:
       if (!activity) throw new Error('Activity not found')
       multiplier = activity.multiplier
     } else {
-      if (PointMultipliers.hasOwnProperty(category)) {
+      if (Object.prototype.hasOwnProperty.call(PointMultipliers, category)) {
         multiplier = PointMultipliers[category]
       } else {
         throw new Error(`Category "${category}" is not supported for adjustment`)
