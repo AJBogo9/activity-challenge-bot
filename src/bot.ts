@@ -28,6 +28,22 @@ commandScenes.forEach(({ command, scene, private: isPrivate }: any) => {
   }
 })
 
+// Global handler for "Back to Menu" button
+bot.hears('« Back to Menu', onlyPrivate, (ctx: any) => ctx.scene.enter('menu_scene'))
+
+// Global handler for "❌ Cancel" button - leaves current scene and goes to menu
+bot.hears('❌ Cancel', onlyPrivate, async (ctx: any) => {
+  await ctx.reply('Action cancelled.')
+  await ctx.scene.enter('menu_scene')
+})
+
+// Global handlers for menu category buttons
+bot.hears('👤 Profile', onlyPrivate, (ctx: any) => ctx.scene.enter('menu_scene'))
+bot.hears('💪 Activities', onlyPrivate, (ctx: any) => ctx.scene.enter('menu_scene'))
+bot.hears('📊 Statistics', onlyPrivate, (ctx: any) => ctx.scene.enter('menu_scene'))
+bot.hears('👥 Teams', onlyPrivate, (ctx: any) => ctx.scene.enter('menu_scene'))
+bot.hears('ℹ️ Information', onlyPrivate, (ctx: any) => ctx.scene.enter('menu_scene'))
+
 bot.catch((err: any, ctx: any) => {
   console.error(`Encountered an error for ${ctx.updateType}`, err)
   try {
@@ -39,12 +55,14 @@ bot.catch((err: any, ctx: any) => {
 
 // Setup bot commands for the menu
 export const setupBotCommands = async () => {
-  const commands = commandScenes
-    .filter(({ description }: any) => description)
-    .map(({ command, description }: any) => ({
-      command,
-      description
-    }))
+  // Only show the main menu command in Telegram's menu button popup
+  await bot.telegram.setMyCommands([
+    { command: 'menu', description: '📋 Open main menu' }
+  ])
 
-  await bot.telegram.setMyCommands(commands)
+  await bot.telegram.setChatMenuButton({
+    menuButton: {
+      type: 'commands'
+    }
+  })
 }

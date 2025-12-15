@@ -16,7 +16,7 @@ export const startWizard = new Scenes.WizardScene(
     instructionsMessage += '4. *Assistance*: Need help? The /help command lists all available commands and their functions.\n\n'
     await ctx.replyWithMarkdownV2(escapeMarkdown(instructionsMessage))
 
-    await ctx.scene.leave()
+    // Go to menu scene to show the keyboard menu
+    await ctx.scene.enter('menu_scene')
   }
 )
-

@@ -80,7 +80,8 @@ registerWizard.action(/^select_guild_(.+)$/, async (ctx: any) => {
     })
     await ctx.editMessageReplyMarkup({})
     await ctx.reply(`You successfully registered to the ${guild} Kesäkuntoon team. You can use /createteam or /jointeam if you want to create or join a team. If you selected the wrong team, you can remove your user and start again with /rmuser.`)
-    return ctx.scene.leave()
+    // Go to menu to show the full registered user menu
+    return ctx.scene.enter('menu_scene')
   } catch (_err) {
     await ctx.editMessageText(texts.actions.error.error)
     return ctx.scene.leave()
