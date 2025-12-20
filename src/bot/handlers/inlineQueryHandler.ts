@@ -93,8 +93,8 @@ export async function handleInlineQuery(ctx: Context) {
   const query = ctx.inlineQuery?.query || ''
   
   // If query is empty, show some popular activities
-  let results = query.length === 0 
-    ? searchableActivities.slice(0, 20) // Show first 20 activities
+  const results = query.length === 0 
+    ? searchableActivities.slice(0, 20)
     : fuse.search(query, { limit: 20 }).map(result => result.item)
 
   // Convert to Telegram inline query results
