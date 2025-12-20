@@ -1,33 +1,30 @@
-import mongoose from 'mongoose'
-import User from '../src/models/user-model'
-import Team from '../src/models/team-model'
-import { mongodbUri } from '../src/config/constants'
+import { sql, closeDb } from '../src/db'
 
 async function clearDatabase() {
-    try {
-        // Connect to MongoDB
-        if (!mongodbUri) {
-            throw new Error("MONGODB_URI is not defined")
-        }
-        await mongoose.connect(mongodbUri)
-        console.log('Connected to MongoDB')
+  try {
+    console.log('Connected to PostgreSQL')
 
-        // Delete all test data
-        const usersDeleted = await User.deleteMany({})
-        const teamsDeleted = await Team.deleteMany({})
+    // Delete all data (order matters due to foreign keys)
+    const activities = await sql`DELETE FROM activities`
+    const users = await sql`DELETE FROM users`
+    const teams = await sql`DELETE FROM teams`
+    const guilds = await sql`DELETE FROM guilds`
 
-        console.log(`✓ Deleted ${usersDeleted.deletedCount} users`)
-        console.log(`✓ Deleted ${teamsDeleted.deletedCount} teams`)
+    console.log(`✓ Deleted ${activities.count} activities`)
+    console.log(`✓ Deleted ${users.count} users`)
+    console.log(`✓ Deleted ${teams.count} teams`)
+    console.log(`✓ Deleted ${guilds.count} guilds`)
 
-        console.log('\nDatabase cleared successfully!')
-
-        await mongoose.disconnect()
-        console.log('Disconnected from MongoDB')
-        process.exit(0)
-    } catch (error) {
-        console.error('Error clearing database:', error)
-        process.exit(1)
-    }
+    console.log('\nDatabase cleared successfully!')
+    
+    await closeDb()
+    console.log('Disconnected from PostgreSQL')
+    process.exit(0)
+  } catch (error) {
+    console.error('Error clearing database:', error)
+    await closeDb()
+    process.exit(1)
+  }
 }
 
 clearDatabase()

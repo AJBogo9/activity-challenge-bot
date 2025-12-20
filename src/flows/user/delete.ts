@@ -1,22 +1,28 @@
 import { Scenes, Markup } from 'telegraf'
-import * as userService from '../../services/user-service'
-import * as teamService from '../../services/team-service'
+import { findUserByTelegramId, deleteUser } from '../../db/users'
+import { updateTeamPoints, getTeamMembers, deleteTeam } from '../../db/teams'
 import { isNotCallback } from '../../utils/flow-helpers'
-import texts from '../../utils/texts'
+import { texts } from '../../utils/texts'
 
 export const deleteUserWizard = new Scenes.WizardScene(
   'delete_user_wizard',
   async (ctx: any) => {
-    const userId = ctx.from.id
-    const user = await userService.findUser(userId)
-
+    const userId = ctx.from.id.toString()
+    const user = await findUserByTelegramId(userId)
+    
     if (!user) {
       await ctx.reply('User not found. Please /register first.')
       return ctx.scene.leave()
     }
 
+    let message = 'Confirm user deletion? This action cannot be undone.'
+    
+    if (user.team_id) {
+      message = 'Confirm user deletion? This action will also remove you from your current team. If your team is left empty, it will be deleted. This cannot be undone.'
+    }
+
     await ctx.reply(
-      'Confirm user deletion? This action will also remove the user from their current team and, if it results in an empty team, delete the team as well. This cannot be undone.',
+      message,
       Markup.inlineKeyboard([
         Markup.button.callback('Yes, delete', 'confirm_delete'),
         Markup.button.callback('No, cancel', 'cancel_delete')
@@ -30,21 +36,41 @@ export const deleteUserWizard = new Scenes.WizardScene(
 )
 
 deleteUserWizard.action('confirm_delete', async (ctx: any) => {
-  const user = await userService.findUser(ctx.from.id)
+  const userId = ctx.from.id.toString()
+  
   try {
-    if (user && user.team) {
-      await teamService.leaveTeam(user._id, user.team)
-    }
-    const deletionResult = await userService.deleteUser(ctx.from.id)
-    if (!deletionResult) {
+    const user = await findUserByTelegramId(userId)
+    
+    if (!user) {
       await ctx.editMessageText('User not found or already deleted.')
-    } else {
-      await ctx.editMessageText('User deleted. You can register again using /register.')
+      return ctx.scene.leave()
     }
+
+    // Store team_id before deletion
+    const teamId = user.team_id
+
+    // Delete the user
+    await deleteUser(userId)
+
+    // Handle team cleanup if user was in a team
+    if (teamId) {
+      const remainingMembers = await getTeamMembers(teamId)
+      
+      if (remainingMembers.length === 0) {
+        // Team is now empty, delete it
+        await deleteTeam(teamId)
+      } else {
+        // Update team points
+        await updateTeamPoints(teamId)
+      }
+    }
+
+    await ctx.editMessageText('User deleted successfully. You can register again using /register.')
   } catch (error) {
-    await ctx.reply(texts.actions.error.error)
-    console.error(error)
+    console.error('Error deleting user:', error)
+    await ctx.editMessageText(texts.actions.error.error)
   }
+  
   return ctx.scene.leave()
 })
 
@@ -52,4 +78,3 @@ deleteUserWizard.action('cancel_delete', async (ctx: any) => {
   await ctx.editMessageText('Deletion canceled.')
   return ctx.scene.leave()
 })
-

@@ -8,7 +8,7 @@ $$\text{Points} = \frac{\text{MET} \times \text{Duration (min)}}{60}$$
 
 This metric is called MET-hours. This metric takes the intensity (MET) and duration (Duration (min)) into account and then normalizes it with 60 to keep points small, easily readable and understandable.
 
-# Approximated points per week by athletes (according to Claude)
+# Approximated points per week by athletes
 
 - Casual exerciser: 30 min/day moderate activity = ~3-4 points/day = 20-30 points/week
 - Active person: 60 min/day varied activities = ~6-8 points/day = 40-60 points/week
@@ -46,4 +46,3 @@ Cap weekly activity points at 100 to prevent overtraining?
     - The activities can be sorted into a tree-like structure (already exists in dataset)
   - Fuzzy text search 
     - The user can search activities with a search bar. Then the fuzzy search will find the best matching activities to the search query.
-  - 
