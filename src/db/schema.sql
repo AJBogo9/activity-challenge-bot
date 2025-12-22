@@ -1,14 +1,4 @@
--- Teams table (MUST come first because users references it)
-CREATE TABLE IF NOT EXISTS teams (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(100) UNIQUE NOT NULL,
-  guild VARCHAR(100) NOT NULL,
-  total_points DECIMAL(10,2) DEFAULT 0 NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW() NOT NULL,
-  updated_at TIMESTAMP DEFAULT NOW() NOT NULL
-);
-
--- Users/Participants table (references teams)
+-- Users/Participants table
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   telegram_id VARCHAR(50) UNIQUE NOT NULL,
@@ -16,7 +6,6 @@ CREATE TABLE IF NOT EXISTS users (
   first_name VARCHAR(100),
   last_name VARCHAR(100),
   guild VARCHAR(100),
-  team_id INTEGER REFERENCES teams(id),
   points DECIMAL(10,2) DEFAULT 0 NOT NULL,
   is_active BOOLEAN DEFAULT true NOT NULL,
   created_at TIMESTAMP DEFAULT NOW() NOT NULL,
@@ -31,8 +20,6 @@ CREATE TABLE IF NOT EXISTS activities (
   duration INTEGER,  -- in minutes
   points DECIMAL(10,2) NOT NULL,  -- MET-hours (decimal values)
   description TEXT,
-  verified_by INTEGER REFERENCES users(id),
-  is_verified BOOLEAN DEFAULT false NOT NULL,
   created_at TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
@@ -57,4 +44,3 @@ CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id);
 CREATE INDEX IF NOT EXISTS idx_users_guild ON users(guild);
 CREATE INDEX IF NOT EXISTS idx_activities_user_id ON activities(user_id);
 CREATE INDEX IF NOT EXISTS idx_activities_created_at ON activities(created_at);
-CREATE INDEX IF NOT EXISTS idx_teams_guild ON teams(guild);

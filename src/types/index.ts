@@ -12,15 +12,6 @@ export interface User {
   updated_at: Date
 }
 
-export interface Team {
-  id: number
-  name: string
-  guild: string
-  total_points: number
-  created_at: Date
-  updated_at: Date
-}
-
 export interface Activity {
   id: number
   user_id: number

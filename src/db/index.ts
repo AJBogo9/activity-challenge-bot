@@ -19,6 +19,5 @@ export const closeDb = async () => {
 
 // Re-export other database modules for convenience
 export * from './users';
-export * from './teams';
 export * from './activities';
 export * from './point-queries';

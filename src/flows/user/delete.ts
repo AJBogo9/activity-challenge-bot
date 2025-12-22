@@ -1,6 +1,5 @@
 import { Scenes, Markup } from 'telegraf'
 import { findUserByTelegramId, deleteUser } from '../../db/users'
-import { updateTeamPoints, getTeamMembers, deleteTeam } from '../../db/teams'
 import { isNotCallback } from '../../utils/flow-helpers'
 import { texts } from '../../utils/texts'
 
@@ -51,19 +50,6 @@ deleteUserWizard.action('confirm_delete', async (ctx: any) => {
 
     // Delete the user
     await deleteUser(userId)
-
-    // Handle team cleanup if user was in a team
-    if (teamId) {
-      const remainingMembers = await getTeamMembers(teamId)
-      
-      if (remainingMembers.length === 0) {
-        // Team is now empty, delete it
-        await deleteTeam(teamId)
-      } else {
-        // Update team points
-        await updateTeamPoints(teamId)
-      }
-    }
 
     await ctx.editMessageText('User deleted successfully. You can register again using /register.')
   } catch (error) {

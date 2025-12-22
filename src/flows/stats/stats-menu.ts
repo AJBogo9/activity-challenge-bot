@@ -11,7 +11,6 @@ Choose what statistics you'd like to view:`
     message,
     Markup.keyboard([
       ['👤 My Summary', '🏆 Top Users'],
-      ['👥 Team Rankings', '👨‍👩‍👧‍👦 Team Members'],
       ['🏛️ Guild Standings', '⚔️ Guild Comparison'],
       ['🔙 Back to Main Menu']
     ])
@@ -28,16 +27,6 @@ statsMenuScene.hears('👤 My Summary', async (ctx: any) => {
 // Top Users - Overall leaderboard
 statsMenuScene.hears('🏆 Top Users', async (ctx: any) => {
   return ctx.scene.enter('top_users')
-})
-
-// Team Rankings - Team leaderboard
-statsMenuScene.hears('👥 Team Rankings', async (ctx: any) => {
-  return ctx.scene.enter('team_rankings')
-})
-
-// Team Members - View your team's members
-statsMenuScene.hears('👨‍👩‍👧‍👦 Team Members', async (ctx: any) => {
-  return ctx.scene.enter('team_members')
 })
 
 // Guild Standings - Overall guild rankings

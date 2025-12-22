@@ -30,14 +30,6 @@ export async function getActivitiesByUser(userId: number): Promise<Activity[]> {
   `
 }
 
-export async function verifyActivity(activityId: number, verifiedBy: number): Promise<void> {
-  await sql`
-    UPDATE activities
-    SET is_verified = true, verified_by = ${verifiedBy}
-    WHERE id = ${activityId}
-  `
-}
-
 export async function getRecentActivities(limit: number = 20): Promise<Activity[]> {
   return await sql<Activity[]>`
     SELECT a.*, u.username, u.first_name, u.guild
