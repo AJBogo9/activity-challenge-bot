@@ -1,95 +1,145 @@
 import { Scenes, Markup } from 'telegraf'
-import * as userService from '../../services/user-service'
-import texts from '../../utils/texts'
-import { isNotCallback } from '../../utils/flow-helpers'
-import User from '../../models/user-model'
+import { findUserByTelegramId, createUser } from '../../db/users'
+import { texts } from '../../utils/texts'
+import { VALID_GUILDS } from '../../types'
 
 export const registerWizard = new Scenes.WizardScene(
   'register_wizard',
+  // Step 1: Check if user exists and show terms
   async (ctx: any) => {
-    const user = await userService.findUser(ctx.from.id)
+    const user = await findUserByTelegramId(ctx.from.id.toString())
+    
     if (user) {
-      await ctx.reply("You've already registered. You can still /createteam or /jointeam.")
-      return ctx.scene.leave()
-    } else {
-      await ctx.reply(texts.terms.only_terms, Markup.inlineKeyboard([
-        Markup.button.callback('Accept', 'accept_terms'),
-        Markup.button.callback('Decline', 'decline_terms')
-      ]))
-      return ctx.wizard.next()
+      await ctx.reply(
+        "You've already registered! You can start logging activities with /sportsactivity.",
+        Markup.keyboard([['⬅️ Back to Main Menu']])
+          .resize()
+          .persistent()
+      )
+      return ctx.scene.enter('main_menu')
     }
-  },
-  async (ctx: any) => {
-    if (await isNotCallback(ctx)) return
+    
+    await ctx.reply(
+      texts.terms.only_terms, 
+      Markup.inlineKeyboard([
+        [Markup.button.callback('✅ Accept', 'accept_terms')],
+        [Markup.button.callback('❌ Decline', 'decline_terms')]
+      ])
+    )
+    
+    return ctx.wizard.next()
   }
 )
 
+// Handle accept terms
 registerWizard.action('accept_terms', async (ctx: any) => {
-  await ctx.editMessageText('You accepted the terms and conditions.')
-  const validGuilds = (User as any).validGuilds
-  const guildButtons = validGuilds.map((g: string) => Markup.button.callback(g, `select_guild_${g}`))
+  await ctx.editMessageText('✅ You accepted the terms and conditions.')
+  
+  // Create guild selection buttons
+  const guildButtons = VALID_GUILDS.map((g: string) => 
+    Markup.button.callback(g, `select_guild_${g}`)
+  )
+  
+  // Arrange buttons in rows of 3
   const guildRows = []
   for (let i = 0; i < guildButtons.length; i += 3) {
-    guildRows.push(guildButtons.slice(i, i + 3));
+    guildRows.push(guildButtons.slice(i, i + 3))
   }
+  
+  // Balance the last row if needed
   if (guildRows.length > 1 && guildRows[guildRows.length - 1].length < 3) {
-    const lastRow = guildRows.pop();
-    const prevRow = guildRows.pop();
-    const combined = prevRow.concat(lastRow);
-    if (combined.length <= 5) {
-      guildRows.push(combined);
-    } else {
-      const total = combined.length;
-      let splitIndex = Math.floor(total / 2);
-      if (splitIndex < 3) {
-        splitIndex = 3;
+    const lastRow = guildRows.pop()
+    const prevRow = guildRows.pop()
+    
+    if (lastRow && prevRow) {
+      const combined = prevRow.concat(lastRow)
+      if (combined.length <= 5) {
+        guildRows.push(combined)
+      } else {
+        const total = combined.length
+        let splitIndex = Math.floor(total / 2)
+        if (splitIndex < 3) {
+          splitIndex = 3
+        }
+        if (total - splitIndex < 3) {
+          splitIndex = total - 3
+        }
+        const firstPart = combined.slice(0, splitIndex)
+        const secondPart = combined.slice(splitIndex)
+        guildRows.push(firstPart)
+        guildRows.push(secondPart)
       }
-      if (total - splitIndex < 3) {
-        splitIndex = total - 3;
-      }
-      const firstPart = combined.slice(0, splitIndex);
-      const secondPart = combined.slice(splitIndex);
-      guildRows.push(firstPart);
-      guildRows.push(secondPart);
     }
   }
-  guildRows.push([Markup.button.callback('Cancel & Exit', 'exit_wizard')])
+  
+  guildRows.push([Markup.button.callback('❌ Cancel', 'cancel_registration')])
+  
   await ctx.reply('Please select your guild:', Markup.inlineKeyboard(guildRows))
 })
 
+// Handle decline terms
 registerWizard.action('decline_terms', async (ctx: any) => {
-  await ctx.editMessageReplyMarkup({})
-  await ctx.reply('You did not accept the terms and conditions necessary to enter the competition. Click /register to start again.')
-  return ctx.scene.leave()
+  await ctx.editMessageReplyMarkup({ inline_keyboard: [] })
+  await ctx.reply(
+    'You did not accept the terms and conditions necessary to enter the competition.\n\nYou can try again from the main menu.',
+    Markup.keyboard([['⬅️ Back to Main Menu']])
+      .resize()
+      .persistent()
+  )
+  return ctx.scene.enter('main_menu')
 })
 
+// Handle guild selection
 registerWizard.action(/^select_guild_(.+)$/, async (ctx: any) => {
   const guild = ctx.match[1]
-
-  ctx.wizard.state.guild = guild
+  
   const firstName = ctx.from.first_name || ''
   const lastName = ctx.from.last_name || ''
-  const fullName = `${firstName} ${lastName}`.trim() || ctx.from.username
-
+  const username = ctx.from.username || `user_${ctx.from.id}`
+  
   try {
-    await userService.createUser({
-      userId: ctx.from.id,
-      username: ctx.from.username,
-      name: fullName,
+    await createUser({
+      telegramId: ctx.from.id.toString(),
+      username: username,
+      firstName: firstName,
+      lastName: lastName,
       guild: guild,
     })
-    await ctx.editMessageReplyMarkup({})
-    await ctx.reply(`You successfully registered to the ${guild} Kesäkuntoon team. You can use /createteam or /jointeam if you want to create or join a team. If you selected the wrong team, you can remove your user and start again with /rmuser.`)
-    // Go to menu to show the full registered user menu
-    return ctx.scene.enter('menu_scene')
-  } catch (_err) {
+    
+    await ctx.editMessageReplyMarkup({ inline_keyboard: [] })
+    await ctx.reply(
+      `🎉 Success! You're now registered to the *${guild}* guild!\n\n` +
+      `You can now:\n` +
+      `• Log activities with /sportsactivity\n` +
+      `• View your stats with /summary\n` +
+      `• Check leaderboards with /leaderboards\n\n` +
+      `If you selected the wrong guild, use /deleteuser to start over.`,
+      { parse_mode: 'Markdown' }
+    )
+    
+    // Go to registered user menu
+    return ctx.scene.enter('registered_menu')
+  } catch (error) {
+    console.error('Error creating user:', error)
     await ctx.editMessageText(texts.actions.error.error)
-    return ctx.scene.leave()
+    await ctx.reply(
+      'There was an error during registration. Please try again.',
+      Markup.keyboard([['⬅️ Back to Main Menu']])
+        .resize()
+        .persistent()
+    )
+    return ctx.scene.enter('main_menu')
   }
 })
 
-registerWizard.action('exit_wizard', async (ctx: any) => {
-  await ctx.editMessageText('Canceled & Exited. Start again with /register.')
-  return ctx.scene.leave()
+// Handle cancel
+registerWizard.action('cancel_registration', async (ctx: any) => {
+  await ctx.editMessageText('❌ Registration cancelled.')
+  await ctx.reply(
+    'You can start registration again from the main menu.',
+    Markup.keyboard([['⬅️ Back to Main Menu']])
+      .resize()
+      .persistent()
+  )
+  return ctx.scene.enter('main_menu')
 })
-

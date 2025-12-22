@@ -1,34 +1,38 @@
 import { Scenes } from 'telegraf'
-import User from '../../models/user-model'
+import { getTopUsers } from '../../db/point-queries'
 import { formatList } from '../../utils/format-list'
-import texts from '../../utils/texts'
+import { texts } from '../../utils/texts'
 import { emojis } from '../../config/constants'
 
 // topusers command
-export const topUsersScene = new Scenes.BaseScene<any>('top_users_scene')
+export const topUsersScene = new Scenes.BaseScene<any>('top_users')
+
 topUsersScene.enter(async (ctx: any) => {
   try {
-    const users = await User.find({}).sort({ "points.total": -1 }).limit(15)
+    const users = await getTopUsers(15)
+    
     if (!users || users.length === 0) {
       await ctx.reply("No users found.")
-      return ctx.scene.leave()
+      return ctx.scene.enter('stats_menu')
     }
 
     let message = "*Top 15 Participants \\(total points\\)* ⭐\n\n"
-
+    
     const titlePadding = 21
     const valuePadding = 6
-
-    users.forEach((user: any, index: number) => {
+    
+    users.forEach((user, index) => {
       const emoji = index < emojis.length ? emojis[index] : `${index + 1}`
-      message += emoji + formatList(user.name, (user.points as any).total, titlePadding, valuePadding) + '\n'
+      const displayName = user.first_name || user.username || 'Unknown'
+      message += emoji + formatList(displayName, user.points, titlePadding, valuePadding) + '\n'
     })
 
     await ctx.replyWithMarkdownV2(message)
-    ctx.scene.leave()
+    // Return to stats_menu so the keyboard keeps working
+    return ctx.scene.enter('stats_menu')
   } catch (error) {
-    console.error(error)
+    console.error('Error fetching top users:', error)
     await ctx.reply(texts.actions.error.error)
-    ctx.scene.leave()
+    return ctx.scene.enter('stats_menu')
   }
 })

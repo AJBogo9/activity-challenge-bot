@@ -1,144 +1,420 @@
 import { Scenes, Markup } from 'telegraf'
-import { isNotCallback } from '../../utils/flow-helpers'
-import { kmActivities, otherActivities } from '../../config/multipliers'
-import * as pointService from '../../services/point-service'
-import * as userService from '../../services/user-service'
+import activitiesData from '../../../data/processed/4_level_hierarchy.json'
+import { findUserByTelegramId, updateUserPoints } from '../../db/users'
+import { createActivity } from '../../db/activities'
 
-export const sportsActivityWizard = new Scenes.WizardScene(
-  'sports_activity_wizard',
-  async (ctx: any) => {
-    const user = await userService.findUser(ctx.from.id)
-    if (!user) {
-      await ctx.reply('User not found. Please /register first.')
-      return ctx.scene.leave()
+interface ActivityData {
+  met_value: number
+  examples: string
+}
+
+interface IntensityLevel {
+  [intensity: string]: ActivityData[]
+}
+
+interface Activities {
+  [activity: string]: IntensityLevel
+}
+
+interface Subcategories {
+  [subcategory: string]: Activities
+}
+
+interface MainCategories {
+  [mainCategory: string]: Subcategories
+}
+
+const hierarchy = activitiesData as MainCategories
+
+// Helper function to create keyboard layout
+function createKeyboard(items: string[], includeBack: boolean = false): string[][] {
+  const keyboard: string[][] = []
+  
+  // If 3 or fewer items, use single column
+  if (items.length <= 3) {
+    items.forEach(item => keyboard.push([item]))
+  } else {
+    // Use 2-column layout for more than 3 items
+    for (let i = 0; i < items.length; i += 2) {
+      if (i + 1 < items.length) {
+        keyboard.push([items[i], items[i + 1]])
+      } else {
+        keyboard.push([items[i]])
+      }
     }
-    await ctx.reply(
-      'What type of exercise did you do this week?',
+  }
+  
+  // Add navigation buttons
+  if (includeBack) {
+    keyboard.push(['⬅️ Back', '❌ Cancel'])
+  } else {
+    keyboard.push(['❌ Cancel'])
+  }
+  
+  return keyboard
+}
+
+export const sportsActivityWizard = new Scenes.WizardScene<any>(
+  'sports_activity_wizard',
+  
+  // Step 0: Choose Main Category
+  async (ctx: any) => {
+    const mainCategories = Object.keys(hierarchy)
+    const keyboard = createKeyboard(mainCategories)
+    
+    await ctx.replyWithMarkdown(
+      '🏃 *Log Activity - Step 1/5*\n\nChoose a main category:',
+      Markup.keyboard(keyboard).resize().oneTime()
+    )
+    
+    return ctx.wizard.next()
+  },
+  
+  // Step 1: Handle Main Category selection and show Subcategory
+  async (ctx: any) => {
+    const input = ctx.message?.text
+    
+    if (input === '❌ Cancel') {
+      await ctx.reply('Activity logging cancelled.', Markup.removeKeyboard())
+      return ctx.scene.enter('registered_menu')
+    }
+    
+    // This shouldn't happen at step 1, but handle it just in case
+    if (input === '⬅️ Back') {
+      const mainCategories = Object.keys(hierarchy)
+      const keyboard = createKeyboard(mainCategories)
+      
+      await ctx.replyWithMarkdown(
+        '🏃 *Log Activity - Step 1/5*\n\nChoose a main category:',
+        Markup.keyboard(keyboard).resize().oneTime()
+      )
+      return
+    }
+    
+    const selectedCategory = input
+    
+    if (!hierarchy[selectedCategory]) {
+      await ctx.reply('Invalid category. Please choose from the options.')
+      return
+    }
+    
+    ctx.wizard.state.mainCategory = selectedCategory
+    const subcategories = Object.keys(hierarchy[selectedCategory])
+    const keyboard = createKeyboard(subcategories, true)
+    
+    await ctx.replyWithMarkdown(
+      `🏃 *Log Activity - Step 2/5*\n\n*Category:* ${selectedCategory}\n\nChoose a subcategory:`,
+      Markup.keyboard(keyboard).resize().oneTime()
+    )
+    
+    return ctx.wizard.next()
+  },
+  
+  // Step 2: Handle Subcategory selection and show Activity
+  async (ctx: any) => {
+    const input = ctx.message?.text
+    
+    if (input === '❌ Cancel') {
+      await ctx.reply('Activity logging cancelled.', Markup.removeKeyboard())
+      return ctx.scene.enter('registered_menu')
+    }
+    
+    if (input === '⬅️ Back') {
+      // Clean up state
+      delete ctx.wizard.state.mainCategory
+      
+      const mainCategories = Object.keys(hierarchy)
+      const keyboard = createKeyboard(mainCategories)
+      
+      await ctx.replyWithMarkdown(
+        '🏃 *Log Activity - Step 1/5*\n\nChoose a main category:',
+        Markup.keyboard(keyboard).resize().oneTime()
+      )
+      
+      // Stay at current step, but will go to step 1 on next input
+      return ctx.wizard.back()
+    }
+    
+    const mainCat = ctx.wizard.state.mainCategory
+    const selectedSubcategory = input
+    
+    if (!hierarchy[mainCat][selectedSubcategory]) {
+      await ctx.reply('Invalid subcategory. Please choose from the options.')
+      return
+    }
+    
+    ctx.wizard.state.subcategory = selectedSubcategory
+    const activities = Object.keys(hierarchy[mainCat][selectedSubcategory])
+    const keyboard = createKeyboard(activities, true)
+    
+    await ctx.replyWithMarkdown(
+      `🏃 *Log Activity - Step 3/5*\n\n*Subcategory:* ${selectedSubcategory}\n\nChoose specific activity:`,
+      Markup.keyboard(keyboard).resize().oneTime()
+    )
+    
+    return ctx.wizard.next()
+  },
+  
+  // Step 3: Handle Activity selection and show Intensity
+  async (ctx: any) => {
+    const input = ctx.message?.text
+    
+    if (input === '❌ Cancel') {
+      await ctx.reply('Activity logging cancelled.', Markup.removeKeyboard())
+      return ctx.scene.enter('registered_menu')
+    }
+    
+    if (input === '⬅️ Back') {
+      // Clean up state
+      delete ctx.wizard.state.subcategory
+      
+      const mainCat = ctx.wizard.state.mainCategory
+      const subcategories = Object.keys(hierarchy[mainCat])
+      const keyboard = createKeyboard(subcategories, true)
+      
+      await ctx.replyWithMarkdown(
+        `🏃 *Log Activity - Step 2/5*\n\n*Category:* ${mainCat}\n\nChoose a subcategory:`,
+        Markup.keyboard(keyboard).resize().oneTime()
+      )
+      
+      return ctx.wizard.back()
+    }
+    
+    const mainCat = ctx.wizard.state.mainCategory
+    const subCat = ctx.wizard.state.subcategory
+    const selectedActivity = input
+    
+    if (!hierarchy[mainCat][subCat][selectedActivity]) {
+      await ctx.reply('Invalid activity. Please choose from the options.')
+      return
+    }
+    
+    ctx.wizard.state.activity = selectedActivity
+    const intensities = Object.keys(hierarchy[mainCat][subCat][selectedActivity])
+    
+    // Add MET values to button labels
+    const intensitiesWithMET = intensities.map(intensity => {
+      const metValue = hierarchy[mainCat][subCat][selectedActivity][intensity][0].met_value
+      return `${intensity} (${metValue} MET)`
+    })
+    
+    const keyboard = createKeyboard(intensitiesWithMET, true)
+    
+    await ctx.replyWithMarkdown(
+      `🏃 *Log Activity - Step 4/5*\n\n*Activity:* ${selectedActivity}\n\nChoose intensity:`,
+      Markup.keyboard(keyboard).resize().oneTime()
+    )
+    
+    return ctx.wizard.next()
+  },
+  
+  // Step 4: Handle Intensity selection and show Duration
+  async (ctx: any) => {
+    const input = ctx.message?.text
+    
+    if (input === '❌ Cancel') {
+      await ctx.reply('Activity logging cancelled.', Markup.removeKeyboard())
+      return ctx.scene.enter('registered_menu')
+    }
+    
+    if (input === '⬅️ Back') {
+      // Clean up state
+      delete ctx.wizard.state.activity
+      
+      const mainCat = ctx.wizard.state.mainCategory
+      const subCat = ctx.wizard.state.subcategory
+      const activities = Object.keys(hierarchy[mainCat][subCat])
+      const keyboard = createKeyboard(activities, true)
+      
+      await ctx.replyWithMarkdown(
+        `🏃 *Log Activity - Step 3/5*\n\n*Subcategory:* ${subCat}\n\nChoose specific activity:`,
+        Markup.keyboard(keyboard).resize().oneTime()
+      )
+      
+      return ctx.wizard.back()
+    }
+    
+    // Extract intensity name from "Intensity (X MET)" format
+    const intensityMatch = input?.match(/^(.+?)\s*\([\d.]+\s*MET\)$/)
+    const selectedIntensity = intensityMatch ? intensityMatch[1] : input
+    
+    const mainCat = ctx.wizard.state.mainCategory
+    const subCat = ctx.wizard.state.subcategory
+    const activity = ctx.wizard.state.activity
+    
+    if (!hierarchy[mainCat][subCat][activity][selectedIntensity]) {
+      await ctx.reply('Invalid intensity. Please choose from the options.')
+      return
+    }
+    
+    ctx.wizard.state.intensity = selectedIntensity
+    ctx.wizard.state.metValue = hierarchy[mainCat][subCat][activity][selectedIntensity][0].met_value
+    
+    // Create inline keyboard with common duration options
+    await ctx.replyWithMarkdown(
+      `🏃 *Log Activity - Step 5/5*\n\n*Activity:* ${activity}\n*Intensity:* ${selectedIntensity}\n*MET Value:* ${ctx.wizard.state.metValue}\n\nHow many minutes did you exercise?\n\n_Tap a quick option below or type a custom number:_`,
       Markup.inlineKeyboard([
-        [Markup.button.callback('Kilometre‑based', 'type_km')],
-        [Markup.button.callback('Hour-based', 'type_other')],
-        [Markup.button.callback('Cancel & Exit', 'exit_wizard')]
+        [
+          Markup.button.callback('15 min', 'duration:15'),
+          Markup.button.callback('20 min', 'duration:20'),
+          Markup.button.callback('30 min', 'duration:30')
+        ],
+        [
+          Markup.button.callback('45 min', 'duration:45'),
+          Markup.button.callback('60 min', 'duration:60'),
+          Markup.button.callback('90 min', 'duration:90')
+        ],
+        [
+          Markup.button.callback('120 min', 'duration:120'),
+          Markup.button.callback('⬅️ Back', 'duration:back'),
+          Markup.button.callback('❌ Cancel', 'duration:cancel')
+        ]
       ])
     )
+    
     return ctx.wizard.next()
   },
+  
+  // Step 5: Handle Duration and Save
   async (ctx: any) => {
-    if (await isNotCallback(ctx)) return
-
-    const exerciseType = ctx.callbackQuery.data.split('_')[1]
-    ctx.wizard.state.exerciseType = exerciseType
-    await ctx.editMessageReplyMarkup({ reply_markup: { inline_keyboard: [] } }) // Updated to use correct type
-    const activities = exerciseType === 'km' ? kmActivities : otherActivities
-    const prompt = exerciseType === 'km' ? 'Which activity did you complete?' : 'Which intensity did you perform?'
-    const keyboard = activities.map((act: any) => [Markup.button.callback(act.label.charAt(0).toUpperCase() + act.label.slice(1), `select_${exerciseType}_${act.key}`)])
-    keyboard.push([Markup.button.callback('Cancel & Exit', 'exit_wizard')])
-    await ctx.reply(prompt, Markup.inlineKeyboard(keyboard))
-    return ctx.wizard.next()
-  },
-  async (ctx: any) => {
-    if (await isNotCallback(ctx)) return
-
-    const activity = ctx.wizard.state.selectedActivity
-    if (!activity) {
-      await ctx.reply('No activity selected. Please try again.')
-      return ctx.scene.leave()
+    let minutes: number
+    
+    // Handle inline button callback
+    if (ctx.callbackQuery?.data) {
+      const data = ctx.callbackQuery.data
+      
+      if (data === 'duration:cancel') {
+        await ctx.answerCbQuery()
+        await ctx.reply('Activity logging cancelled.', Markup.removeKeyboard())
+        return ctx.scene.enter('registered_menu')
+      }
+      
+      if (data === 'duration:back') {
+        await ctx.answerCbQuery()
+        
+        // Clean up state
+        delete ctx.wizard.state.intensity
+        delete ctx.wizard.state.metValue
+        
+        const mainCat = ctx.wizard.state.mainCategory
+        const subCat = ctx.wizard.state.subcategory
+        const activity = ctx.wizard.state.activity
+        const intensities = Object.keys(hierarchy[mainCat][subCat][activity])
+        
+        const intensitiesWithMET = intensities.map(intensity => {
+          const metValue = hierarchy[mainCat][subCat][activity][intensity][0].met_value
+          return `${intensity} (${metValue} MET)`
+        })
+        
+        const keyboard = createKeyboard(intensitiesWithMET, true)
+        
+        await ctx.replyWithMarkdown(
+          `🏃 *Log Activity - Step 4/5*\n\n*Activity:* ${activity}\n\nChoose intensity:`,
+          Markup.keyboard(keyboard).resize().oneTime()
+        )
+        
+        return ctx.wizard.back()
+      }
+      
+      if (data.startsWith('duration:')) {
+        await ctx.answerCbQuery()
+        const durationStr = data.split(':')[1]
+        minutes = parseInt(durationStr)
+      } else {
+        await ctx.answerCbQuery()
+        return
+      }
+    } 
+    // Handle text input
+    else if (ctx.message?.text) {
+      const duration = ctx.message.text
+      
+      if (duration === '❌ Cancel') {
+        await ctx.reply('Activity logging cancelled.', Markup.removeKeyboard())
+        return ctx.scene.enter('registered_menu')
+      }
+      
+      if (duration === '⬅️ Back') {
+        // Clean up state
+        delete ctx.wizard.state.intensity
+        delete ctx.wizard.state.metValue
+        
+        const mainCat = ctx.wizard.state.mainCategory
+        const subCat = ctx.wizard.state.subcategory
+        const activity = ctx.wizard.state.activity
+        const intensities = Object.keys(hierarchy[mainCat][subCat][activity])
+        
+        const intensitiesWithMET = intensities.map(intensity => {
+          const metValue = hierarchy[mainCat][subCat][activity][intensity][0].met_value
+          return `${intensity} (${metValue} MET)`
+        })
+        
+        const keyboard = createKeyboard(intensitiesWithMET, true)
+        
+        await ctx.replyWithMarkdown(
+          `🏃 *Log Activity - Step 4/5*\n\n*Activity:* ${activity}\n\nChoose intensity:`,
+          Markup.keyboard(keyboard).resize().oneTime()
+        )
+        
+        return ctx.wizard.back()
+      }
+      
+      minutes = parseInt(duration)
+    } else {
+      return
     }
-    const promptText = activity.type === 'km'
-      ? `How many kilometres did you cover during ${activity.label}? (Enter a number)`
-      : `How many minutes did you spend on ${activity.label}? (Enter a number)`
-    const cancelKeyboard = Markup.inlineKeyboard([Markup.button.callback('Cancel & Exit', 'exit_wizard')])
-    const msg = await ctx.reply(promptText, cancelKeyboard)
-    ctx.wizard.state.numericPromptMsgId = msg.message_id
-    return ctx.wizard.next()
-  },
-  async (ctx: any) => {
-    const value = parseFloat(ctx.message.text)
-    if (isNaN(value) || value <= 0) {
-      await ctx.reply('Invalid input. Please enter a positive number.')
-      return ctx.wizard.selectStep(ctx.wizard.cursor)
+    
+    if (isNaN(minutes) || minutes <= 0) {
+      await ctx.reply('Please enter a valid number of minutes (e.g., 30)')
+      return
     }
+    
+    ctx.wizard.state.duration = minutes
+    
+    // Calculate points (MET * minutes / 60)
+    const points = Number(((ctx.wizard.state.metValue * minutes) / 60).toFixed(2))
+    
     try {
-      await ctx.telegram.editMessageReplyMarkup(
-        ctx.chat.id,
-        ctx.wizard.state.numericPromptMsgId,
-        null,
-        { inline_keyboard: [] } // Updated to use correct type
-      )
-    } catch (_err) { /**/ }
-    const activity = ctx.wizard.state.selectedActivity
-    let duration, unitLabel
-    if (activity.type === 'km') {
-      duration = value
-      unitLabel = 'kilometres'
-    } else {
-      duration = value / 60
-      unitLabel = 'minutes'
+      const user = await findUserByTelegramId(ctx.from.id.toString())
+      
+      if (!user) {
+        await ctx.reply('User not found. Please register first with /start', Markup.removeKeyboard())
+        return ctx.scene.enter('registered_menu')
+      }
+      
+      await createActivity({
+        userId: user.id,
+        activityType: `${ctx.wizard.state.mainCategory} - ${ctx.wizard.state.activity}`,
+        duration: minutes,
+        points: points,
+        description: `${ctx.wizard.state.intensity} intensity`
+      })
+      
+      await updateUserPoints(user.id, points)
+      
+      const newTotalPoints = Number(user.points || 0) + points
+      
+      const summary = `
+✅ *Activity Logged Successfully!*
+
+📋 *Summary:*
+• *Category:* ${ctx.wizard.state.mainCategory}
+• *Activity:* ${ctx.wizard.state.activity}
+• *Intensity:* ${ctx.wizard.state.intensity}
+• *Duration:* ${minutes} minutes
+• *MET Value:* ${ctx.wizard.state.metValue}
+
+🎯 *Points Earned:* ${points}
+📊 *Total Points:* ${newTotalPoints}
+`
+      
+      await ctx.replyWithMarkdown(summary, Markup.removeKeyboard())
+      
+    } catch (error) {
+      console.error('Error saving activity:', error)
+      await ctx.reply('❌ An error occurred while saving your activity. Please try again later.', Markup.removeKeyboard())
     }
-    if (unitLabel === 'kilometres' && duration >= activity.maxAllowed && activity.maxAllowed !== undefined) {
-      await ctx.reply(`Woah, ${activity.label} for ${value} ${unitLabel}? Send a DM to @EppuRuotsalainen to get your points or start again with /addexercise.`)
-      return ctx.scene.leave()
-    }
-    if (unitLabel === 'minutes' && duration >= activity.maxAllowed && activity.maxAllowed !== undefined) {
-      await ctx.reply(`Woah, ${value} ${unitLabel} of ${activity.label}? Send a DM to @EppuRuotsalainen to get your points or start again with /addexercise.`)
-      return ctx.scene.leave()
-    }
-    const pointsEarned = duration * activity.multiplier
-    ctx.wizard.state.activityValue = value
-    ctx.wizard.state.convertedValue = activity.type === 'km' ? value : duration
-    ctx.wizard.state.pointsEarned = pointsEarned
-    const confirmKeyboard = Markup.inlineKeyboard([
-      [Markup.button.callback('Confirm', 'confirm_activity')],
-      [Markup.button.callback('Start Over', 'start_over')],
-      [Markup.button.callback('Cancel & Exit', 'exit_wizard')]
-    ])
-    let confirmMessage
-    if (activity.type === 'km') {
-      confirmMessage = `You did ${activity.label} for ${value} ${unitLabel}, earning ${pointsEarned.toFixed(2)} points. Do you confirm?`
-    } else {
-      confirmMessage = `You spent ${value} ${unitLabel} (${duration.toFixed(2)} hours) on ${activity.label}, earning ${pointsEarned.toFixed(2)} points. Do you confirm?`
-    }
-    await ctx.reply(confirmMessage, confirmKeyboard)
-    return ctx.wizard.next()
-  },
+    
+    return ctx.scene.enter('registered_menu')
+  }
 )
-
-sportsActivityWizard.action('confirm_activity', async (ctx: any) => {
-  await ctx.editMessageReplyMarkup({ reply_markup: { inline_keyboard: [] } }) // Updated to use correct type
-  const userId = ctx.from.id
-  const pointsData = { exercise: ctx.wizard.state.pointsEarned, total: ctx.wizard.state.pointsEarned }
-  try {
-    await pointService.addPoints(userId, pointsData)
-    await ctx.editMessageText(
-      `Activity recorded! You earned ${ctx.wizard.state.pointsEarned.toFixed(2)} points for ${ctx.wizard.state.selectedActivity.label}.`
-    )
-  } catch (_err) {
-    await ctx.reply('There was an error recording your activity. Please try again later.')
-  }
-  return ctx.scene.leave()
-})
-
-sportsActivityWizard.action(/^select_(km|other)_(.+)$/, async (ctx: any) => {
-  const exerciseType = ctx.match[1]
-  const selectedKey = ctx.match[2]
-  const activities = exerciseType === 'km' ? kmActivities : otherActivities
-  const activity = activities.find((a: any) => a.key === selectedKey)
-  if (!activity) {
-    await ctx.reply('Invalid selection. Please try again.')
-    return ctx.scene.leave()
-  }
-  ctx.wizard.state.selectedActivity = activity
-  await ctx.editMessageReplyMarkup({ reply_markup: { inline_keyboard: [] } }) // Updated to use correct type
-  return ctx.wizard.steps[ctx.wizard.cursor](ctx)
-})
-
-sportsActivityWizard.action('exit_wizard', async (ctx: any) => {
-  await ctx.editMessageReplyMarkup({ reply_markup: { inline_keyboard: [] } }) // Updated to use correct type
-  await ctx.reply('Canceled. You can add your exercise later using /addexercise.')
-  return ctx.scene.leave()
-})
-
-sportsActivityWizard.action('start_over', async (ctx: any) => {
-  await ctx.editMessageText('Starting over!')
-  ctx.wizard.selectStep(0)
-  return ctx.wizard.steps[0](ctx)
-})

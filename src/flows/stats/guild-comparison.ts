@@ -1,86 +1,94 @@
 import { Scenes } from 'telegraf'
-import * as pointService from '../../services/point-service'
-import texts from '../../utils/texts'
+import * as pointService from '../../db/point-queries'
 import { formatList } from '../../utils/format-list'
+import { emojis } from '../../config/constants'
+import { texts } from '../../utils/texts'
 
-export const guildComparisonScene = new Scenes.BaseScene<any>('guild_comparison_scene')
+/**
+ * Guild comparison scene - shows detailed comparison of guilds
+ * Displays both average and total points, plus member counts
+ * Scene ID: 'guild_comparison'
+ */
+export const guildComparisonScene = new Scenes.BaseScene<any>('guild_comparison')
+
 guildComparisonScene.enter(async (ctx: any) => {
   try {
-    const standings = await pointService.getGuildsTotals()
-    if (!standings) {
-      await ctx.reply("No guild data available.")
-      return ctx.scene.leave()
-    }
-    const validStandings = standings.filter((guild: any) => guild.participants > 2 && guild.total.total > 0)
-    if (validStandings.length === 0) {
-      await ctx.reply("No guild data available.")
+    const guilds = await pointService.getGuildLeaderboard()
+    
+    if (!guilds || guilds.length === 0) {
+      await ctx.reply("No guild statistics available yet. Guilds need at least 3 active members with points.")
       return ctx.scene.leave()
     }
 
-    const sortedByAverage = [...validStandings].sort((a: any, b: any) => b.total.average - a.total.average)
-
-    const titlePadding = 15
-    const valuePadding = 6
-
-    let message = '*Guilds Comparison* 🏆\n\n'
-
-    message += '*Average / Total points*\n'
-    sortedByAverage.forEach((guild: any) => {
-      // eslint-disable-next-line no-useless-escape
-      const text = `\(${parseFloat(guild.total.average).toFixed(1)}/${parseFloat(guild.total.total).toFixed(1)}\)`
-      message += formatList(guild.guild, text, titlePadding, valuePadding) + '\n'
+    let message = '*📊 Guild Comparison*\n\n'
+    
+    guilds.forEach((guild: any, index: number) => {
+      const emoji = index < emojis.length ? emojis[index] : `${index + 1}\\.`
+      const escapedGuild = guild.guild.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&')
+      const avgPoints = Math.round(guild.average_points * 10) / 10
+      const totalPoints = Number(guild.total_points)
+      const memberCount = Number(guild.member_count)
+      
+      message += `${emoji} *${escapedGuild}*\n`
+      message += `   Average: ${avgPoints} pts\n`
+      message += `   Total: ${totalPoints} pts\n`
+      message += `   Members: ${memberCount}\n\n`
     })
 
-    message += '\n'
-    message += '*Participants*\n'
-    const sortedByParticipants = [...validStandings].sort((a: any, b: any) => b.participants - a.participants)
-    sortedByParticipants.forEach((guild: any) => {
-      message += formatList(guild.guild, guild.participants, titlePadding, valuePadding) + '\n'
-    })
-
-    message += '\n'
-    message += '*Top 3 Guilds per Category \\(total points\\):*\n\n'
-
-    const normalCategories: any = {
-      exercise: 'Exercise',
-      sportsTurn: 'Sports Sessions Participation',
-      trySport: 'Trying New Sports'
-    }
-
-    Object.keys(normalCategories).forEach(categoryKey => {
-      message += `*${normalCategories[categoryKey]}*\n`
-      const sortedGuilds = [...validStandings]
-        .sort((a: any, b: any) => b[categoryKey].total - a[categoryKey].total)
-        .slice(0, 3)
-
-      sortedGuilds.forEach((guild: any) => {
-        const points = guild[categoryKey].total.toString()
-        message += formatList(guild.guild, points, titlePadding, valuePadding) + '\n'
-      })
-      message += '\n'
-    })
-
-    const healthStandings = validStandings.map((guild: any) => {
-      const healthPoints = (guild.tryRecipe.total || 0) + (guild.goodSleep.total || 0) + (guild.meditate.total || 0) + (guild.lessAlc.total || 0)
-      return { guild: guild.guild, healthPoints }
-    })
-
-    const topHealth = [...healthStandings]
-      .sort((a, b) => b.healthPoints - a.healthPoints)
-      .slice(0, 3)
-
-    message += `*Health Points*\n`
-    topHealth.forEach(entry => {
-      message += formatList(entry.guild, entry.healthPoints.toString(), titlePadding, valuePadding) + '\n'
-    })
-    message += '\n'
+    message += `_Total guilds: ${guilds.length}_`
 
     await ctx.replyWithMarkdownV2(message)
-    ctx.scene.leave()
+    // Don't leave the scene - stay in stats_menu so keyboard still works
   } catch (error) {
     await ctx.reply(texts.actions.error.error)
-    console.error(error)
-    ctx.scene.leave()
+    console.error('Error in guild comparison scene:', error)
   }
 })
 
+/**
+ * Guild detailed stats scene - shows side-by-side comparison
+ * of average vs top 50% average
+ * Scene ID: 'guild_detailed_stats'
+ */
+export const guildDetailedStatsScene = new Scenes.BaseScene<any>('guild_detailed_stats')
+
+guildDetailedStatsScene.enter(async (ctx: any) => {
+  try {
+    const [allGuilds, topGuilds] = await Promise.all([
+      pointService.getGuildLeaderboard(),
+      pointService.getGuildTopLeaderboard()
+    ])
+    
+    if (!allGuilds || allGuilds.length === 0) {
+      await ctx.reply("No guild statistics available yet. Guilds need at least 3 active members with points.")
+      return ctx.scene.leave()
+    }
+
+    // Create a map for quick lookup
+    const topGuildsMap = new Map(
+      topGuilds.map(g => [g.guild, g.average_points])
+    )
+
+    let message = '*🔬 Detailed Guild Statistics*\n\n'
+    message += '_Avg All vs Top 50%_\n\n'
+    
+    allGuilds.forEach((guild: any, index: number) => {
+      const emoji = index < emojis.length ? emojis[index] : `${index + 1}\\.`
+      const escapedGuild = guild.guild.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&')
+      const avgAll = Math.round(guild.average_points * 10) / 10
+      const avgTop = topGuildsMap.get(guild.guild)
+      const avgTopStr = avgTop ? Math.round(avgTop * 10) / 10 : 'N/A'
+      
+      message += `${emoji} *${escapedGuild}*\n`
+      message += `   All: ${avgAll} | Top 50%: ${avgTopStr}\n`
+    })
+
+    message += `\n_Shows consistency of guild performance_`
+
+    await ctx.replyWithMarkdownV2(message)
+    // Don't leave the scene - stay in stats_menu so keyboard still works
+  } catch (error) {
+    await ctx.reply(texts.actions.error.error)
+    console.error('Error in guild detailed stats scene:', error)
+  }
+})

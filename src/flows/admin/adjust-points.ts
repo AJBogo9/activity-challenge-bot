@@ -1,9 +1,8 @@
 import { Scenes, Markup } from 'telegraf'
-import User from '../../models/user-model'
-import { adminIds } from '../../config'
 import { isNotCallback } from '../../utils/flow-helpers'
-import { kmActivities, otherActivities, PointMultipliers } from '../../config/multipliers'
-import * as pointService from '../../services/point-service'  // <-- Add this line
+import { adjustUserPoints } from '../../db/point-queries'
+import { findUserByUsername } from '../../db/users'
+import { adminIds } from '../../config/constants'
 
 export const adjustPointsWizard = new Scenes.WizardScene(
   'adjust_points_wizard',
@@ -13,82 +12,41 @@ export const adjustPointsWizard = new Scenes.WizardScene(
       await ctx.reply("You are not authorized to perform this action.")
       return ctx.scene.leave()
     }
-    const sentMessage = await ctx.replyWithMarkdownV2("*Admin Mode*:\nPlease enter the username of the user whose points you want to adjust:", Markup.inlineKeyboard([
-      Markup.button.callback("Cancel & Exit", "exit_wizard")
-    ]))
+    const sentMessage = await ctx.replyWithMarkdownV2(
+      "*Admin Mode*:\nPlease enter the username of the user whose points you want to adjust:",
+      Markup.inlineKeyboard([
+        Markup.button.callback("Cancel & Exit", "exit_wizard")
+      ])
+    )
     ctx.wizard.state.startMessageId = sentMessage.message_id
     return ctx.wizard.next()
   },
   async (ctx: any) => {
     const targetUsername = ctx.message.text.trim()
     ctx.wizard.state.targetUsername = targetUsername
-    const targetUser = await User.findOne({ username: targetUsername })
+    
+    const targetUser = await findUserByUsername(targetUsername)
+    
     if (!targetUser) {
-      await ctx.telegram.editMessageText(ctx.chat.id, ctx.wizard.state.startMessageId, null, `Please enter the username of the user whose points you want to adjust:`)
+      await ctx.telegram.editMessageText(
+        ctx.chat.id, 
+        ctx.wizard.state.startMessageId, 
+        null, 
+        `Please enter the username of the user whose points you want to adjust:`
+      )
       await ctx.reply("User not found. Start again using /adjustpoints.")
       return ctx.scene.leave()
     }
-    await ctx.telegram.editMessageText(ctx.chat.id, ctx.wizard.state.startMessageId, null, `Please enter the username of the user whose points you want to adjust: ${targetUser.username} (${targetUser.name}) selected`)
-    await ctx.reply(
-      "Select the adjustment type:",
-      Markup.inlineKeyboard([
-        [Markup.button.callback("km", "type_km"), Markup.button.callback("other", "type_other"), Markup.button.callback("special", "type_special")],
-        [Markup.button.callback("Cancel & Exit", "exit_wizard")]
-      ])
+    
+    await ctx.telegram.editMessageText(
+      ctx.chat.id, 
+      ctx.wizard.state.startMessageId, 
+      null, 
+      `Please enter the username of the user whose points you want to adjust: ${targetUser.username} (${targetUser.first_name || 'N/A'}) selected`
     )
-    return ctx.wizard.next()
-  },
-  async (ctx: any) => {
-    if (await isNotCallback(ctx)) return
-
-    const typeSelected = ctx.callbackQuery.data.split('_')[1]
-    ctx.wizard.state.adjustmentType = typeSelected
-    await ctx.answerCbQuery()
-    if (typeSelected === 'special') {
-      const buttons = Object.keys(PointMultipliers).map(cat =>
-        Markup.button.callback(cat, `select_special_${cat}`)
-      )
-      buttons.push(Markup.button.callback("Cancel & Exit", "exit_wizard"))
-      await ctx.editMessageText(
-        "Special adjustment selected. Please choose a category:",
-        Markup.inlineKeyboard(buttons, { columns: 3 })
-      )
-      return ctx.wizard.next()
-    } else {
-      const activities = typeSelected === 'km' ? kmActivities : otherActivities
-      const buttons = activities.map((act: any) =>
-        Markup.button.callback(act.key, `select_ex_${act.key}`)
-      )
-      buttons.push(Markup.button.callback("Cancel & Exit", "exit_wizard"))
-      await ctx.editMessageText(
-        `You selected "${typeSelected}". Now, please select the specific activity:`,
-        Markup.inlineKeyboard(buttons, { columns: 3 })
-      )
-      return ctx.wizard.next()
-    }
-  },
-  async (ctx: any) => {
-    if (await isNotCallback(ctx)) return
-
-    const data = ctx.callbackQuery.data
-    if (data.startsWith('select_special_')) {
-      const specialCategory = data.split('_')[2]
-      ctx.wizard.state.category = specialCategory
-      await ctx.answerCbQuery()
-      await ctx.editMessageText(`Special category "${specialCategory}" selected.`)
-    } else if (data.startsWith('select_ex_')) {
-      const activityKey = data.split('_')[2]
-      ctx.wizard.state.activityKey = activityKey
-      ctx.wizard.state.category = 'exercise'
-      await ctx.answerCbQuery()
-      await ctx.editMessageText(`Exercise activity "${activityKey}" selected.`)
-      ctx.wizard.state.activityType = ctx.wizard.state.adjustmentType
-    } else {
-      await ctx.reply("Invalid selection. Please try again.")
-      return ctx.scene.leave()
-    }
+    
     const sentMessage = await ctx.reply(
-      "Please enter the adjustment quantity (e.g. 3 to add or -2 to subtract):",
+      "Please enter the number of points to adjust (positive to add, negative to subtract):",
       Markup.inlineKeyboard([
         Markup.button.callback("Cancel & Exit", "exit_wizard")
       ])
@@ -98,23 +56,33 @@ export const adjustPointsWizard = new Scenes.WizardScene(
   },
   async (ctx: any) => {
     const input = ctx.message.text.trim()
-    const quantity = parseFloat(input)
-    if (isNaN(quantity)) {
-      await ctx.telegram.editMessageText(ctx.chat.id, ctx.wizard.state.questionMessageId, null, `Please enter the adjustment quantity (e.g. 3 to add or -2 to subtract):`)
-      await ctx.reply("Invalid input. Please enter a valid numeric value for quantity.")
+    const pointsDelta = parseInt(input, 10)
+    
+    if (isNaN(pointsDelta)) {
+      await ctx.telegram.editMessageText(
+        ctx.chat.id, 
+        ctx.wizard.state.questionMessageId, 
+        null, 
+        `Please enter the number of points to adjust (positive to add, negative to subtract):`
+      )
+      await ctx.reply("Invalid input. Please enter a valid numeric value.")
       return ctx.wizard.selectStep(ctx.wizard.cursor)
     }
-    await ctx.telegram.editMessageText(ctx.chat.id, ctx.wizard.state.questionMessageId, null, `Please enter the adjustment quantity (e.g. 3 to add or -2 to subtract): ${quantity} selected`)
-    ctx.wizard.state.quantity = quantity
-    let summary = `You are about to adjust ${ctx.wizard.state.targetUsername}'s `
-    if (ctx.wizard.state.category === 'exercise') {
-      summary += `exercise points for activity "${ctx.wizard.state.activityKey}" (${ctx.wizard.state.adjustmentType}).`
-    } else {
-      summary += `"${ctx.wizard.state.category}" points.`
-    }
-    summary += `\nAdjustment quantity: ${quantity} unit(s) multiplied by the standard multiplier. Confirm?`
+    
+    await ctx.telegram.editMessageText(
+      ctx.chat.id, 
+      ctx.wizard.state.questionMessageId, 
+      null, 
+      `Please enter the number of points to adjust (positive to add, negative to subtract): ${pointsDelta} selected`
+    )
+    
+    ctx.wizard.state.pointsDelta = pointsDelta
+    
+    const action = pointsDelta > 0 ? 'add' : 'subtract'
+    const absPoints = Math.abs(pointsDelta)
+    
     await ctx.reply(
-      summary,
+      `You are about to ${action} ${absPoints} points ${pointsDelta > 0 ? 'to' : 'from'} ${ctx.wizard.state.targetUsername}'s account. Confirm?`,
       Markup.inlineKeyboard([
         [Markup.button.callback("Confirm", "confirm_adjust"), Markup.button.callback("Cancel & Exit", "exit_wizard")]
       ])
@@ -125,23 +93,22 @@ export const adjustPointsWizard = new Scenes.WizardScene(
     if (await isNotCallback(ctx)) return
 
     await ctx.answerCbQuery()
+    
     if (ctx.callbackQuery.data === 'confirm_adjust') {
       try {
-        let extra = {}
-        if (ctx.wizard.state.category === 'exercise') {
-          extra = {
-            activityType: ctx.wizard.state.adjustmentType,
-            activityKey: ctx.wizard.state.activityKey
-          }
-        }
-        await pointService.adjustPoints(
+        await adjustUserPoints(
           ctx.wizard.state.targetUsername,
-          ctx.wizard.state.category,
-          ctx.wizard.state.quantity,
-          extra
+          ctx.wizard.state.pointsDelta
         )
-        await ctx.editMessageText(`Successfully adjusted ${ctx.wizard.state.targetUsername}'s ${ctx.wizard.state.category} points.`)
+        
+        const action = ctx.wizard.state.pointsDelta > 0 ? 'added to' : 'subtracted from'
+        const absPoints = Math.abs(ctx.wizard.state.pointsDelta)
+        
+        await ctx.editMessageText(
+          `Successfully ${action} ${absPoints} points ${ctx.wizard.state.pointsDelta > 0 ? 'to' : 'from'} ${ctx.wizard.state.targetUsername}'s account.`
+        )
       } catch (error: any) {
+        console.error('Error adjusting points:', error)
         await ctx.editMessageText(`Error adjusting points: ${error.message}`)
       }
     } else {

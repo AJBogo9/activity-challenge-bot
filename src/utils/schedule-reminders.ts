@@ -1,5 +1,5 @@
 import schedule from 'node-schedule'
-import { bot } from '../bot'
+import { bot } from '..'
 import { sendReminder } from '../services/user-service'
 import { allowedDates, reminderTime } from '../config/constants'
 

@@ -1,53 +1,60 @@
-import { connectDatabase, disconnectDatabase } from './src/database'
-import { bot, setupBotCommands } from './src/bot'
-import scheduleReminders from './src/utils/schedule-reminders'
+import { Scenes, session } from 'telegraf'
+import { bot } from './src/bot/instance'
+import { registerCommands } from './src/bot/commands'
+import { runMigrations } from './src/db/migrate'
+import { setupBotCommands } from './src/bot/setup'
+import { closeDb } from './src/db'
+import * as flows from './src/flows'
+import { registerGlobalHandlers } from './src/bot/handlers/handlers'
 
-async function handleError(error: any) {
-  console.error('Unexpected error occurred:', error)
+type MyContext = Scenes.SceneContext
 
-  if (error.response && error.response.description) {
-    console.error('Error response:', error.response.description)
-  }
+// Setup scenes stage
+const stage = new Scenes.Stage<MyContext>(Object.values(flows) as any[])
 
-  if (error.response && error.response.error_code === 403) {
-    console.error('Handling 403 error: The bot was kicked from the group chat')
-  }
+// Register middleware
+bot.use(session())
+bot.use(stage.middleware())
 
-  console.log('Attempting to restart the bot...')
-  setTimeout(startBot, 5000)
-}
+// Register all handlers
+registerCommands()
+registerGlobalHandlers()
 
-async function startBot() {
+// Main startup function
+async function main() {
   try {
-    await connectDatabase()
+    console.log('🚀 Starting Summer Body Bot...')
+
+    // Setup database (create tables)
+    console.log('📊 Setting up database...')
+    await runMigrations()
+
+    // Setup bot commands menu
+    console.log('⚙️  Configuring bot commands...')
     await setupBotCommands()
-    scheduleReminders()
-    console.log('Bot started')
+
+    // Start the bot
+    console.log('🤖 Launching bot...')
     await bot.launch()
-  } catch (err) {
-    console.error('Could not start the bot:', err)
-    handleError(err)
+    console.log('✅ Bot started successfully!')
+
+    // Graceful shutdown handlers
+    const shutdown = async (signal: string) => {
+      console.log(`\n${signal} received, shutting down gracefully...`)
+      bot.stop(signal)
+      await closeDb()
+      console.log('👋 Shutdown complete')
+      process.exit(0)
+    }
+
+    process.once('SIGINT', () => shutdown('SIGINT'))
+    process.once('SIGTERM', () => shutdown('SIGTERM'))
+  } catch (error) {
+    console.error('❌ Failed to start bot:', error)
+    await closeDb()
+    process.exit(1)
   }
 }
 
-startBot()
-
-process.once('SIGINT', () => {
-  bot.stop('SIGINT')
-  disconnectDatabase()
-    .then(() => process.exit(0))
-    .catch((error: any) => {
-      console.error('Error during shutdown:', error)
-      process.exit(1)
-    })
-})
-
-process.once('SIGTERM', () => {
-  bot.stop('SIGTERM')
-  disconnectDatabase()
-    .then(() => process.exit(0))
-    .catch((error: any) => {
-      console.error('Error during shutdown:', error)
-      process.exit(1)
-    })
-})
+// Start the application
+main()

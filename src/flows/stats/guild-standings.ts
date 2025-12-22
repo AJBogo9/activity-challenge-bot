@@ -1,66 +1,82 @@
 import { Scenes } from 'telegraf'
-import * as pointService from '../../services/point-service'
-import texts from '../../utils/texts'
+import * as pointService from '../../db/point-queries'
 import { formatList } from '../../utils/format-list'
 import { emojis } from '../../config/constants'
+import { texts } from '../../utils/texts'
 
-// topguilds command
-export const guildStandingsScene = new Scenes.BaseScene<any>('guild_standings_scene')
+/**
+ * Guild standings scene - shows average points per member
+ * Scene ID: 'guild_standings'
+ */
+export const guildStandingsScene = new Scenes.BaseScene<any>('guild_standings')
+
 guildStandingsScene.enter(async (ctx: any) => {
   try {
-    const averages = await pointService.getGuildsLeaderboards()
-    if (!averages || averages.length === 0) {
-      await ctx.reply("No guild statistics available.")
+    const guilds = await pointService.getGuildLeaderboard()
+    
+    if (!guilds || guilds.length === 0) {
+      await ctx.reply("No guild statistics available yet. Guilds need at least 3 active members with points.")
       return ctx.scene.leave()
     }
-    averages.sort((a: any, b: any) => b.average - a.average)
 
-    let message = '*Standings \\(by average points\\)* 🏆\n\n'
-
+    let message = '*Guild Standings \\(by average points\\)* 🏆\n\n'
+    message += '_Minimum 3 active members required_\n\n'
+    
     const guildPadding = 15
     const pointPadding = 6
 
-    averages.forEach((guild: any, index: number) => {
-      const emoji = index < emojis.length ? emojis[index] : `${index + 1}`
-      message += emoji + formatList(guild.guild, guild.average, guildPadding, pointPadding) + '\n'
+    guilds.forEach((guild: any, index: number) => {
+      const emoji = index < emojis.length ? emojis[index] : `${index + 1}\\.`
+      const escapedGuild = guild.guild.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&')
+      const points = Math.round(guild.average_points * 10) / 10
+      message += emoji + formatList(escapedGuild, points.toString(), guildPadding, pointPadding) + '\n'
     })
 
+    message += `\n_Total guilds: ${guilds.length}_`
+
     await ctx.replyWithMarkdownV2(message)
-    ctx.scene.leave()
+    // Don't leave the scene - stay in stats_menu so keyboard still works
   } catch (error) {
     await ctx.reply(texts.actions.error.error)
-    console.error(error)
-    ctx.scene.leave()
+    console.error('Error in guild standings scene:', error)
   }
 })
 
-// topguilds50 command
-export const guildTopStandingsScene = new Scenes.BaseScene<any>('guild_top_standings_scene')
+/**
+ * Guild top 50% standings scene - shows average of top half performers
+ * Scene ID: 'guild_top_standings'
+ */
+export const guildTopStandingsScene = new Scenes.BaseScene<any>('guild_top_standings')
+
 guildTopStandingsScene.enter(async (ctx: any) => {
   try {
-    const averages = await pointService.getGuildsTopLeaderboards()
-    if (!averages || averages.length === 0) {
-      await ctx.reply("No guild statistics available.")
+    const guilds = await pointService.getGuildTopLeaderboard()
+    
+    if (!guilds || guilds.length === 0) {
+      await ctx.reply("No guild statistics available yet. Guilds need at least 3 active members with points.")
       return ctx.scene.leave()
     }
-    averages.sort((a: any, b: any) => b.average - a.average)
 
-    let message = '*Standings \\(by avg of top 50%\\)* 🏆\n\n'
-
+    let message = '*Guild Standings \\(top 50% average\\)* 🏆\n\n'
+    message += '_Based on average of top half performers_\n'
+    message += '_Minimum 3 active members required_\n\n'
+    
     const guildPadding = 15
     const pointPadding = 6
 
-    averages.forEach((guild: any, index: number) => {
-      const emoji = index < emojis.length ? emojis[index] : `${index + 1}`
-      message += emoji + formatList(guild.guild, guild.average.toString(), guildPadding, pointPadding) + '\n'
+    guilds.forEach((guild: any, index: number) => {
+      const emoji = index < emojis.length ? emojis[index] : `${index + 1}\\.`
+      const escapedGuild = guild.guild.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&')
+      const points = Math.round(guild.average_points * 10) / 10
+      message += emoji + formatList(escapedGuild, points.toString(), guildPadding, pointPadding) + '\n'
     })
 
+    message += `\n_Total guilds: ${guilds.length}_`
+
     await ctx.replyWithMarkdownV2(message)
-    ctx.scene.leave()
+    // Don't leave the scene - stay in stats_menu so keyboard still works
   } catch (error) {
     await ctx.reply(texts.actions.error.error)
-    console.error(error)
-    ctx.scene.leave()
+    console.error('Error in guild top standings scene:', error)
   }
 })
-
