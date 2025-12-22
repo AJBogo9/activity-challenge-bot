@@ -1,0 +1,11 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"  # Works for Bun projects
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    
+  - package-ecosystem: "docker"  # Works for Podman
+    directory: "/"
+    schedule:
+      interval: "weekly"
