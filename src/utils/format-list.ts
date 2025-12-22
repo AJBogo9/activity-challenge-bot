@@ -24,7 +24,11 @@ export const formatList = (title: string, text: string | number, titlePadding: n
 }
 
 export const escapeMarkdown = (text: string | number): string => {
-    if (typeof text === 'number') { text = formatNumber(text) }
-    else if (typeof text === 'string' && !isNaN(parseFloat(text)) && text.trim() !== '') { text = formatNumber(parseFloat(text)) }
-    return (text as string).replace(/[[\]()~`>#+-=|{}.!\\]/g, (x) => '\\' + x)
+  if (typeof text === 'number') { 
+    text = formatNumber(text) 
+  } else if (typeof text === 'string' && !isNaN(parseFloat(text)) && text.trim() !== '') { 
+    text = formatNumber(parseFloat(text)) 
+  }
+  // Added _ and * to the escape list
+  return (text as string).replace(/[_*[\]()~`>#+=|{}.!\\-]/g, (x) => '\\' + x)
 }
