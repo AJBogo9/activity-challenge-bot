@@ -38,10 +38,11 @@ guildComparisonScene.enter(async (ctx: any) => {
     message += `_Total guilds: ${guilds.length}_`
 
     await ctx.replyWithMarkdownV2(message)
-    // Don't leave the scene - stay in stats_menu so keyboard still works
+    return ctx.scene.enter('stats_menu')
   } catch (error) {
     await ctx.reply(texts.actions.error.error)
     console.error('Error in guild comparison scene:', error)
+    return ctx.scene.enter('stats_menu')
   }
 })
 
@@ -86,9 +87,10 @@ guildDetailedStatsScene.enter(async (ctx: any) => {
     message += `\n_Shows consistency of guild performance_`
 
     await ctx.replyWithMarkdownV2(message)
-    // Don't leave the scene - stay in stats_menu so keyboard still works
+    return ctx.scene.enter('stats_menu')
   } catch (error) {
     await ctx.reply(texts.actions.error.error)
     console.error('Error in guild detailed stats scene:', error)
+    return ctx.scene.enter('stats_menu')
   }
 })

@@ -35,10 +35,11 @@ guildStandingsScene.enter(async (ctx: any) => {
     message += `\n_Total guilds: ${guilds.length}_`
 
     await ctx.replyWithMarkdownV2(message)
-    // Don't leave the scene - stay in stats_menu so keyboard still works
+    return ctx.scene.enter('stats_menu')
   } catch (error) {
     await ctx.reply(texts.actions.error.error)
     console.error('Error in guild standings scene:', error)
+    return ctx.scene.enter('stats_menu')
   }
 })
 
@@ -74,9 +75,10 @@ guildTopStandingsScene.enter(async (ctx: any) => {
     message += `\n_Total guilds: ${guilds.length}_`
 
     await ctx.replyWithMarkdownV2(message)
-    // Don't leave the scene - stay in stats_menu so keyboard still works
+    return ctx.scene.enter('stats_menu')
   } catch (error) {
     await ctx.reply(texts.actions.error.error)
     console.error('Error in guild top standings scene:', error)
+    return ctx.scene.enter('stats_menu')
   }
 })
