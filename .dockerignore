@@ -1,0 +1,42 @@
+# Dependencies (reinstalled in container)
+node_modules
+venv
+__pycache__
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Environment files
+.env
+.env.*
+
+# Build outputs
+dist
+build
+*.log
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation (not needed at runtime)
+*.md
+README.md
+docs/
+
+# Notes and temp files
+notes/
+tmp/
+temp/
+.cache
+
+# CI/CD
+.github/
