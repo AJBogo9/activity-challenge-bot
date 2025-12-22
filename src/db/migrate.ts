@@ -4,14 +4,20 @@ import { join } from 'path'
 
 export async function runMigrations() {
   try {
-    console.log('🔄 Creating database tables...')
+    console.log('🔄 Running database migrations...')
+    
+    // Suppress NOTICE messages for cleaner output
+    await sql`SET client_min_messages TO WARNING;`
     
     const schemaSQL = readFileSync(join(__dirname, 'schema.sql'), 'utf-8')
     await sql.unsafe(schemaSQL)
     
-    console.log('✅ Tables created successfully')
+    // Reset back to default
+    await sql`SET client_min_messages TO NOTICE;`
+    
+    console.log('✅ Database migrations completed')
   } catch (error) {
-    console.error('❌ Failed to create tables:', error)
+    console.error('❌ Migration failed:', error)
     throw error
   }
 }

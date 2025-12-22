@@ -6,6 +6,7 @@ import { setupBotCommands } from './src/bot/setup'
 import { closeDb } from './src/db'
 import * as flows from './src/flows'
 import { registerGlobalHandlers } from './src/bot/handlers/handlers'
+import { initializeContributors } from './src/flows/info/credits'
 
 type MyContext = Scenes.SceneContext
 
@@ -23,34 +24,51 @@ registerGlobalHandlers()
 // Main startup function
 async function main() {
   try {
-    console.log('🚀 Starting Summer Body Bot...')
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+    console.log('🚀 Starting Activity Challenge Bot...')
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
 
     // Setup database (create tables)
     console.log('📊 Setting up database...')
     await runMigrations()
+    console.log('')
+
+    // Initialize contributors list
+    console.log('👥 Fetching contributors...')
+    await initializeContributors()
+    console.log('')
 
     // Setup bot commands menu
     console.log('⚙️  Configuring bot commands...')
     await setupBotCommands()
+    console.log('')
 
     // Start the bot
     console.log('🤖 Launching bot...')
-    await bot.launch()
-    console.log('✅ Bot started successfully!')
+    bot.launch()
+
+    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+    console.log('✅ Bot is now running and listening for messages')
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
+
 
     // Graceful shutdown handlers
     const shutdown = async (signal: string) => {
-      console.log(`\n${signal} received, shutting down gracefully...`)
+      console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
+      console.log(`${signal} received, shutting down gracefully...`)
       bot.stop(signal)
       await closeDb()
       console.log('👋 Shutdown complete')
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
       process.exit(0)
     }
 
     process.once('SIGINT', () => shutdown('SIGINT'))
     process.once('SIGTERM', () => shutdown('SIGTERM'))
   } catch (error) {
+    console.error('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
     console.error('❌ Failed to start bot:', error)
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
     await closeDb()
     process.exit(1)
   }
