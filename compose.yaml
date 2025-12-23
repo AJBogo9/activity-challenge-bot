@@ -38,11 +38,11 @@ services:
     build: .
     container_name: activity-challenge-bot
     restart: always
-    network_mode: "host"  # <-- ADD THIS LINE
+    network_mode: "host"
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/summer_body  # <-- Change 'postgres' to 'localhost'
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/summer_body
       NODE_ENV: development
-      BOT_TOKEN: ${BOT_TOKEN}  # <-- Make sure this is set
+      BOT_TOKEN: ${BOT_TOKEN}
     depends_on:
       postgres:
         condition: service_healthy

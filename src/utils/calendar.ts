@@ -6,13 +6,13 @@ import { startDate, endDate } from '../config/constants'
 
 // Calendar for activity logging - respects competition dates
 export const activityCalendar = new Calendar(bot, {
-  date_format: 'YYYY-MM-DD',
+  date_format: 'DD-MM-YYYY',
   language: 'en',
   bot_api: 'telegraf',
   close_calendar: true,
   start_week_day: 1, // Monday
-  start_date: startDate || 'now', // Use competition start date if available
-  stop_date: endDate || false,     // Use competition end date if available
+  start_date: startDate ? new Date(startDate) : false,
+  stop_date: endDate ? new Date(endDate) : false,
   custom_start_msg: '📅 Select the date when you did this activity:'
 })
 
@@ -36,7 +36,6 @@ export function handleCalendarSelection(ctx: any): string | null {
   // Check if this callback is for our calendar
   if (messageId === activityCalendar.chats.get(chatId)) {
     const selectedDate = activityCalendar.clickButtonCalendar(ctx.callbackQuery)
-    
     if (selectedDate !== -1) {
       return selectedDate as string
     }

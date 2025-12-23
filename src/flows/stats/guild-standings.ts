@@ -1,8 +1,13 @@
 import { Scenes } from 'telegraf'
 import * as pointService from '../../db/point-queries'
 import { formatList } from '../../utils/format-list'
-import { emojis } from '../../config/constants'
 import { texts } from '../../utils/texts'
+
+function getRankPrefix(index: number): string {
+  const medals = ['🥇', '🥈', '🥉']
+  if (index < 3) return medals[index]
+  return `${index + 1}\\.`
+}
 
 /**
  * Guild standings scene - shows average points per member
@@ -24,16 +29,17 @@ guildStandingsScene.enter(async (ctx: any) => {
     
     const guildPadding = 15
     const pointPadding = 6
-
+    
     guilds.forEach((guild: any, index: number) => {
-      const emoji = index < emojis.length ? emojis[index] : `${index + 1}\\.`
+      const prefix = getRankPrefix(index)
       const escapedGuild = guild.guild.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&')
       const points = Math.round(guild.average_points * 10) / 10
-      message += emoji + formatList(escapedGuild, points.toString(), guildPadding, pointPadding) + '\n'
+      
+      message += prefix + formatList(escapedGuild, points.toString(), guildPadding, pointPadding) + '\n'
     })
-
+    
     message += `\n_Total guilds: ${guilds.length}_`
-
+    
     await ctx.replyWithMarkdownV2(message)
     return ctx.scene.enter('stats_menu')
   } catch (error) {
@@ -64,16 +70,17 @@ guildTopStandingsScene.enter(async (ctx: any) => {
     
     const guildPadding = 15
     const pointPadding = 6
-
+    
     guilds.forEach((guild: any, index: number) => {
-      const emoji = index < emojis.length ? emojis[index] : `${index + 1}\\.`
+      const prefix = getRankPrefix(index)
       const escapedGuild = guild.guild.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&')
       const points = Math.round(guild.average_points * 10) / 10
-      message += emoji + formatList(escapedGuild, points.toString(), guildPadding, pointPadding) + '\n'
+      
+      message += prefix + formatList(escapedGuild, points.toString(), guildPadding, pointPadding) + '\n'
     })
-
+    
     message += `\n_Total guilds: ${guilds.length}_`
-
+    
     await ctx.replyWithMarkdownV2(message)
     return ctx.scene.enter('stats_menu')
   } catch (error) {
