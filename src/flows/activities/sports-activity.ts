@@ -76,9 +76,7 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
       // Handle calendar date selection
       const selectedDate = handleCalendarSelection(ctx)
       
-      if (selectedDate) {
-        console.log(`📅 Date selected in wizard: ${selectedDate}`)
-        
+      if (selectedDate) {     
         // Store in session for handleDateSelection to process
         ctx.scene.session.selectedDate = selectedDate
         
