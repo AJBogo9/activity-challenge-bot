@@ -5,10 +5,10 @@ export async function handleCancel(ctx: any) {
   return ctx.scene.enter('registered_menu')
 }
 
-export function isCancel(input: string): boolean {
+export function isCancel(input: string | undefined): boolean {
   return input === '❌ Cancel'
 }
 
-export function isBack(input: string): boolean {
+export function isBack(input: string | undefined): boolean {
   return input === '⬅️ Back'
 }

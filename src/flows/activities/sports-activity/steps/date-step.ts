@@ -14,6 +14,17 @@ export async function showDateSelection(ctx: any) {
 
   // Show the calendar
   await showActivityCalendar(ctx)
+  
+  // Add Back and Cancel buttons below the calendar
+  await ctx.reply(
+    'Need to go back?',
+    Markup.inlineKeyboard([
+      [
+        Markup.button.callback('⬅️ Back', 'date:back'),
+        Markup.button.callback('❌ Cancel', 'date:cancel')
+      ]
+    ])
+  )
 }
 
 export async function handleDateSelection(ctx: any) {

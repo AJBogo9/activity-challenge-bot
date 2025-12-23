@@ -40,7 +40,10 @@ export function addMetValuesToIntensities(
   })
 }
 
-export function extractIntensityFromLabel(label: string): string {
+export function extractIntensityFromLabel(label: string | undefined): string {
+  if (!label) {
+    return ''
+  }
   const match = label.match(/^(.+?)\s*\([\d.]+\s*MET\)$/)
   return match ? match[1] : label
 }

@@ -59,7 +59,8 @@ export async function handleDurationAndSave(ctx: any) {
       // Show calendar again
       await showActivityCalendar(ctx)
       
-      return ctx.wizard.back()
+      // Go back to step 4 (index 3) to handle calendar callbacks
+      return ctx.wizard.selectStep(3)
     }
     
     if (data.startsWith('duration:')) {
@@ -93,7 +94,8 @@ export async function handleDurationAndSave(ctx: any) {
       // Show calendar again
       await showActivityCalendar(ctx)
       
-      return ctx.wizard.back()
+      // Go back to step 4 (index 3) to handle calendar callbacks
+      return ctx.wizard.selectStep(3)
     }
     
     minutes = parseInt(duration)
@@ -119,6 +121,10 @@ export async function handleDurationAndSave(ctx: any) {
       return ctx.scene.enter('registered_menu')
     }
     
+    // Calculate new total before update
+    const oldPoints = Number(user.points || 0)
+    const newTotalPoints = Number((oldPoints + points).toFixed(2))
+    
     await createActivity({
       userId: user.id,
       activityType: `${ctx.wizard.state.mainCategory} - ${ctx.wizard.state.activity}`,
@@ -129,8 +135,6 @@ export async function handleDurationAndSave(ctx: any) {
     })
     
     await updateUserPoints(user.id, points)
-    
-    const newTotalPoints = Number(user.points || 0) + points
     
     const summary = `
 ✅ *Activity Logged Successfully!*
