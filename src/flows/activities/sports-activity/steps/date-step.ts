@@ -7,7 +7,6 @@ export async function showDateSelection(ctx: any) {
   
   // Remove keyboard and show calendar
   await ctx.reply('Great! Now let\'s select the date.', Markup.removeKeyboard())
-  
   await ctx.replyWithMarkdown(
     `🏃 *Log Activity - Step 5/6*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*MET Value:* ${ctx.wizard.state.metValue}\n\n📅 When did you do this activity?`
   )
@@ -17,9 +16,11 @@ export async function showDateSelection(ctx: any) {
 }
 
 export async function handleDateSelection(ctx: any) {
-  // Check if date was selected
+  // This function is called from the callback handler after date is selected
+  // The date should already be in ctx.scene.session.selectedDate
+  
   if (!ctx.scene.session.selectedDate) {
-    // Still waiting for selection, don't show error
+    await ctx.reply('Please select a date from the calendar.')
     return
   }
   
@@ -28,6 +29,4 @@ export async function handleDateSelection(ctx: any) {
   
   // Clear the selected date for next use
   delete ctx.scene.session.selectedDate
-  
-  return ctx.wizard.next()
 }

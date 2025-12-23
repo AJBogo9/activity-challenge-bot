@@ -13,13 +13,16 @@ type MyContext = Scenes.SceneContext
 // Setup scenes stage
 const stage = new Scenes.Stage<MyContext>(Object.values(flows) as any[])
 
-// Register middleware
+// Register middleware IN ORDER
 bot.use(session())
 bot.use(stage.middleware())
 
-// Register all handlers
-registerCommands()
+// Register global handlers AFTER stage middleware
+// This way ctx.wizard will exist when callbacks are processed
 registerGlobalHandlers()
+
+// Register commands
+registerCommands()
 
 // Main startup function
 async function main() {
@@ -51,7 +54,6 @@ async function main() {
     console.log('✅ Bot is now running and listening for messages')
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
 
-
     // Graceful shutdown handlers
     const shutdown = async (signal: string) => {
       console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
@@ -65,6 +67,7 @@ async function main() {
 
     process.once('SIGINT', () => shutdown('SIGINT'))
     process.once('SIGTERM', () => shutdown('SIGTERM'))
+
   } catch (error) {
     console.error('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
     console.error('❌ Failed to start bot:', error)
