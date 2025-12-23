@@ -18,12 +18,18 @@ export async function showIntensitySelection(ctx: any) {
 }
 
 export async function handleIntensitySelection(ctx: any) {
-  const input = ctx.message?.text
+  // Handle both text messages and callback queries
+  const input = ctx.message?.text || ctx.callbackQuery?.data
+  
+  if (!input) {
+    await ctx.reply('Please select an intensity from the options.')
+    return
+  }
   
   if (isCancel(input)) {
     return handleCancel(ctx)
   }
-  
+
   if (isBack(input)) {
     delete ctx.wizard.state.activity
     ctx.wizard.selectStep(2)
@@ -31,24 +37,23 @@ export async function handleIntensitySelection(ctx: any) {
     const subCat = ctx.wizard.state.subcategory
     const activities = getActivities(mainCat, subCat)
     const keyboard = createKeyboard(activities, true)
-    
     await ctx.replyWithMarkdown(
       `🏃 *Log Activity - Step 3/6*\n\n*Subcategory:* ${subCat}\n\nChoose specific activity:`,
       Markup.keyboard(keyboard).resize().oneTime()
     )
     return 'back'
   }
-  
+
   const selectedIntensity = extractIntensityFromLabel(input)
   const mainCat = ctx.wizard.state.mainCategory
   const subCat = ctx.wizard.state.subcategory
   const activity = ctx.wizard.state.activity
-  
+
   if (!isValidIntensity(mainCat, subCat, activity, selectedIntensity)) {
     await ctx.reply('Invalid intensity. Please choose from the options.')
     return
   }
-  
+
   ctx.wizard.state.intensity = selectedIntensity
   ctx.wizard.state.metValue = getMetValue(mainCat, subCat, activity, selectedIntensity)
 }

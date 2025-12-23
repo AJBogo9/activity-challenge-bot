@@ -54,26 +54,27 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
       
       if (selectedDate) {
         console.log(`📅 Date selected in wizard: ${selectedDate}`)
-        
         // Save the date
         ctx.wizard.state.activityDate = selectedDate
-        
         // Answer callback
         await ctx.answerCbQuery()
-        
         // Show duration selection
         await showDurationSelection(ctx)
-        
         // Skip step 5 and go to step 6
         ctx.wizard.next() // to 5
         return ctx.wizard.next() // to 6
+      } else {
+        // Calendar navigation (month change) - just answer the callback
+        // The calendar library already handled updating the message
+        await ctx.answerCbQuery()
+        return // Stop here - don't process as intensity selection
       }
     }
-    
+
     // Handle intensity selection (text input)
     const result = await handleIntensitySelection(ctx)
     if (result) return result
-    
+
     if (ctx.wizard.state.intensity) {
       await showDateSelection(ctx)
       // Stay on step 4 - wait for calendar callback
