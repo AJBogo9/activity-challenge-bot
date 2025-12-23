@@ -18,8 +18,8 @@ export async function showIntensitySelection(ctx: any) {
 }
 
 export async function handleIntensitySelection(ctx: any) {
-  // Handle both text messages and callback queries
-  const input = ctx.message?.text || ctx.callbackQuery?.data
+    // Only handle text messages (keyboard buttons)
+  const input = ctx.message?.text
   
   if (!input) {
     await ctx.reply('Please select an intensity from the options.')
