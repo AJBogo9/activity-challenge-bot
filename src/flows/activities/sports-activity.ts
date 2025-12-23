@@ -3,7 +3,7 @@ import { showCategorySelection, handleCategorySelection } from './sports-activit
 import { showSubcategorySelection, handleSubcategorySelection } from './sports-activity/steps/subcategory-step'
 import { showActivitySelection, handleActivitySelection } from './sports-activity/steps/activity-step'
 import { showIntensitySelection, handleIntensitySelection } from './sports-activity/steps/intensity-step'
-import { showDateSelection } from './sports-activity/steps/date-step'
+import { handleDateSelection, showDateSelection } from './sports-activity/steps/date-step'
 import { showDurationSelection, handleDurationAndSave } from './sports-activity/steps/duration-step'
 import { handleCalendarSelection } from '../../utils/calendar'
 
@@ -52,14 +52,19 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
     if (ctx.callbackQuery) {
       const selectedDate = handleCalendarSelection(ctx)
       
-      if (selectedDate) {
-        console.log(`📅 Date selected in wizard: ${selectedDate}`)
-        // Save the date
-        ctx.wizard.state.activityDate = selectedDate
+      if (selectedDate) {        
+        // Store in session for handleDateSelection to process
+        ctx.scene.session.selectedDate = selectedDate
+        
         // Answer callback
         await ctx.answerCbQuery()
+        
+        // Use the handler function (consistent with other steps)
+        await handleDateSelection(ctx)
+        
         // Show duration selection
         await showDurationSelection(ctx)
+        
         // Skip step 5 and go to step 6
         ctx.wizard.next() // to 5
         return ctx.wizard.next() // to 6
