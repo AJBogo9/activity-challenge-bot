@@ -1,8 +1,7 @@
-import type { MainCategories } from '../types'
-
+// src/flows/activities/sports-activity/helpers/keyboard-builder.ts
 export function createKeyboard(items: string[], includeBack: boolean = false): string[][] {
   const keyboard: string[][] = []
-  
+
   // If 3 or fewer items, use single column
   if (items.length <= 3) {
     items.forEach(item => keyboard.push([item]))
@@ -16,14 +15,14 @@ export function createKeyboard(items: string[], includeBack: boolean = false): s
       }
     }
   }
-  
+
   // Add navigation buttons
   if (includeBack) {
     keyboard.push(['⬅️ Back', '❌ Cancel'])
   } else {
     keyboard.push(['❌ Cancel'])
   }
-  
+
   return keyboard
 }
 
@@ -32,7 +31,7 @@ export function addMetValuesToIntensities(
   mainCategory: string,
   subcategory: string,
   activity: string,
-  hierarchy: MainCategories
+  hierarchy: Record<string, Record<string, Record<string, Record<string, Array<{ met_value: number; examples: string }>>>>>
 ): string[] {
   return intensities.map(intensity => {
     const metValue = hierarchy[mainCategory]?.[subcategory]?.[activity]?.[intensity]?.[0]?.met_value || 0

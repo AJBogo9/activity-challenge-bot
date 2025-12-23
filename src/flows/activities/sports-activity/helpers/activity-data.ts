@@ -1,7 +1,9 @@
+// src/flows/activities/sports-activity/helpers/activity-data.ts
 import activitiesData from '../../../../../data/processed/4_level_hierarchy.json'
-import type { MainCategories } from '../types'
 
-export const hierarchy = activitiesData as MainCategories
+type HierarchyData = Record<string, Record<string, Record<string, Record<string, Array<{ met_value: number; examples: string }>>>>>
+
+export const hierarchy = activitiesData as HierarchyData
 
 export function getMainCategories(): string[] {
   return Object.keys(hierarchy)

@@ -44,7 +44,7 @@ guildComparisonScene.enter(async (ctx: any) => {
   }
 })
 
-export const guildDetailedStatsScene = new Scenes.BaseScene<any>('guild_detailed_stats')
+const guildDetailedStatsScene = new Scenes.BaseScene<any>('guild_detailed_stats')
 
 guildDetailedStatsScene.enter(async (ctx: any) => {
   try {

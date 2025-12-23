@@ -38,26 +38,9 @@ export async function updateUserPoints(userId: number, pointsToAdd: number): Pro
   `
 }
 
-export async function getTopUsersByGuild(guild: string, limit: number = 10): Promise<User[]> {
-  return await sql<User[]>`
-    SELECT * FROM users
-    WHERE guild = ${guild} AND is_active = true
-    ORDER BY points DESC
-    LIMIT ${limit}
-  `
-}
-
 export async function deleteUser(telegramId: string): Promise<void> {
   await sql`
     DELETE FROM users 
     WHERE telegram_id = ${telegramId}
   `
-}
-
-export async function findUserByUsername(username: string): Promise<User | null> {
-  const result = await sql<User[]>`
-    SELECT * FROM users 
-    WHERE username = ${username}
-  `
-  return result[0] || null
 }

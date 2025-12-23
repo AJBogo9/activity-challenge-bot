@@ -24,16 +24,7 @@ export interface Activity {
   created_at: Date
 }
 
-export interface Guild {
-  id: number
-  name: string
-  total_points: number
-  created_at: Date
-}
-
 export const VALID_GUILDS = [
   'TiK', 'DG', 'FK', 'PT', 'AS', 'SIK', 'KIK', 'MK', 'IK', 
   'Athene', 'Prodeko', 'Inkubio', 'KY', 'TOKYO', 'AK', 'TF', 'PJK', 'VK', 'KK'
 ] as const
-
-export type GuildName = typeof VALID_GUILDS[number]

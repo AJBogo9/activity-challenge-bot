@@ -17,36 +17,6 @@ export async function addPointsToUser(
 }
 
 /**
- * Adjust user points (can be positive or negative)
- */
-export async function adjustUserPoints(
-  username: string,
-  pointsDelta: number
-): Promise<void> {
-  await sql`
-    UPDATE users 
-    SET points = GREATEST(0, points + ${pointsDelta}), 
-        updated_at = NOW()
-    WHERE username = ${username}
-  `
-  
-  // Update team totals
-  await sql`
-    UPDATE teams t
-    SET total_points = (
-      SELECT COALESCE(SUM(u.points), 0)
-      FROM users u
-      WHERE u.team_id = t.id
-    ),
-    updated_at = NOW()
-    FROM users u
-    WHERE u.username = ${username} 
-    AND u.team_id IS NOT NULL
-    AND t.id = u.team_id
-  `
-}
-
-/**
  * Get user's point summary
  */
 export async function getUserSummary(telegramId: string) {
