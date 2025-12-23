@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS activities (
   duration INTEGER,  -- in minutes
   points DECIMAL(10,2) NOT NULL,  -- MET-hours (decimal values)
   description TEXT,
+  activity_date DATE DEFAULT CURRENT_DATE,
   created_at TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
@@ -44,3 +45,4 @@ CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id);
 CREATE INDEX IF NOT EXISTS idx_users_guild ON users(guild);
 CREATE INDEX IF NOT EXISTS idx_activities_user_id ON activities(user_id);
 CREATE INDEX IF NOT EXISTS idx_activities_created_at ON activities(created_at);
+CREATE INDEX IF NOT EXISTS idx_activities_date ON activities(activity_date);

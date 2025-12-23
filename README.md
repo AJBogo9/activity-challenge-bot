@@ -96,4 +96,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Support
 
-- Report bugs: [GitHub Issues](https://github.com/EppuRuotsalainen/summer-body-bot/issues)
+- Report bugs: [GitHub Issues](https://github.com/EppuRuotsalainen/activity-challenge-bot/issues)

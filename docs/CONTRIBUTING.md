@@ -125,7 +125,7 @@ Bot started
 
 ## Questions and Feedback
 
-- **Issues**: Report bugs or request features via [GitHub Issues](https://github.com/EppuRuotsalainen/summer-body-bot/issues)
+- **Issues**: Report bugs or request features via [GitHub Issues](https://github.com/EppuRuotsalainen/activity-challenge-bot/issues)
 - **Contact**: Reach out to the maintainers for sensitive questions
 
 ## Resources

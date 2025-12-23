@@ -36,7 +36,7 @@ services:
 
   app:
     build: .
-    container_name: summer-body-bot
+    container_name: activity-challenge-bot
     restart: always
     network_mode: "host"  # <-- ADD THIS LINE
     environment:
