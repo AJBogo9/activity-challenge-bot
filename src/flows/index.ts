@@ -27,6 +27,3 @@ export { quickStartWizard } from './activities/quick-start-activity'
 export { registerWizard } from './user/register'
 export { deleteUserWizard } from './user/delete'
 export { profileScene } from './user/profile'
-
-// Feedback flow
-// export { feedbackWizard as feedbackScene } from './feedback/feedback'

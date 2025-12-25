@@ -1,9 +1,12 @@
 import { bot } from './instance'
 
 export async function setupBotCommands() {
-  // Show start and menu commands in Telegram's menu button popup
-  await bot.telegram.setMyCommands([])
-
+  // Show only essential commands in Telegram's menu
+  await bot.telegram.setMyCommands([
+    { command: 'menu', description: '🏠 Return to main menu' },
+    { command: 'cancel', description: '❌ Cancel current action' }
+  ])
+  
   await bot.telegram.setChatMenuButton({
     menuButton: {
       type: 'default'
