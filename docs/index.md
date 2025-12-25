@@ -7,7 +7,7 @@ hero:
   tagline: A Telegram bot for managing inter-guild activity challenges
   actions:
     - theme: brand
-      text: Get Started
+      text: Contributing
       link: /CONTRIBUTING
     - theme: alt
       text: Point System
