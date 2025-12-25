@@ -1,25 +1,24 @@
 import { bot } from './instance'
-import onlyPrivate from '../utils/check-private'
 import { getActivityById } from './handlers/inlineQueryHandler'
 
 export function registerCommands() {
   // Start command - entry point when user first opens bot
-  bot.start(onlyPrivate, (ctx: any) => ctx.scene.enter('start_wizard'))
+  bot.start((ctx: any) => ctx.scene.enter('start_wizard'))
   
   // Menu command - lets users return to main menu if stuck
-  bot.command('menu', onlyPrivate, (ctx: any) => {
+  bot.command('menu', (ctx: any) => {
     ctx.scene.leave()
     return ctx.scene.enter('registered_menu')
   })
   
   // Cancel command - universal escape hatch
-  bot.command('cancel', onlyPrivate, (ctx: any) => {
+  bot.command('cancel', (ctx: any) => {
     ctx.scene.leave()
     return ctx.scene.enter('registered_menu')
   })
   
   // Quick log command - for inline query results
-  bot.command('quicklog', onlyPrivate, async (ctx: any) => {
+  bot.command('quicklog', async (ctx: any) => {
     const activityId = ctx.message.text.split(' ')[1]
     
     if (!activityId) {
