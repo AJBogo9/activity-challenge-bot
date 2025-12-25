@@ -33,9 +33,8 @@ guildStandingsScene.enter(async (ctx: any) => {
     guilds.forEach((guild: any, index: number) => {
       const prefix = getRankPrefix(index)
       const escapedGuild = guild.guild.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&')
-      const points = Math.round(guild.average_points * 10) / 10
-      
-      message += prefix + formatList(escapedGuild, points.toString(), guildPadding, pointPadding) + '\n'
+      const points = parseFloat(guild.average_points).toFixed(1)
+      message += prefix + formatList(escapedGuild, points, guildPadding, pointPadding) + '\n'
     })
     
     message += `\n_Total guilds: ${guilds.length}_`
@@ -74,9 +73,8 @@ guildTopStandingsScene.enter(async (ctx: any) => {
     guilds.forEach((guild: any, index: number) => {
       const prefix = getRankPrefix(index)
       const escapedGuild = guild.guild.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&')
-      const points = Math.round(guild.average_points * 10) / 10
-      
-      message += prefix + formatList(escapedGuild, points.toString(), guildPadding, pointPadding) + '\n'
+      const points = parseFloat(guild.average_points).toFixed(1)
+      message += prefix + formatList(escapedGuild, points, guildPadding, pointPadding) + '\n'
     })
     
     message += `\n_Total guilds: ${guilds.length}_`

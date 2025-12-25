@@ -17,7 +17,7 @@ guildComparisonScene.enter(async (ctx: any) => {
     
     if (!guilds || guilds.length === 0) {
       await ctx.reply("No guild statistics available yet. Guilds need at least 3 active members with points.")
-      return ctx.scene.leave()
+      return ctx.scene.enter('stats_menu')
     }
 
     let message = '*📊 Guild Comparison*\n\n'
@@ -25,26 +25,28 @@ guildComparisonScene.enter(async (ctx: any) => {
     guilds.forEach((guild: any, index: number) => {
       const prefix = getRankPrefix(index)
       const escapedGuild = escapeMarkdown(guild.guild)
-      const avgPoints = escapeMarkdown(Math.round(guild.average_points * 10) / 10)
-      const totalPoints = escapeMarkdown(Number(guild.total_points))
-      const memberCount = escapeMarkdown(Number(guild.member_count))
+      const avgPoints = parseFloat(guild.average_points)
+      const totalPoints = parseFloat(guild.total_points)
+      const memberCount = parseInt(guild.member_count)
       
       message += `${prefix} *${escapedGuild}*\n`
-      message += `   Average: ${avgPoints} pts\n`
-      message += `   Total: ${totalPoints} pts\n`
-      message += `   Members: ${memberCount}\n\n`
+      message += `   Average: ${escapeMarkdown(avgPoints.toFixed(1))} pts\n`
+      message += `   Total: ${escapeMarkdown(totalPoints.toFixed(0))} pts\n`
+      message += `   Members: ${escapeMarkdown(memberCount.toString())}\n\n`
     })
     
     message += `_Total guilds: ${guilds.length}_`
     
     await ctx.replyWithMarkdownV2(message)
+    return ctx.scene.enter('stats_menu')
   } catch (error) {
     await ctx.reply(texts.actions.error.error)
     console.error('Error in guild comparison scene:', error)
+    return ctx.scene.enter('stats_menu')
   }
 })
 
-const guildDetailedStatsScene = new Scenes.BaseScene<any>('guild_detailed_stats')
+export const guildDetailedStatsScene = new Scenes.BaseScene<any>('guild_detailed_stats')
 
 guildDetailedStatsScene.enter(async (ctx: any) => {
   try {
@@ -55,32 +57,34 @@ guildDetailedStatsScene.enter(async (ctx: any) => {
     
     if (!allGuilds || allGuilds.length === 0) {
       await ctx.reply("No guild statistics available yet. Guilds need at least 3 active members with points.")
-      return ctx.scene.leave()
+      return ctx.scene.enter('stats_menu')
     }
 
     const topGuildsMap = new Map(
-      topGuilds.map(g => [g.guild, g.average_points])
+      topGuilds.map(g => [g.guild, parseFloat(g.average_points)])
     )
-    
+
     let message = '*🔬 Detailed Guild Statistics*\n\n'
     message += '_Avg All vs Top 50%_\n\n'
     
     allGuilds.forEach((guild: any, index: number) => {
       const prefix = getRankPrefix(index)
       const escapedGuild = escapeMarkdown(guild.guild)
-      const avgAll = escapeMarkdown(Math.round(guild.average_points * 10) / 10)
+      const avgAll = parseFloat(guild.average_points)
       const avgTop = topGuildsMap.get(guild.guild)
-      const avgTopStr = avgTop ? escapeMarkdown(Math.round(avgTop * 10) / 10) : 'N/A'
+      const avgTopStr = avgTop !== undefined ? escapeMarkdown(avgTop.toFixed(1)) : 'N/A'
       
       message += `${prefix} *${escapedGuild}*\n`
-      message += `   All: ${avgAll} | Top 50%: ${avgTopStr}\n`
+      message += `   All: ${escapeMarkdown(avgAll.toFixed(1))} | Top 50%: ${avgTopStr}\n`
     })
     
     message += `\n_Shows consistency of guild performance_`
     
     await ctx.replyWithMarkdownV2(message)
+    return ctx.scene.enter('stats_menu')
   } catch (error) {
     await ctx.reply(texts.actions.error.error)
     console.error('Error in guild detailed stats scene:', error)
+    return ctx.scene.enter('stats_menu')
   }
 })

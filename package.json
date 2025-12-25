@@ -24,9 +24,9 @@
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "pod:metabase:logs": "podman logs -f summer-body-metabase",
-    "pod:metabase:restart": "podman restart summer-body-metabase",
-    "pod:db:psql": "podman exec -it summer-body-postgres psql -U ${POSTGRES_USER:-postgres} -d summer_body"
+    "pod:metabase:logs": "podman logs -f activity-bot-metabase",
+    "pod:metabase:restart": "podman restart activity-bot-metabase",
+    "pod:db:psql": "podman exec -it activity-bot-postgres psql -U ${POSTGRES_USER:-postgres} -d summer_body"
   },
   "repository": {
     "type": "git",

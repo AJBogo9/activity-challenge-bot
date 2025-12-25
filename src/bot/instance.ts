@@ -1,6 +1,6 @@
 import { Telegraf, Scenes } from 'telegraf'
 import https from 'https'
-import { botToken } from '../config/constants'
+import { botToken } from '../constants'
 
 type MyContext = Scenes.SceneContext
 

@@ -2,7 +2,7 @@
 // @ts-expect-error - No type definitions available for telegram-inline-calendar
 import Calendar from 'telegram-inline-calendar'
 import { bot } from '../bot/instance'
-import { startDate, endDate } from '../config/constants'
+import { startDate, endDate } from '../constants'
 
 // Calendar for activity logging - respects competition dates
 const activityCalendar = new Calendar(bot, {

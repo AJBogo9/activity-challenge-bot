@@ -45,8 +45,6 @@ profileScene.hears('📊 User Summary', async (ctx: any) => {
 🆔 *Username:* ${user.username ? '@' + user.username : 'N/A'}
 🏛️ *Guild:* ${user.guild || 'None'}
 🎯 *Total Points:* ${user.points || 0}
-📅 *Registered:* ${registeredDate}
-✅ *Status:* ${user.is_active ? 'Active' : 'Inactive'}
 `
 
     await ctx.replyWithMarkdown(summary)
