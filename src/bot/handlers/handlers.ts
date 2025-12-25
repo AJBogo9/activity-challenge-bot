@@ -1,4 +1,4 @@
-import { texts } from "../../utils/texts"
+import { ERROR_MESSAGE } from "../../utils/texts"
 import { bot } from "../instance"
 import { handleInlineQuery } from './inlineQueryHandler'
 
@@ -24,7 +24,7 @@ export function registerGlobalHandlers() {
   bot.catch((err: any, ctx: any) => {
     console.error(`Encountered an error for ${ctx.updateType}`, err)
     try {
-      ctx.reply(texts.actions.error.error)
+      ctx.reply(ERROR_MESSAGE)
     } catch (e) {
       console.error("Could not reply to error", e)
     }

@@ -1,6 +1,6 @@
 import { Scenes, Markup } from 'telegraf'
 import { findUserByTelegramId, createUser } from '../../db/users'
-import { texts } from '../../utils/texts'
+import { ERROR_MESSAGE, TERMS_AND_CONDITIONS } from '../../utils/texts'
 import { VALID_GUILDS } from '../../types'
 
 export const registerWizard = new Scenes.WizardScene(
@@ -20,7 +20,7 @@ export const registerWizard = new Scenes.WizardScene(
     }
     
     await ctx.reply(
-      texts.terms.only_terms, 
+      TERMS_AND_CONDITIONS, 
       Markup.inlineKeyboard([
         [Markup.button.callback('✅ Accept', 'accept_terms')],
         [Markup.button.callback('❌ Decline', 'decline_terms')]
@@ -121,7 +121,7 @@ registerWizard.action(/^select_guild_(.+)$/, async (ctx: any) => {
     return ctx.scene.enter('registered_menu')
   } catch (error) {
     console.error('Error creating user:', error)
-    await ctx.editMessageText(texts.actions.error.error)
+    await ctx.editMessageText(ERROR_MESSAGE)
     await ctx.reply(
       'There was an error during registration. Please try again.',
       Markup.keyboard([['⬅️ Back to Main Menu']])

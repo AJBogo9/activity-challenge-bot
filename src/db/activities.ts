@@ -1,4 +1,3 @@
-// src/db/activities.ts
 import { Activity } from '../types'
 import { sql } from './index'
 

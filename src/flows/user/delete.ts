@@ -1,6 +1,6 @@
 import { Scenes, Markup } from 'telegraf'
 import { findUserByTelegramId, deleteUser } from '../../db/users'
-import { texts } from '../../utils/texts'
+import { ERROR_MESSAGE } from '../../utils/texts'
 
 export const deleteUserWizard = new Scenes.WizardScene(
   'delete_user_wizard',
@@ -55,7 +55,7 @@ deleteUserWizard.action('confirm_delete', async (ctx: any) => {
     await ctx.editMessageText('User deleted successfully. You can register again using /register.')
   } catch (error) {
     console.error('Error deleting user:', error)
-    await ctx.editMessageText(texts.actions.error.error)
+    await ctx.editMessageText(ERROR_MESSAGE)
   }
   
   return ctx.scene.leave()

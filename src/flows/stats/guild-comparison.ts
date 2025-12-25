@@ -1,7 +1,7 @@
 import { Scenes } from 'telegraf'
 import * as pointService from '../../db/point-queries'
-import { texts } from '../../utils/texts'
 import { escapeMarkdown } from '../../utils/format-list'
+import { ERROR_MESSAGE } from '../../utils/texts'
 
 function getRankPrefix(index: number): string {
   const medals = ['🥇', '🥈', '🥉']
@@ -40,7 +40,7 @@ guildComparisonScene.enter(async (ctx: any) => {
     await ctx.replyWithMarkdownV2(message)
     return ctx.scene.enter('stats_menu')
   } catch (error) {
-    await ctx.reply(texts.actions.error.error)
+    await ctx.reply(ERROR_MESSAGE)
     console.error('Error in guild comparison scene:', error)
     return ctx.scene.enter('stats_menu')
   }
@@ -83,7 +83,7 @@ guildDetailedStatsScene.enter(async (ctx: any) => {
     await ctx.replyWithMarkdownV2(message)
     return ctx.scene.enter('stats_menu')
   } catch (error) {
-    await ctx.reply(texts.actions.error.error)
+    await ctx.reply(ERROR_MESSAGE)
     console.error('Error in guild detailed stats scene:', error)
     return ctx.scene.enter('stats_menu')
   }
