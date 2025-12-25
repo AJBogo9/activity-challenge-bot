@@ -19,7 +19,7 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Stop the bot
         run: |
-          ssh -o StrictHostKeyChecking=no -l ${{ secrets.YOUR_SERVER_USER}} ${{ secrets.YOUR_SERVER_IP}} 'echo ${{ secrets.YOUR_SERVER_USER_PASSWORD}} | sudo -S docker stop summer-body-bot'
+          ssh -o StrictHostKeyChecking=no -l ${{ secrets.YOUR_SERVER_USER}} ${{ secrets.YOUR_SERVER_IP}} 'echo ${{ secrets.YOUR_SERVER_USER_PASSWORD}} | sudo -S docker stop activity-challenge-bot'
   deploy:
     runs-on: ubuntu-latest
 
@@ -32,4 +32,4 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Deploy to Server
         run: |
-          ssh -o StrictHostKeyChecking=no -l ${{ secrets.YOUR_SERVER_USER}} ${{ secrets.YOUR_SERVER_IP}} 'cd /home/mikmokki/summer-body-bot/ && git pull origin main && echo ${{ secrets.YOUR_SERVER_USER_PASSWORD}} | sudo -S ./deploy-script.sh'
+          ssh -o StrictHostKeyChecking=no -l ${{ secrets.YOUR_SERVER_USER}} ${{ secrets.YOUR_SERVER_IP}} 'cd /home/mikmokki/activity-challenge-bot/ && git pull origin main && echo ${{ secrets.YOUR_SERVER_USER_PASSWORD}} | sudo -S ./deploy-script.sh'

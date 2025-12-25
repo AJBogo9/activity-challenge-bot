@@ -1,9 +1,13 @@
 import { Scenes } from 'telegraf'
 import * as pointService from '../../db/point-queries'
-import { formatList } from '../../utils/format-list'
-import { emojis } from '../../config/constants'
 import { texts } from '../../utils/texts'
-import { escapeMarkdown } from '../../utils/format-list' // Add this import
+import { escapeMarkdown } from '../../utils/format-list'
+
+function getRankPrefix(index: number): string {
+  const medals = ['🥇', '🥈', '🥉']
+  if (index < 3) return medals[index]
+  return `${index + 1}\\.`
+}
 
 export const guildComparisonScene = new Scenes.BaseScene<any>('guild_comparison')
 
@@ -19,13 +23,13 @@ guildComparisonScene.enter(async (ctx: any) => {
     let message = '*📊 Guild Comparison*\n\n'
     
     guilds.forEach((guild: any, index: number) => {
-      const emoji = index < emojis.length ? emojis[index] : `${index + 1}\\.`
+      const prefix = getRankPrefix(index)
       const escapedGuild = escapeMarkdown(guild.guild)
       const avgPoints = escapeMarkdown(Math.round(guild.average_points * 10) / 10)
       const totalPoints = escapeMarkdown(Number(guild.total_points))
       const memberCount = escapeMarkdown(Number(guild.member_count))
       
-      message += `${emoji} *${escapedGuild}*\n`
+      message += `${prefix} *${escapedGuild}*\n`
       message += `   Average: ${avgPoints} pts\n`
       message += `   Total: ${totalPoints} pts\n`
       message += `   Members: ${memberCount}\n\n`
@@ -40,7 +44,7 @@ guildComparisonScene.enter(async (ctx: any) => {
   }
 })
 
-export const guildDetailedStatsScene = new Scenes.BaseScene<any>('guild_detailed_stats')
+const guildDetailedStatsScene = new Scenes.BaseScene<any>('guild_detailed_stats')
 
 guildDetailedStatsScene.enter(async (ctx: any) => {
   try {
@@ -53,7 +57,7 @@ guildDetailedStatsScene.enter(async (ctx: any) => {
       await ctx.reply("No guild statistics available yet. Guilds need at least 3 active members with points.")
       return ctx.scene.leave()
     }
-    
+
     const topGuildsMap = new Map(
       topGuilds.map(g => [g.guild, g.average_points])
     )
@@ -62,13 +66,13 @@ guildDetailedStatsScene.enter(async (ctx: any) => {
     message += '_Avg All vs Top 50%_\n\n'
     
     allGuilds.forEach((guild: any, index: number) => {
-      const emoji = index < emojis.length ? emojis[index] : `${index + 1}\\.`
+      const prefix = getRankPrefix(index)
       const escapedGuild = escapeMarkdown(guild.guild)
       const avgAll = escapeMarkdown(Math.round(guild.average_points * 10) / 10)
       const avgTop = topGuildsMap.get(guild.guild)
       const avgTopStr = avgTop ? escapeMarkdown(Math.round(avgTop * 10) / 10) : 'N/A'
       
-      message += `${emoji} *${escapedGuild}*\n`
+      message += `${prefix} *${escapedGuild}*\n`
       message += `   All: ${avgAll} | Top 50%: ${avgTopStr}\n`
     })
     

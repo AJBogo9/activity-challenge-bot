@@ -2,7 +2,7 @@ import { Telegraf, Scenes } from 'telegraf'
 import https from 'https'
 import { telegramToken } from '../config/constants'
 
-export type MyContext = Scenes.SceneContext
+type MyContext = Scenes.SceneContext
 
 if (!telegramToken) {
   throw new Error('TELEGRAM_TOKEN is not defined in environment variables')
