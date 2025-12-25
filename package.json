@@ -23,7 +23,10 @@
     "lint": "eslint --max-warnings=-1",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "pod:metabase:logs": "podman logs -f summer-body-metabase",
+    "pod:metabase:restart": "podman restart summer-body-metabase",
+    "pod:db:psql": "podman exec -it summer-body-postgres psql -U ${POSTGRES_USER:-postgres} -d summer_body"
   },
   "repository": {
     "type": "git",

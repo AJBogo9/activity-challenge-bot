@@ -33,7 +33,7 @@ export async function createUser(data: {
 export async function updateUserPoints(userId: number, pointsToAdd: number): Promise<void> {
   await sql`
     UPDATE users 
-    SET points = points + ${Number(pointsToAdd)}, updated_at = NOW()
+    SET points = points + ${Number(pointsToAdd)}
     WHERE id = ${userId}
   `
 }

@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: summer_body
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"  # Only expose to localhost
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -21,7 +21,7 @@ services:
     image: metabase/metabase:latest
     container_name: summer-body-metabase
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"  # Only expose to localhost (use nginx/caddy for public access)
     environment:
       MB_DB_TYPE: postgres
       MB_DB_DBNAME: metabase
@@ -29,6 +29,7 @@ services:
       MB_DB_USER: ${POSTGRES_USER}
       MB_DB_PASS: ${POSTGRES_PASSWORD}
       MB_DB_HOST: postgres
+      MB_ENCRYPTION_SECRET_KEY: ${MB_ENCRYPTION_SECRET_KEY}  # Add this to your .env
     depends_on:
       postgres:
         condition: service_healthy
@@ -38,18 +39,16 @@ services:
     build: .
     container_name: activity-challenge-bot
     restart: always
-    network_mode: "host"
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/summer_body
-      NODE_ENV: development
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/summer_body
+      NODE_ENV: production
       BOT_TOKEN: ${BOT_TOKEN}
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
-      - .:/app
-      - /app/node_modules
-    command: bun --watch index.ts
+      - ./data:/app/data  # Only mount data directory, not entire source code
+    command: bun index.ts  # Remove --watch for production
 
 volumes:
   postgres_data:

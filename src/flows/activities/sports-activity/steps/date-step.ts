@@ -1,3 +1,4 @@
+// src/flows/activities/sports-activity/steps/date-step.ts
 import { Markup } from 'telegraf'
 import { showActivityCalendar } from '../../../../utils/calendar'
 
@@ -14,7 +15,7 @@ export async function showDateSelection(ctx: any) {
 
   // Show the calendar
   await showActivityCalendar(ctx)
-  
+
   // Add Back and Cancel buttons below the calendar
   await ctx.reply(
     'Need to go back?',
@@ -29,7 +30,6 @@ export async function showDateSelection(ctx: any) {
 
 export async function handleDateSelection(ctx: any) {
   // This function is called from the callback handler after date is selected
-  // The date should already be in ctx.scene.session.selectedDate
   if (!ctx.scene.session.selectedDate) {
     await ctx.reply('Please select a date from the calendar.')
     return
@@ -37,7 +37,7 @@ export async function handleDateSelection(ctx: any) {
 
   // Save the date to wizard state
   ctx.wizard.state.activityDate = ctx.scene.session.selectedDate
-  
+
   // Clear the selected date for next use
   delete ctx.scene.session.selectedDate
 }

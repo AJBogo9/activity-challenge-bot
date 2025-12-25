@@ -61,9 +61,7 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
         await ctx.answerCbQuery()
         delete ctx.wizard.state.intensity
         delete ctx.wizard.state.metValue
-        
         await showIntensitySelection(ctx)
-        // Stay on step 4
         return
       }
       
@@ -75,10 +73,12 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
       
       // Handle calendar date selection
       const selectedDate = handleCalendarSelection(ctx)
+      console.log('🔍 Step 4 - Calendar returned:', selectedDate) // DEBUG
       
       if (selectedDate) {     
         // Store in session for handleDateSelection to process
         ctx.scene.session.selectedDate = selectedDate
+        console.log('🔍 Step 4 - Stored in session:', ctx.scene.session.selectedDate) // DEBUG
         
         // Answer callback
         await ctx.answerCbQuery()
@@ -86,6 +86,8 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
         // Use the handler function (consistent with other steps)
         const { handleDateSelection } = await import('./sports-activity/steps/date-step')
         await handleDateSelection(ctx)
+        
+        console.log('🔍 Step 4 - After handleDateSelection, wizard.state.activityDate:', ctx.wizard.state.activityDate) // DEBUG
         
         // Show duration selection
         await showDurationSelection(ctx)
@@ -95,16 +97,15 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
         return ctx.wizard.next() // to 6
       } else {
         // Calendar navigation (month change) - just answer the callback
-        // The calendar library already handled updating the message
         await ctx.answerCbQuery()
-        return // Stop here - don't process as intensity selection
+        return
       }
     }
-
+    
     // Handle intensity selection (text input)
     const result = await handleIntensitySelection(ctx)
     if (result) return result
-
+    
     if (ctx.wizard.state.intensity) {
       await showDateSelection(ctx)
       // Stay on step 4 - wait for calendar callback

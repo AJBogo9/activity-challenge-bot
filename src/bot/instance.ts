@@ -1,13 +1,13 @@
 import { Telegraf, Scenes } from 'telegraf'
 import https from 'https'
-import { telegramToken } from '../config/constants'
+import { botToken } from '../config/constants'
 
 type MyContext = Scenes.SceneContext
 
-if (!telegramToken) {
+if (!botToken) {
   throw new Error('TELEGRAM_TOKEN is not defined in environment variables')
 }
 
 const agent = new https.Agent({ keepAlive: false })
 
-export const bot = new Telegraf<MyContext>(telegramToken, { telegram: { agent } })
+export const bot = new Telegraf<MyContext>(botToken, { telegram: { agent } })

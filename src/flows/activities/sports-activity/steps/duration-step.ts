@@ -32,6 +32,8 @@ export async function showDurationSelection(ctx: any) {
 }
 
 export async function handleDurationAndSave(ctx: any) {
+  console.log('🔍 Duration step - wizard.state.activityDate:', ctx.wizard.state.activityDate) // DEBUG
+  
   let minutes: number
   
   // Handle inline button callback

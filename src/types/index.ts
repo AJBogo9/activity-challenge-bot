@@ -22,6 +22,7 @@ export interface Activity {
   verified_by?: number
   is_verified: boolean
   created_at: Date
+  activity_date: Date
 }
 
 export const VALID_GUILDS = [

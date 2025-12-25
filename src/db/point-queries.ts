@@ -2,7 +2,7 @@ import { sql } from './index'
 import { User } from '../types'
 
 /**
- * Add points to a user and update their team's total
+ * Add points to a user
  */
 export async function addPointsToUser(
   telegramId: string, 
@@ -11,7 +11,7 @@ export async function addPointsToUser(
   // Update user points
   await sql`
     UPDATE users 
-    SET points = points + ${points}, updated_at = NOW()
+    SET points = points + ${points}
     WHERE telegram_id = ${telegramId}
   `
 }
@@ -33,7 +33,7 @@ export async function getUserSummary(telegramId: string) {
 }
 
 /**
- * Get guild leaderboard (guilds with 3+ active members)
+ * Get guild leaderboard (guilds with 3+ members)
  * Ordered by average points per member
  */
 export async function getGuildLeaderboard() {
@@ -44,7 +44,7 @@ export async function getGuildLeaderboard() {
       SUM(points) as total_points,
       ROUND(AVG(points), 1) as average_points
     FROM users
-    WHERE is_active = true AND points > 0 AND guild IS NOT NULL
+    WHERE points > 0 AND guild IS NOT NULL
     GROUP BY guild
     HAVING COUNT(*) >= 3
     ORDER BY average_points DESC
@@ -63,7 +63,7 @@ export async function getGuildTopLeaderboard() {
         ROW_NUMBER() OVER (PARTITION BY guild ORDER BY points DESC) as rank,
         COUNT(*) OVER (PARTITION BY guild) as total_count
       FROM users
-      WHERE is_active = true AND points > 0 AND guild IS NOT NULL
+      WHERE points > 0 AND guild IS NOT NULL
     ),
     top_half AS (
       SELECT 
@@ -90,7 +90,7 @@ export async function getGuildTopLeaderboard() {
 export async function getTopUsers(limit: number = 20): Promise<User[]> {
   return await sql<User[]>`
     SELECT * FROM users
-    WHERE is_active = true AND points > 0
+    WHERE points > 0
     ORDER BY points DESC
     LIMIT ${limit}
   `

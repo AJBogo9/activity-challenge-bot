@@ -1,6 +1,6 @@
 import 'dotenv/config'
 
-export const telegramToken = process.env.TELEGRAM_TOKEN
+export const botToken = process.env.BOT_TOKEN
 
 // Competition dates
 export const startDate = process.env.COMPETITION_START_DATE || ''
