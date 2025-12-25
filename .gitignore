@@ -33,3 +33,7 @@ TODO.md
 
 # Test coverage
 coverage/
+
+# VitePress
+docs/.vitepress/dist
+docs/.vitepress/cache
