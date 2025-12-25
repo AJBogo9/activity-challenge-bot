@@ -1,8 +1,9 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: "Your Project",
-  description: "Project description",
+  title: "Activity Challenge Bot",
+  description: "A Telegram bot for tracking competition scores among Aalto guilds",
+  base: '/activity-challenge-bot/',
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
