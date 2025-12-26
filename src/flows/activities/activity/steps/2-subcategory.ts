@@ -1,10 +1,18 @@
 import { Markup } from 'telegraf'
 import { createKeyboard } from '../helpers/keyboard-builder'
-import { getSubcategories, getMainCategories, isValidSubcategory } from '../helpers/activity-data'
-import { handleCancel, isCancel, isBack } from '../helpers/navigation'
+import { getSubcategories, isValidSubcategory } from '../helpers/activity-data'
 
-export async function showSubcategorySelection(ctx: any) {
+/**
+ * Display subcategory selection screen
+ */
+export async function showSubcategorySelection(ctx: any): Promise<void> {
   const mainCategory = ctx.wizard.state.mainCategory
+  
+  if (!mainCategory) {
+    await ctx.reply('❌ Error: No main category selected.')
+    return
+  }
+
   const subcategories = getSubcategories(mainCategory)
   const keyboard = createKeyboard(subcategories, true)
   
@@ -14,33 +22,33 @@ export async function showSubcategorySelection(ctx: any) {
   )
 }
 
-export async function handleSubcategorySelection(ctx: any) {
-  const input = ctx.message?.text
-  
-  if (isCancel(input)) {
-    return handleCancel(ctx)
+/**
+ * Handle subcategory selection from user input
+ * @returns true if subcategory was selected successfully, false otherwise
+ */
+export async function handleSubcategorySelection(ctx: any): Promise<boolean> {
+  // Only process text messages
+  if (!ctx.message?.text) {
+    return false
   }
-  
-  if (isBack(input)) {
-    delete ctx.wizard.state.mainCategory
-    ctx.wizard.selectStep(0)
-    const mainCategories = getMainCategories()
-    const keyboard = createKeyboard(mainCategories)
-    
-    await ctx.replyWithMarkdown(
-      '🏃 *Log Activity - Step 1/6*\n\nChoose a main category:',
-      Markup.keyboard(keyboard).resize().oneTime()
-    )
-    return 'back'
+
+  const selectedSubcategory = ctx.message.text.trim()
+  const mainCategory = ctx.wizard.state.mainCategory
+
+  // Validate we have a main category
+  if (!mainCategory) {
+    await ctx.reply('❌ Error: No main category found. Please start over.')
+    return false
   }
-  
-  const mainCat = ctx.wizard.state.mainCategory
-  const selectedSubcategory = input
-  
-  if (!isValidSubcategory(mainCat, selectedSubcategory)) {
-    await ctx.reply('Invalid subcategory. Please choose from the options.')
-    return
+
+  // Validate subcategory
+  if (!isValidSubcategory(mainCategory, selectedSubcategory)) {
+    await ctx.reply('❌ Invalid subcategory. Please choose from the options provided.')
+    return false
   }
-  
+
+  // Store in wizard state
   ctx.wizard.state.subcategory = selectedSubcategory
+  
+  return true
 }

@@ -1,14 +1,32 @@
 import { Markup } from 'telegraf'
-import { showActivityCalendar } from '../../../../utils/calendar'
-import { handleCancel } from '../helpers/navigation'
 
-export async function showDurationSelection(ctx: any) {
+/**
+ * Display duration selection screen with quick options
+ */
+export async function showDurationSelection(ctx: any): Promise<void> {
   const activity = ctx.wizard.state.activity
   const intensity = ctx.wizard.state.intensity
+  const activityDate = ctx.wizard.state.activityDate
+  const metValue = ctx.wizard.state.metValue
   
-  // Create inline keyboard with common duration options
+  if (!activity || !intensity || !activityDate || !metValue) {
+    await ctx.reply('❌ Error: Missing activity information. Please start over.')
+    return
+  }
+
+  // Format date for display
+  const dateStr = activityDate instanceof Date 
+    ? activityDate.toLocaleDateString() 
+    : activityDate
+
   await ctx.replyWithMarkdown(
-    `🏃 *Log Activity - Step 6/7*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*Date:* ${ctx.wizard.state.activityDate}\n*MET Value:* ${ctx.wizard.state.metValue}\n\nHow many minutes did you exercise?\n\n_Tap a quick option below or type a custom number:_`,
+    `🏃 *Log Activity - Step 6/6*\n\n` +
+    `*Activity:* ${activity}\n` +
+    `*Intensity:* ${intensity}\n` +
+    `*Date:* ${dateStr}\n` +
+    `*MET Value:* ${metValue}\n\n` +
+    `⏱️ How many minutes did you exercise?\n\n` +
+    `_Tap a quick option below or type a custom number:_`,
     Markup.inlineKeyboard([
       [
         Markup.button.callback('15 min', 'duration:15'),
@@ -29,44 +47,26 @@ export async function showDurationSelection(ctx: any) {
   )
 }
 
-export async function handleDurationInput(ctx: any) {
-  console.log('🔍 Duration step - wizard.state.activityDate:', ctx.wizard.state.activityDate) // DEBUG
-  
-  let minutes: number
-  
+/**
+ * Handle duration input from inline buttons or text
+ */
+export async function handleDurationInput(ctx: any): Promise<void> {
+  let minutes: number | undefined
+
   // Handle inline button callback
   if (ctx.callbackQuery?.data) {
     const data = ctx.callbackQuery.data
     
-    if (data === 'duration:cancel') {
-      await ctx.answerCbQuery()
-      return handleCancel(ctx)
+    // Skip back/cancel - handled in wizard
+    if (data === 'duration:back' || data === 'duration:cancel') {
+      return
     }
-    
-    if (data === 'duration:back') {
-      await ctx.answerCbQuery()
-      
-      // Clean up state
-      delete ctx.wizard.state.activityDate
-      
-      const activity = ctx.wizard.state.activity
-      const intensity = ctx.wizard.state.intensity
-      
-      await ctx.replyWithMarkdown(
-        `🏃 *Log Activity - Step 5/7*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*MET Value:* ${ctx.wizard.state.metValue}\n\n📅 When did you do this activity?`
-      )
-      
-      // Show calendar again
-      await showActivityCalendar(ctx)
-      
-      // Go back to step 4 (index 3) to handle calendar callbacks
-      return ctx.wizard.selectStep(3)
-    }
-    
+
+    // Extract duration from button callback
     if (data.startsWith('duration:')) {
       await ctx.answerCbQuery()
       const durationStr = data.split(':')[1]
-      minutes = parseInt(durationStr)
+      minutes = parseInt(durationStr, 10)
     } else {
       await ctx.answerCbQuery()
       return
@@ -74,47 +74,25 @@ export async function handleDurationInput(ctx: any) {
   } 
   // Handle text input
   else if (ctx.message?.text) {
-    const duration = ctx.message.text
-    
-    if (duration === '❌ Cancel') {
-      return handleCancel(ctx)
-    }
-    
-    if (duration === '⬅️ Back') {
-      // Clean up state
-      delete ctx.wizard.state.activityDate
-      
-      const activity = ctx.wizard.state.activity
-      const intensity = ctx.wizard.state.intensity
-      
-      await ctx.replyWithMarkdown(
-        `🏃 *Log Activity - Step 5/7*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*MET Value:* ${ctx.wizard.state.metValue}\n\n📅 When did you do this activity?`
-      )
-      
-      // Show calendar again
-      await showActivityCalendar(ctx)
-      
-      // Go back to step 4 (index 3) to handle calendar callbacks
-      return ctx.wizard.selectStep(3)
-    }
-    
-    minutes = parseInt(duration)
+    const input = ctx.message.text.trim()
+    minutes = parseInt(input, 10)
   } else {
     return
   }
-  
-  if (isNaN(minutes) || minutes <= 0) {
-    await ctx.reply('Please enter a valid number of minutes (e.g., 30)')
+
+  // Validate duration
+  if (!minutes || isNaN(minutes) || minutes <= 0 || minutes > 1440) {
+    await ctx.reply('❌ Please enter a valid number of minutes (1-1440).')
     return
   }
-  
-  // Save duration to wizard state
+
+  // Store duration in wizard state
   ctx.wizard.state.duration = minutes
-  
-  // Calculate points for preview (MET * minutes / 60)
-  const points = Number(((ctx.wizard.state.metValue * minutes) / 60).toFixed(2))
+
+  // Calculate points for preview (MET * hours)
+  const metValue = ctx.wizard.state.metValue
+  const points = Number(((metValue * minutes) / 60).toFixed(2))
   ctx.wizard.state.calculatedPoints = points
-  
-  // Move to confirmation step
-  return ctx.wizard.next()
+
+  console.log(`✅ Duration set: ${minutes} min, Points: ${points}`)
 }

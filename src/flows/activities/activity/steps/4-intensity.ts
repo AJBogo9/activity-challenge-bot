@@ -1,14 +1,28 @@
 import { Markup } from 'telegraf'
 import { createKeyboard, addMetValuesToIntensities, extractIntensityFromLabel } from '../helpers/keyboard-builder'
-import { hierarchy, getIntensities, getActivities, getMetValue, isValidIntensity } from '../helpers/activity-data'
-import { handleCancel, isCancel, isBack } from '../helpers/navigation'
+import { hierarchy, getIntensities, getMetValue, isValidIntensity } from '../helpers/activity-data'
 
-export async function showIntensitySelection(ctx: any) {
-  const mainCat = ctx.wizard.state.mainCategory
-  const subCat = ctx.wizard.state.subcategory
+/**
+ * Display intensity selection screen with MET values
+ */
+export async function showIntensitySelection(ctx: any): Promise<void> {
+  const mainCategory = ctx.wizard.state.mainCategory
+  const subcategory = ctx.wizard.state.subcategory
   const activity = ctx.wizard.state.activity
-  const intensities = getIntensities(mainCat, subCat, activity)
-  const intensitiesWithMET = addMetValuesToIntensities(intensities, mainCat, subCat, activity, hierarchy)
+  
+  if (!mainCategory || !subcategory || !activity) {
+    await ctx.reply('❌ Error: Missing activity information. Please start over.')
+    return
+  }
+
+  const intensities = getIntensities(mainCategory, subcategory, activity)
+  const intensitiesWithMET = addMetValuesToIntensities(
+    intensities, 
+    mainCategory, 
+    subcategory, 
+    activity, 
+    hierarchy
+  )
   const keyboard = createKeyboard(intensitiesWithMET, true)
   
   await ctx.replyWithMarkdown(
@@ -17,43 +31,38 @@ export async function showIntensitySelection(ctx: any) {
   )
 }
 
-export async function handleIntensitySelection(ctx: any) {
-    // Only handle text messages (keyboard buttons)
-  const input = ctx.message?.text
-  
-  if (!input) {
-    await ctx.reply('Please select an intensity from the options.')
-    return
-  }
-  
-  if (isCancel(input)) {
-    return handleCancel(ctx)
+/**
+ * Handle intensity selection from user input
+ * @returns true if intensity was selected successfully, false otherwise
+ */
+export async function handleIntensitySelection(ctx: any): Promise<boolean> {
+  // Only process text messages
+  if (!ctx.message?.text) {
+    return false
   }
 
-  if (isBack(input)) {
-    delete ctx.wizard.state.activity
-    ctx.wizard.selectStep(2)
-    const mainCat = ctx.wizard.state.mainCategory
-    const subCat = ctx.wizard.state.subcategory
-    const activities = getActivities(mainCat, subCat)
-    const keyboard = createKeyboard(activities, true)
-    await ctx.replyWithMarkdown(
-      `🏃 *Log Activity - Step 3/6*\n\n*Subcategory:* ${subCat}\n\nChoose specific activity:`,
-      Markup.keyboard(keyboard).resize().oneTime()
-    )
-    return 'back'
-  }
-
+  const input = ctx.message.text.trim()
   const selectedIntensity = extractIntensityFromLabel(input)
-  const mainCat = ctx.wizard.state.mainCategory
-  const subCat = ctx.wizard.state.subcategory
+  
+  const mainCategory = ctx.wizard.state.mainCategory
+  const subcategory = ctx.wizard.state.subcategory
   const activity = ctx.wizard.state.activity
 
-  if (!isValidIntensity(mainCat, subCat, activity, selectedIntensity)) {
-    await ctx.reply('Invalid intensity. Please choose from the options.')
-    return
+  // Validate we have required state
+  if (!mainCategory || !subcategory || !activity) {
+    await ctx.reply('❌ Error: Missing activity information. Please start over.')
+    return false
   }
 
+  // Validate intensity
+  if (!isValidIntensity(mainCategory, subcategory, activity, selectedIntensity)) {
+    await ctx.reply('❌ Invalid intensity. Please choose from the options provided.')
+    return false
+  }
+
+  // Store intensity and MET value in wizard state
   ctx.wizard.state.intensity = selectedIntensity
-  ctx.wizard.state.metValue = getMetValue(mainCat, subCat, activity, selectedIntensity)
+  ctx.wizard.state.metValue = getMetValue(mainCategory, subcategory, activity, selectedIntensity)
+  
+  return true
 }

@@ -1,49 +1,56 @@
 import { Markup } from 'telegraf'
 import { createKeyboard } from '../helpers/keyboard-builder'
-import { getActivities, getSubcategories, isValidActivity } from '../helpers/activity-data'
-import { handleCancel, isCancel, isBack } from '../helpers/navigation'
+import { getActivities, isValidActivity } from '../helpers/activity-data'
 
-export async function showActivitySelection(ctx: any) {
-  const mainCat = ctx.wizard.state.mainCategory
-  const subCat = ctx.wizard.state.subcategory
-  const activities = getActivities(mainCat, subCat)
+/**
+ * Display activity selection screen
+ */
+export async function showActivitySelection(ctx: any): Promise<void> {
+  const mainCategory = ctx.wizard.state.mainCategory
+  const subcategory = ctx.wizard.state.subcategory
+  
+  if (!mainCategory || !subcategory) {
+    await ctx.reply('❌ Error: Missing category information. Please start over.')
+    return
+  }
+
+  const activities = getActivities(mainCategory, subcategory)
   const keyboard = createKeyboard(activities, true)
   
   await ctx.replyWithMarkdown(
-    `🏃 *Log Activity - Step 3/6*\n\n*Subcategory:* ${subCat}\n\nChoose specific activity:`,
+    `🏃 *Log Activity - Step 3/6*\n\n*Subcategory:* ${subcategory}\n\nChoose specific activity:`,
     Markup.keyboard(keyboard).resize().oneTime()
   )
 }
 
-export async function handleActivitySelection(ctx: any) {
-  const input = ctx.message?.text
-  
-  if (isCancel(input)) {
-    return handleCancel(ctx)
+/**
+ * Handle activity selection from user input
+ * @returns true if activity was selected successfully, false otherwise
+ */
+export async function handleActivitySelection(ctx: any): Promise<boolean> {
+  // Only process text messages
+  if (!ctx.message?.text) {
+    return false
   }
-  
-  if (isBack(input)) {
-    delete ctx.wizard.state.subcategory
-    ctx.wizard.selectStep(1)
-    const mainCat = ctx.wizard.state.mainCategory
-    const subcategories = getSubcategories(mainCat)
-    const keyboard = createKeyboard(subcategories, true)
-    
-    await ctx.replyWithMarkdown(
-      `🏃 *Log Activity - Step 2/6*\n\n*Category:* ${mainCat}\n\nChoose a subcategory:`,
-      Markup.keyboard(keyboard).resize().oneTime()
-    )
-    return 'back'
+
+  const selectedActivity = ctx.message.text.trim()
+  const mainCategory = ctx.wizard.state.mainCategory
+  const subcategory = ctx.wizard.state.subcategory
+
+  // Validate we have required state
+  if (!mainCategory || !subcategory) {
+    await ctx.reply('❌ Error: Missing category information. Please start over.')
+    return false
   }
-  
-  const mainCat = ctx.wizard.state.mainCategory
-  const subCat = ctx.wizard.state.subcategory
-  const selectedActivity = input
-  
-  if (!isValidActivity(mainCat, subCat, selectedActivity)) {
-    await ctx.reply('Invalid activity. Please choose from the options.')
-    return
+
+  // Validate activity
+  if (!isValidActivity(mainCategory, subcategory, selectedActivity)) {
+    await ctx.reply('❌ Invalid activity. Please choose from the options provided.')
+    return false
   }
-  
+
+  // Store in wizard state
   ctx.wizard.state.activity = selectedActivity
+  
+  return true
 }

@@ -1,20 +1,40 @@
 import { Markup } from 'telegraf'
 import { findUserByTelegramId, updateUserPoints } from '../../../../db/users'
 import { createActivity } from '../../../../db/activities'
-import { handleCancel } from '../helpers/navigation'
-import { showDurationSelection } from './6-duration'
 
-export async function showConfirmation(ctx: any) {
-  const { mainCategory, activity, intensity, activityDate, duration, metValue, calculatedPoints } = ctx.wizard.state
-  
+/**
+ * Display confirmation screen with activity summary
+ */
+export async function showConfirmation(ctx: any): Promise<void> {
+  const { 
+    mainCategory, 
+    subcategory,
+    activity, 
+    intensity, 
+    activityDate, 
+    duration, 
+    metValue, 
+    calculatedPoints 
+  } = ctx.wizard.state
+
+  if (!mainCategory || !activity || !intensity || !activityDate || !duration || !metValue) {
+    await ctx.reply('❌ Error: Missing activity information. Please start over.')
+    return
+  }
+
+  // Format date for display
+  const dateStr = activityDate instanceof Date 
+    ? activityDate.toLocaleDateString() 
+    : activityDate
+
   const summary = `
 🔍 *Review Your Activity - Step 7/7*
 
 📋 *Summary:*
-- *Category:* ${mainCategory}
+- *Category:* ${mainCategory}${subcategory ? ` > ${subcategory}` : ''}
 - *Activity:* ${activity}
 - *Intensity:* ${intensity}
-- *Date:* ${activityDate}
+- *Date:* ${dateStr}
 - *Duration:* ${duration} minutes
 - *MET Value:* ${metValue}
 
@@ -22,7 +42,7 @@ export async function showConfirmation(ctx: any) {
 
 _Please review the information above. Is everything correct?_
 `
-  
+
   await ctx.replyWithMarkdown(
     summary,
     Markup.inlineKeyboard([
@@ -37,84 +57,107 @@ _Please review the information above. Is everything correct?_
   )
 }
 
-export async function handleConfirmation(ctx: any) {
+/**
+ * Handle confirmation actions (save, back, cancel)
+ */
+export async function handleConfirmation(ctx: any): Promise<void> {
+  // Only process callback queries
   if (!ctx.callbackQuery?.data) {
     return
   }
-  
+
   const data = ctx.callbackQuery.data
-  
-  if (data === 'confirm:cancel') {
-    await ctx.answerCbQuery()
-    return handleCancel(ctx)
+
+  // Skip back/cancel - handled in wizard
+  if (data === 'confirm:back' || data === 'confirm:cancel') {
+    return
   }
-  
-  if (data === 'confirm:back') {
-    await ctx.answerCbQuery()
-    
-    // Clear duration and points from state
-    delete ctx.wizard.state.duration
-    delete ctx.wizard.state.calculatedPoints
-    
-    // Go back to duration step (step index 4)
-    ctx.wizard.selectStep(4)
-    
-    // Show duration selection again
-    return showDurationSelection(ctx)
-  }
-  
+
+  // Handle save confirmation
   if (data === 'confirm:save') {
     await ctx.answerCbQuery('Saving activity...')
-    
-    const { mainCategory, activity, intensity, activityDate, duration, metValue, calculatedPoints } = ctx.wizard.state
-    
+
+    const { 
+      mainCategory, 
+      subcategory,
+      activity, 
+      intensity, 
+      activityDate, 
+      duration, 
+      metValue, 
+      calculatedPoints 
+    } = ctx.wizard.state
+
     try {
+      // Find user
       const user = await findUserByTelegramId(ctx.from.id.toString())
       
       if (!user) {
-        await ctx.reply('User not found. Please register first with /start', Markup.removeKeyboard())
+        await ctx.reply(
+          '❌ User not found. Please register first with /start',
+          Markup.removeKeyboard()
+        )
         return ctx.scene.enter('registered_menu')
       }
-      
-      // Calculate new total before update
+
+      // Calculate new total points
       const oldPoints = Number(user.points || 0)
       const newTotalPoints = Number((oldPoints + calculatedPoints).toFixed(2))
-      
+
+      // Format activity type with hierarchy
+      const activityType = subcategory 
+        ? `${mainCategory} - ${subcategory} - ${activity}`
+        : `${mainCategory} - ${activity}`
+
       // Create activity record
       await createActivity({
         userId: user.id,
-        activityType: `${mainCategory} - ${activity}`,
-        duration: duration,
+        activityType,
+        duration,
         points: calculatedPoints,
         description: `${intensity} intensity`,
-        activityDate: activityDate
+        activityDate
       })
-      
+
       // Update user points
       await updateUserPoints(user.id, calculatedPoints)
-      
+
+      // Format date for display
+      const dateStr = activityDate instanceof Date 
+        ? activityDate.toLocaleDateString() 
+        : activityDate
+
+      // Success message
       const successMessage = `
 ✅ *Activity Logged Successfully!*
 
 📋 *Summary:*
-- *Category:* ${mainCategory}
+- *Category:* ${mainCategory}${subcategory ? ` > ${subcategory}` : ''}
 - *Activity:* ${activity}
 - *Intensity:* ${intensity}
-- *Date:* ${activityDate}
+- *Date:* ${dateStr}
 - *Duration:* ${duration} minutes
 - *MET Value:* ${metValue}
 
 🎯 *Points Earned:* ${calculatedPoints}
 📊 *Total Points:* ${newTotalPoints}
+
+Great work! Keep it up! 💪
 `
-      
+
       await ctx.replyWithMarkdown(successMessage, Markup.removeKeyboard())
       
+      console.log(`✅ Activity saved for user ${user.id}: ${calculatedPoints} points`)
+
     } catch (error) {
       console.error('Error saving activity:', error)
-      await ctx.reply('❌ An error occurred while saving your activity. Please try again later.', Markup.removeKeyboard())
+      await ctx.reply(
+        '❌ An error occurred while saving your activity. Please try again later.',
+        Markup.removeKeyboard()
+      )
     }
-    
+
+    // Return to main menu
     return ctx.scene.enter('registered_menu')
   }
 }

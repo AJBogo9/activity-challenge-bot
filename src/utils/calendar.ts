@@ -1,10 +1,11 @@
-// src/utils/calendar.ts
 // @ts-expect-error - No type definitions available for telegram-inline-calendar
 import Calendar from 'telegram-inline-calendar'
 import { bot } from '../bot/instance'
 import { startDate, endDate } from '../constants'
 
-// Calendar for activity logging - respects competition dates
+/**
+ * Calendar for activity logging - respects competition dates
+ */
 const activityCalendar = new Calendar(bot, {
   date_format: 'YYYY-MM-DD',
   language: 'en',
@@ -16,30 +17,46 @@ const activityCalendar = new Calendar(bot, {
   custom_start_msg: '📅 Select the date when you did this activity:'
 })
 
-// Helper function to show calendar
-export async function showActivityCalendar(ctx: any) {
+/**
+ * Show the activity calendar picker
+ * @param ctx - Telegram context
+ */
+export async function showActivityCalendar(ctx: any): Promise<any> {
   try {
-    return await activityCalendar.startNavCalendar(ctx.message || ctx.callbackQuery?.message)
+    const message = ctx.message || ctx.callbackQuery?.message
+    if (!message) {
+      throw new Error('No message context available for calendar')
+    }
+    return await activityCalendar.startNavCalendar(message)
   } catch (error) {
     console.error('Error showing calendar:', error)
     throw error
   }
 }
 
-// Helper function to handle calendar selection
+/**
+ * Handle calendar button clicks and date selection
+ * @param ctx - Telegram context with callback query
+ * @returns Selected date string (YYYY-MM-DD) or null if navigation/no selection
+ */
 export function handleCalendarSelection(ctx: any): string | null {
-  if (!ctx.callbackQuery) return null
-  
+  if (!ctx.callbackQuery?.message) {
+    return null
+  }
+
   const chatId = ctx.callbackQuery.message.chat.id
   const messageId = ctx.callbackQuery.message.message_id
-  
+
   // Check if this callback is for our calendar
   if (messageId === activityCalendar.chats.get(chatId)) {
-    const selectedDate = activityCalendar.clickButtonCalendar(ctx.callbackQuery)
-    if (selectedDate !== -1) {
-      return selectedDate as string
+    const result = activityCalendar.clickButtonCalendar(ctx.callbackQuery)
+    
+    // -1 means calendar navigation (prev/next month), not a date selection
+    if (result !== -1 && result) {
+      console.log('📅 Date selected from calendar:', result)
+      return result as string
     }
   }
-  
+
   return null
 }
