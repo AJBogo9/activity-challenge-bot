@@ -5,7 +5,7 @@ import { User } from '../types'
  * Add points to a user
  */
 export async function addPointsToUser(
-  telegramId: string, 
+  telegramId: string,
   points: number
 ): Promise<void> {
   // Update user points
@@ -39,14 +39,17 @@ export async function getUserSummary(telegramId: string) {
 export async function getGuildLeaderboard() {
   return await sql`
     SELECT 
-      guild,
-      COUNT(*) as member_count,
-      SUM(points) as total_points,
-      ROUND(AVG(points), 1) as average_points
-    FROM users
-    WHERE points > 0 AND guild IS NOT NULL
-    GROUP BY guild
-    HAVING COUNT(*) >= 3
+      g.name as guild,
+      COUNT(u.id) as active_members,
+      g.total_members as total_members,
+      ROUND(COUNT(u.id)::DECIMAL / g.total_members * 100, 1) as participation_percentage,
+      SUM(COALESCE(u.points, 0)) as total_points,
+      ROUND(SUM(COALESCE(u.points, 0)) / CAST(g.total_members AS DECIMAL), 1) as average_points
+    FROM guilds g
+    LEFT JOIN users u ON g.name = u.guild
+    WHERE g.is_active = TRUE
+    GROUP BY g.name, g.total_members
+    HAVING COUNT(u.id) >= 3
     ORDER BY average_points DESC
   `
 }
@@ -58,28 +61,29 @@ export async function getGuildTopLeaderboard() {
   return await sql`
     WITH ranked_users AS (
       SELECT 
-        guild,
-        points,
-        ROW_NUMBER() OVER (PARTITION BY guild ORDER BY points DESC) as rank,
-        COUNT(*) OVER (PARTITION BY guild) as total_count
-      FROM users
-      WHERE points > 0 AND guild IS NOT NULL
+        u.guild,
+        u.points,
+        ROW_NUMBER() OVER (PARTITION BY u.guild ORDER BY u.points DESC) as rank,
+        g.total_members
+      FROM users u
+      JOIN guilds g ON u.guild = g.name
+      WHERE u.points > 0 AND g.is_active = TRUE
     ),
     top_half AS (
       SELECT 
         guild,
         points,
-        total_count
+        total_members
       FROM ranked_users
-      WHERE rank <= CEIL(total_count / 2.0)
+      WHERE rank <= CEIL(total_members / 2.0)
     )
     SELECT 
       guild,
-      MAX(total_count) as member_count,
+      total_members,
       ROUND(AVG(points), 1) as average_points
     FROM top_half
-    GROUP BY guild
-    HAVING MAX(total_count) >= 3
+    GROUP BY guild, total_members
+    HAVING total_members >= 3
     ORDER BY average_points DESC
   `
 }

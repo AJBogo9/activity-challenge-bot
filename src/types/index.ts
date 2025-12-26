@@ -25,7 +25,9 @@ export interface Activity {
   activity_date: Date
 }
 
-export const VALID_GUILDS = [
-  'TiK', 'DG', 'FK', 'PT', 'AS', 'SIK', 'KIK', 'MK', 'IK', 
-  'Athene', 'Prodeko', 'Inkubio', 'KY', 'TOKYO', 'AK', 'TF', 'PJK', 'VK', 'KK'
-] as const
+export interface Guild {
+  name: string
+  total_members: number
+  is_active: boolean
+  created_at: Date
+}

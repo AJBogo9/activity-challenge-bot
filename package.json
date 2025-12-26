@@ -12,6 +12,7 @@
     "pod:logs": "podman logs -f activity-challenge-bot",
     "pod:populate": "podman exec -it activity-challenge-bot bun scripts/populateTestData.ts",
     "pod:clear": "podman exec -it activity-challenge-bot bun scripts/clear.ts",
+    "pod:init-guilds": "podman exec -it activity-challenge-bot bun scripts/init-guilds.ts",
     "pod:up": "podman-compose up -d --build",
     "pod:down": "podman-compose down",
     "pod:restart": "podman restart activity-challenge-bot",
