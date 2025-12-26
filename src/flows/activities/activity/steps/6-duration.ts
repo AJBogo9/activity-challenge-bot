@@ -1,6 +1,4 @@
 import { Markup } from 'telegraf'
-import { findUserByTelegramId, updateUserPoints } from '../../../../db/users'
-import { createActivity } from '../../../../db/activities'
 import { showActivityCalendar } from '../../../../utils/calendar'
 import { handleCancel } from '../helpers/navigation'
 
@@ -10,7 +8,7 @@ export async function showDurationSelection(ctx: any) {
   
   // Create inline keyboard with common duration options
   await ctx.replyWithMarkdown(
-    `🏃 *Log Activity - Step 6/6*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*Date:* ${ctx.wizard.state.activityDate}\n*MET Value:* ${ctx.wizard.state.metValue}\n\nHow many minutes did you exercise?\n\n_Tap a quick option below or type a custom number:_`,
+    `🏃 *Log Activity - Step 6/7*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*Date:* ${ctx.wizard.state.activityDate}\n*MET Value:* ${ctx.wizard.state.metValue}\n\nHow many minutes did you exercise?\n\n_Tap a quick option below or type a custom number:_`,
     Markup.inlineKeyboard([
       [
         Markup.button.callback('15 min', 'duration:15'),
@@ -31,7 +29,7 @@ export async function showDurationSelection(ctx: any) {
   )
 }
 
-export async function handleDurationAndSave(ctx: any) {
+export async function handleDurationInput(ctx: any) {
   console.log('🔍 Duration step - wizard.state.activityDate:', ctx.wizard.state.activityDate) // DEBUG
   
   let minutes: number
@@ -55,7 +53,7 @@ export async function handleDurationAndSave(ctx: any) {
       const intensity = ctx.wizard.state.intensity
       
       await ctx.replyWithMarkdown(
-        `🏃 *Log Activity - Step 5/6*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*MET Value:* ${ctx.wizard.state.metValue}\n\n📅 When did you do this activity?`
+        `🏃 *Log Activity - Step 5/7*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*MET Value:* ${ctx.wizard.state.metValue}\n\n📅 When did you do this activity?`
       )
       
       // Show calendar again
@@ -90,7 +88,7 @@ export async function handleDurationAndSave(ctx: any) {
       const intensity = ctx.wizard.state.intensity
       
       await ctx.replyWithMarkdown(
-        `🏃 *Log Activity - Step 5/6*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*MET Value:* ${ctx.wizard.state.metValue}\n\n📅 When did you do this activity?`
+        `🏃 *Log Activity - Step 5/7*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*MET Value:* ${ctx.wizard.state.metValue}\n\n📅 When did you do this activity?`
       )
       
       // Show calendar again
@@ -110,55 +108,13 @@ export async function handleDurationAndSave(ctx: any) {
     return
   }
   
+  // Save duration to wizard state
   ctx.wizard.state.duration = minutes
   
-  // Calculate points (MET * minutes / 60)
+  // Calculate points for preview (MET * minutes / 60)
   const points = Number(((ctx.wizard.state.metValue * minutes) / 60).toFixed(2))
+  ctx.wizard.state.calculatedPoints = points
   
-  try {
-    const user = await findUserByTelegramId(ctx.from.id.toString())
-    
-    if (!user) {
-      await ctx.reply('User not found. Please register first with /start', Markup.removeKeyboard())
-      return ctx.scene.enter('registered_menu')
-    }
-    
-    // Calculate new total before update
-    const oldPoints = Number(user.points || 0)
-    const newTotalPoints = Number((oldPoints + points).toFixed(2))
-    
-    await createActivity({
-      userId: user.id,
-      activityType: `${ctx.wizard.state.mainCategory} - ${ctx.wizard.state.activity}`,
-      duration: minutes,
-      points: points,
-      description: `${ctx.wizard.state.intensity} intensity`,
-      activityDate: ctx.wizard.state.activityDate
-    })
-    
-    await updateUserPoints(user.id, points)
-    
-    const summary = `
-✅ *Activity Logged Successfully!*
-
-📋 *Summary:*
-- *Category:* ${ctx.wizard.state.mainCategory}
-- *Activity:* ${ctx.wizard.state.activity}
-- *Intensity:* ${ctx.wizard.state.intensity}
-- *Date:* ${ctx.wizard.state.activityDate}
-- *Duration:* ${minutes} minutes
-- *MET Value:* ${ctx.wizard.state.metValue}
-
-🎯 *Points Earned:* ${points}
-📊 *Total Points:* ${newTotalPoints}
-`
-    
-    await ctx.replyWithMarkdown(summary, Markup.removeKeyboard())
-    
-  } catch (error) {
-    console.error('Error saving activity:', error)
-    await ctx.reply('❌ An error occurred while saving your activity. Please try again later.', Markup.removeKeyboard())
-  }
-  
-  return ctx.scene.enter('registered_menu')
+  // Move to confirmation step
+  return ctx.wizard.next()
 }
