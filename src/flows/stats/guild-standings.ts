@@ -1,7 +1,7 @@
 import { Scenes } from 'telegraf'
 import * as pointService from '../../db/point-queries'
 import { formatList } from '../../utils/format-list'
-import { texts } from '../../utils/texts'
+import { ERROR_MESSAGE } from '../../utils/texts'
 
 function getRankPrefix(index: number): string {
   const medals = ['🥇', '🥈', '🥉']
@@ -11,14 +11,14 @@ function getRankPrefix(index: number): string {
 
 /**
  * Guild standings scene - shows average points per member
- * Scene ID: 'guild_standings'
+ * Scene ID: 'guild_スタンドィングス'
  */
 export const guildStandingsScene = new Scenes.BaseScene<any>('guild_standings')
 
 guildStandingsScene.enter(async (ctx: any) => {
   try {
     const guilds = await pointService.getGuildLeaderboard()
-    
+
     if (!guilds || guilds.length === 0) {
       await ctx.reply("No guild statistics available yet. Guilds need at least 3 active members with points.")
       return ctx.scene.leave()
@@ -26,24 +26,27 @@ guildStandingsScene.enter(async (ctx: any) => {
 
     let message = '*Guild Standings \\(by average points\\)* 🏆\n\n'
     message += '_Minimum 3 active members required_\n\n'
-    
+
     const guildPadding = 15
     const pointPadding = 6
-    
+
     guilds.forEach((guild: any, index: number) => {
       const prefix = getRankPrefix(index)
       const escapedGuild = guild.guild.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&')
-      const points = Math.round(guild.average_points * 10) / 10
-      
-      message += prefix + formatList(escapedGuild, points.toString(), guildPadding, pointPadding) + '\n'
+      const points = parseFloat(guild.average_points).toFixed(1)
+      const active = guild.active_members
+      const total = guild.total_members
+      const percent = guild.participation_percentage
+      const label = `${escapedGuild} \\(${active}/${total} \\- ${percent}%\\)`
+      message += prefix + formatList(label, points, guildPadding, pointPadding) + '\n'
     })
-    
+
     message += `\n_Total guilds: ${guilds.length}_`
-    
+
     await ctx.replyWithMarkdownV2(message)
     return ctx.scene.enter('stats_menu')
   } catch (error) {
-    await ctx.reply(texts.actions.error.error)
+    await ctx.reply(ERROR_MESSAGE)
     console.error('Error in guild standings scene:', error)
     return ctx.scene.enter('stats_menu')
   }
@@ -58,7 +61,7 @@ export const guildTopStandingsScene = new Scenes.BaseScene<any>('guild_top_stand
 guildTopStandingsScene.enter(async (ctx: any) => {
   try {
     const guilds = await pointService.getGuildTopLeaderboard()
-    
+
     if (!guilds || guilds.length === 0) {
       await ctx.reply("No guild statistics available yet. Guilds need at least 3 active members with points.")
       return ctx.scene.leave()
@@ -67,24 +70,25 @@ guildTopStandingsScene.enter(async (ctx: any) => {
     let message = '*Guild Standings \\(top 50% average\\)* 🏆\n\n'
     message += '_Based on average of top half performers_\n'
     message += '_Minimum 3 active members required_\n\n'
-    
+
     const guildPadding = 15
     const pointPadding = 6
-    
+
     guilds.forEach((guild: any, index: number) => {
       const prefix = getRankPrefix(index)
       const escapedGuild = guild.guild.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&')
-      const points = Math.round(guild.average_points * 10) / 10
-      
-      message += prefix + formatList(escapedGuild, points.toString(), guildPadding, pointPadding) + '\n'
+      const points = parseFloat(guild.average_points).toFixed(1)
+      const total = guild.total_members
+      const label = `${escapedGuild} \\(${total}\\)`
+      message += prefix + formatList(label, points, guildPadding, pointPadding) + '\n'
     })
-    
+
     message += `\n_Total guilds: ${guilds.length}_`
-    
+
     await ctx.replyWithMarkdownV2(message)
     return ctx.scene.enter('stats_menu')
   } catch (error) {
-    await ctx.reply(texts.actions.error.error)
+    await ctx.reply(ERROR_MESSAGE)
     console.error('Error in guild top standings scene:', error)
     return ctx.scene.enter('stats_menu')
   }

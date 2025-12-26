@@ -1,12 +1,13 @@
 import { Scenes } from 'telegraf'
-import { showCategorySelection, handleCategorySelection } from './sports-activity/steps/category-step'
-import { showSubcategorySelection, handleSubcategorySelection } from './sports-activity/steps/subcategory-step'
-import { showActivitySelection, handleActivitySelection } from './sports-activity/steps/activity-step'
-import { showIntensitySelection, handleIntensitySelection } from './sports-activity/steps/intensity-step'
-import { showDateSelection } from './sports-activity/steps/date-step'
-import { showDurationSelection, handleDurationAndSave } from './sports-activity/steps/duration-step'
-import { handleCalendarSelection } from '../../utils/calendar'
-import { handleCancel } from './sports-activity/helpers/navigation'
+import { showCategorySelection, handleCategorySelection } from './steps/1-category'
+import { showSubcategorySelection, handleSubcategorySelection } from './steps/2-subcategory'
+import { showActivitySelection, handleActivitySelection } from './steps/3-activity'
+import { showIntensitySelection, handleIntensitySelection } from './steps/4-intensity'
+import { showDateSelection } from './steps/5-date'
+import { showDurationSelection, handleDurationInput } from './steps/6-duration'
+import { showConfirmation, handleConfirmation } from './steps/7-confirmation'
+import { handleCalendarSelection } from '../../../utils/calendar'
+import { handleCancel } from './helpers/navigation'
 
 export const sportsActivityWizard = new Scenes.WizardScene<any>(
   'sports_activity_wizard',
@@ -61,9 +62,7 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
         await ctx.answerCbQuery()
         delete ctx.wizard.state.intensity
         delete ctx.wizard.state.metValue
-        
         await showIntensitySelection(ctx)
-        // Stay on step 4
         return
       }
       
@@ -75,17 +74,21 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
       
       // Handle calendar date selection
       const selectedDate = handleCalendarSelection(ctx)
+      console.log('🔍 Step 4 - Calendar returned:', selectedDate) // DEBUG
       
       if (selectedDate) {     
         // Store in session for handleDateSelection to process
         ctx.scene.session.selectedDate = selectedDate
+        console.log('🔍 Step 4 - Stored in session:', ctx.scene.session.selectedDate) // DEBUG
         
         // Answer callback
         await ctx.answerCbQuery()
         
         // Use the handler function (consistent with other steps)
-        const { handleDateSelection } = await import('./sports-activity/steps/date-step')
+        const { handleDateSelection } = await import('./steps/5-date')
         await handleDateSelection(ctx)
+        
+        console.log('🔍 Step 4 - After handleDateSelection, wizard.state.activityDate:', ctx.wizard.state.activityDate) // DEBUG
         
         // Show duration selection
         await showDurationSelection(ctx)
@@ -95,16 +98,15 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
         return ctx.wizard.next() // to 6
       } else {
         // Calendar navigation (month change) - just answer the callback
-        // The calendar library already handled updating the message
         await ctx.answerCbQuery()
-        return // Stop here - don't process as intensity selection
+        return
       }
     }
-
+    
     // Handle intensity selection (text input)
     const result = await handleIntensitySelection(ctx)
     if (result) return result
-
+    
     if (ctx.wizard.state.intensity) {
       await showDateSelection(ctx)
       // Stay on step 4 - wait for calendar callback
@@ -116,6 +118,19 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
     await ctx.reply('Please select a date from the calendar above.')
   },
 
-  // Step 6: Handle duration and save
-  handleDurationAndSave
+  // Step 6: Handle duration input and move to confirmation
+  async (ctx: any) => {
+    const result = await handleDurationInput(ctx)
+    if (result) return result
+    
+    if (ctx.wizard.state.duration) {
+      await showConfirmation(ctx)
+      return ctx.wizard.next()
+    }
+  },
+
+  // Step 7: Handle confirmation and save
+  async (ctx: any) => {
+    return await handleConfirmation(ctx)
+  }
 )

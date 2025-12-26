@@ -1,7 +1,7 @@
 import { Scenes } from 'telegraf'
 import { getTopUsers } from '../../db/point-queries'
 import { formatList } from '../../utils/format-list'
-import { texts } from '../../utils/texts'
+import { ERROR_MESSAGE } from '../../utils/texts'
 
 function getRankPrefix(index: number): string {
   const medals = ['🥇', '🥈', '🥉']
@@ -37,7 +37,7 @@ topUsersScene.enter(async (ctx: any) => {
     return ctx.scene.enter('stats_menu')
   } catch (error) {
     console.error('Error fetching top users:', error)
-    await ctx.reply(texts.actions.error.error)
+    await ctx.reply(ERROR_MESSAGE)
     return ctx.scene.enter('stats_menu')
   }
 })

@@ -44,10 +44,7 @@ profileScene.hears('📊 User Summary', async (ctx: any) => {
 👤 *Name:* ${user.first_name}${user.last_name ? ' ' + user.last_name : ''}
 🆔 *Username:* ${user.username ? '@' + user.username : 'N/A'}
 🏛️ *Guild:* ${user.guild || 'None'}
-👥 *Team ID:* ${user.team_id || 'No team'}
 🎯 *Total Points:* ${user.points || 0}
-📅 *Registered:* ${registeredDate}
-✅ *Status:* ${user.is_active ? 'Active' : 'Inactive'}
 `
 
     await ctx.replyWithMarkdown(summary)
@@ -106,8 +103,7 @@ profileScene.hears('📜 Activity History', async (ctx: any) => {
         message += `   📝 ${activity.description}\n`
       }
       
-      message += `   📅 ${date} at ${time}\n`
-      message += `   ${activity.is_verified ? '✅ Verified' : '⏳ Pending'}\n\n`
+      message += `   📅 ${activity.activity_date}\n\n`
     })
 
     message += `_Total activities: ${activities.length}_`
@@ -142,8 +138,7 @@ profileScene.hears('📜 Activity History', async (ctx: any) => {
           activityText += `   📝 ${activity.description}\n`
         }
         
-        activityText += `   📅 ${date} at ${time}\n`
-        activityText += `   ${activity.is_verified ? '✅ Verified' : '⏳ Pending'}\n\n`
+        activityText += `   📅 ${date}\n\n`
 
         if (currentChunk.length + activityText.length > 4000) {
           chunks.push(currentChunk)

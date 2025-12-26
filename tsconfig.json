@@ -9,15 +9,17 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
     "rootDir": "./",
-    "types": ["bun-types"]
+    "types": [
+      "bun-types"
+    ]
   },
   "include": [
     "src/**/*",
     "index.ts",
-    "scripts/**/*"
+    "scripts/**/*",
+    "tests/**/*"
   ],
   "exclude": [
-    "node_modules",
-    "**/*.test.ts"
+    "node_modules"
   ]
 }
