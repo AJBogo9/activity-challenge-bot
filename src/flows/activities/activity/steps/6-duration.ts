@@ -8,7 +8,7 @@ export async function showDurationSelection(ctx: any): Promise<void> {
   const intensity = ctx.wizard.state.intensity
   const activityDate = ctx.wizard.state.activityDate
   const metValue = ctx.wizard.state.metValue
-  
+
   if (!activity || !intensity || !activityDate || !metValue) {
     await ctx.reply('❌ Error: Missing activity information. Please start over.')
     return
@@ -40,7 +40,6 @@ export async function showDurationSelection(ctx: any): Promise<void> {
       ],
       [
         Markup.button.callback('120 min', 'duration:120'),
-        Markup.button.callback('⬅️ Back', 'duration:back'),
         Markup.button.callback('❌ Cancel', 'duration:cancel')
       ]
     ])
@@ -56,9 +55,9 @@ export async function handleDurationInput(ctx: any): Promise<void> {
   // Handle inline button callback
   if (ctx.callbackQuery?.data) {
     const data = ctx.callbackQuery.data
-    
-    // Skip back/cancel - handled in wizard
-    if (data === 'duration:back' || data === 'duration:cancel') {
+
+    // Skip cancel - handled in wizard
+    if (data === 'duration:cancel') {
       return
     }
 

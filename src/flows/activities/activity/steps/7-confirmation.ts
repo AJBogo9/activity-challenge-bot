@@ -50,7 +50,6 @@ _Please review the information above. Is everything correct?_
         Markup.button.callback('✅ Confirm & Save', 'confirm:save'),
       ],
       [
-        Markup.button.callback('⬅️ Back to Duration', 'confirm:back'),
         Markup.button.callback('❌ Cancel', 'confirm:cancel')
       ]
     ])
@@ -58,7 +57,7 @@ _Please review the information above. Is everything correct?_
 }
 
 /**
- * Handle confirmation actions (save, back, cancel)
+ * Handle confirmation actions (save, cancel)
  */
 export async function handleConfirmation(ctx: any): Promise<void> {
   // Only process callback queries
@@ -68,8 +67,8 @@ export async function handleConfirmation(ctx: any): Promise<void> {
 
   const data = ctx.callbackQuery.data
 
-  // Skip back/cancel - handled in wizard
-  if (data === 'confirm:back' || data === 'confirm:cancel') {
+  // Skip cancel - handled in wizard
+  if (data === 'confirm:cancel') {
     return
   }
 

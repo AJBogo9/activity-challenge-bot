@@ -7,7 +7,6 @@ import { getSubcategories, isValidSubcategory } from '../helpers/activity-data'
  */
 export async function showSubcategorySelection(ctx: any): Promise<void> {
   const mainCategory = ctx.wizard.state.mainCategory
-  
   if (!mainCategory) {
     await ctx.reply('❌ Error: No main category selected.')
     return
@@ -15,7 +14,7 @@ export async function showSubcategorySelection(ctx: any): Promise<void> {
 
   const subcategories = getSubcategories(mainCategory)
   const keyboard = createKeyboard(subcategories, true)
-  
+
   await ctx.replyWithMarkdown(
     `🏃 *Log Activity - Step 2/6*\n\n*Category:* ${mainCategory}\n\nChoose a subcategory:`,
     Markup.keyboard(keyboard).resize().oneTime()
@@ -33,6 +32,12 @@ export async function handleSubcategorySelection(ctx: any): Promise<boolean> {
   }
 
   const selectedSubcategory = ctx.message.text.trim()
+
+  // Handle cancel
+  if (selectedSubcategory === '❌ Cancel') {
+    return false // Let wizard handle the cancel
+  }
+
   const mainCategory = ctx.wizard.state.mainCategory
 
   // Validate we have a main category
@@ -49,6 +54,5 @@ export async function handleSubcategorySelection(ctx: any): Promise<boolean> {
 
   // Store in wizard state
   ctx.wizard.state.subcategory = selectedSubcategory
-  
   return true
 }

@@ -7,7 +7,7 @@ import { getMainCategories, isValidCategory } from '../helpers/activity-data'
  */
 export async function showCategorySelection(ctx: any): Promise<void> {
   const mainCategories = getMainCategories()
-  const keyboard = createKeyboard(mainCategories)
+  const keyboard = createKeyboard(mainCategories, true) // Pass true to add cancel button
   
   await ctx.replyWithMarkdown(
     '🏃 *Log Activity - Step 1/6*\n\nChoose a main category:',
@@ -27,6 +27,11 @@ export async function handleCategorySelection(ctx: any): Promise<boolean> {
 
   const selectedCategory = ctx.message.text.trim()
 
+  // Handle cancel
+  if (selectedCategory === '❌ Cancel') {
+    return false // Let wizard handle the cancel
+  }
+
   // Validate category
   if (!isValidCategory(selectedCategory)) {
     await ctx.reply('❌ Invalid category. Please choose from the options provided.')
@@ -35,6 +40,5 @@ export async function handleCategorySelection(ctx: any): Promise<boolean> {
 
   // Store in wizard state
   ctx.wizard.state.mainCategory = selectedCategory
-  
   return true
 }

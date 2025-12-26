@@ -6,11 +6,12 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: summer_body
+      POSTGRES_DB: activity_challenge
     ports:
       - "127.0.0.1:5432:5432"  # Only expose to localhost
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
@@ -40,7 +41,7 @@ services:
     container_name: activity-challenge-bot
     restart: always
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/summer_body
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/activity_challenge
       NODE_ENV: production
       BOT_TOKEN: ${BOT_TOKEN}
       # Add competition dates

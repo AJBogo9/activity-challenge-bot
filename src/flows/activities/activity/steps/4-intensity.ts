@@ -9,7 +9,7 @@ export async function showIntensitySelection(ctx: any): Promise<void> {
   const mainCategory = ctx.wizard.state.mainCategory
   const subcategory = ctx.wizard.state.subcategory
   const activity = ctx.wizard.state.activity
-  
+
   if (!mainCategory || !subcategory || !activity) {
     await ctx.reply('❌ Error: Missing activity information. Please start over.')
     return
@@ -23,7 +23,7 @@ export async function showIntensitySelection(ctx: any): Promise<void> {
     activity,
   )
   const keyboard = createKeyboard(intensitiesWithMET, true)
-  
+
   await ctx.replyWithMarkdown(
     `🏃 *Log Activity - Step 4/6*\n\n*Activity:* ${activity}\n\nChoose intensity:`,
     Markup.keyboard(keyboard).resize().oneTime()
@@ -41,8 +41,13 @@ export async function handleIntensitySelection(ctx: any): Promise<boolean> {
   }
 
   const input = ctx.message.text.trim()
+
+  // Handle cancel (before extracting intensity)
+  if (input === '❌ Cancel') {
+    return false // Let wizard handle the cancel
+  }
+
   const selectedIntensity = extractIntensityFromLabel(input)
-  
   const mainCategory = ctx.wizard.state.mainCategory
   const subcategory = ctx.wizard.state.subcategory
   const activity = ctx.wizard.state.activity
@@ -62,6 +67,5 @@ export async function handleIntensitySelection(ctx: any): Promise<boolean> {
   // Store intensity and MET value in wizard state
   ctx.wizard.state.intensity = selectedIntensity
   ctx.wizard.state.metValue = getMetValue(mainCategory, subcategory, activity, selectedIntensity)
-  
   return true
 }

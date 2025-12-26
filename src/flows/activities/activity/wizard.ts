@@ -19,12 +19,6 @@ interface WizardState {
   duration?: number
 }
 
-// Navigation helper
-const goBack = async (ctx: any, showPrevious: Function) => {
-  await ctx.answerCbQuery()
-  await showPrevious(ctx)
-}
-
 export const sportsActivityWizard = new Scenes.WizardScene<any>(
   'sports_activity_wizard',
   
@@ -36,12 +30,8 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
 
   // Step 1: Handle Category → Show Subcategory
   async (ctx: any) => {
-    // Handle back/cancel
-    if (ctx.callbackQuery?.data === 'category:back') {
-      await handleCancel(ctx)
-      return
-    }
-    if (ctx.callbackQuery?.data === 'category:cancel') {
+    // Check for cancel text
+    if (ctx.message?.text?.trim() === '❌ Cancel') {
       await handleCancel(ctx)
       return
     }
@@ -58,12 +48,8 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
 
   // Step 2: Handle Subcategory → Show Activity
   async (ctx: any) => {
-    if (ctx.callbackQuery?.data === 'subcategory:back') {
-      delete ctx.wizard.state.mainCategory
-      await goBack(ctx, showCategorySelection)
-      return ctx.wizard.back()
-    }
-    if (ctx.callbackQuery?.data === 'subcategory:cancel') {
+    // Check for cancel text
+    if (ctx.message?.text?.trim() === '❌ Cancel') {
       await handleCancel(ctx)
       return
     }
@@ -80,12 +66,8 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
 
   // Step 3: Handle Activity → Show Intensity
   async (ctx: any) => {
-    if (ctx.callbackQuery?.data === 'activity:back') {
-      delete ctx.wizard.state.subcategory
-      await goBack(ctx, showSubcategorySelection)
-      return ctx.wizard.back()
-    }
-    if (ctx.callbackQuery?.data === 'activity:cancel') {
+    // Check for cancel text
+    if (ctx.message?.text?.trim() === '❌ Cancel') {
       await handleCancel(ctx)
       return
     }
@@ -102,13 +84,8 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
 
   // Step 4: Handle Intensity → Show Date
   async (ctx: any) => {
-    if (ctx.callbackQuery?.data === 'intensity:back') {
-      delete ctx.wizard.state.activity
-      delete ctx.wizard.state.metValue
-      await goBack(ctx, showActivitySelection)
-      return ctx.wizard.back()
-    }
-    if (ctx.callbackQuery?.data === 'intensity:cancel') {
+    // Check for cancel text
+    if (ctx.message?.text?.trim() === '❌ Cancel') {
       await handleCancel(ctx)
       return
     }
@@ -123,14 +100,9 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
     return ctx.wizard.next()
   },
 
-  // Step 5: Handle Date → Show Duration
+  // Step 5: Handle Date → Show Duration (INLINE KEYBOARD)
   async (ctx: any) => {
-    if (ctx.callbackQuery?.data === 'date:back') {
-      delete ctx.wizard.state.intensity
-      delete ctx.wizard.state.metValue
-      await goBack(ctx, showIntensitySelection)
-      return ctx.wizard.back()
-    }
+    // Handle cancel callback for inline keyboard
     if (ctx.callbackQuery?.data === 'date:cancel') {
       await handleCancel(ctx)
       return
@@ -155,13 +127,9 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
     return ctx.wizard.next()
   },
 
-  // Step 6: Handle Duration → Show Confirmation
+  // Step 6: Handle Duration → Show Confirmation (INLINE KEYBOARD)
   async (ctx: any) => {
-    if (ctx.callbackQuery?.data === 'duration:back') {
-      delete ctx.wizard.state.activityDate
-      await goBack(ctx, showDateSelection)
-      return ctx.wizard.back()
-    }
+    // Handle cancel callback for inline keyboard
     if (ctx.callbackQuery?.data === 'duration:cancel') {
       await handleCancel(ctx)
       return
@@ -177,8 +145,14 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
     return ctx.wizard.next()
   },
 
-  // Step 7: Handle Confirmation → Save
+  // Step 7: Handle Confirmation → Save (INLINE KEYBOARD)
   async (ctx: any) => {
+    // Handle cancel callback for inline keyboard
+    if (ctx.callbackQuery?.data === 'confirmation:cancel') {
+      await handleCancel(ctx)
+      return
+    }
+    
     await handleConfirmation(ctx)
   }
 )

@@ -3,15 +3,15 @@ import { getMetValue } from './activity-data'
 /**
  * Create a Telegram keyboard layout from an array of items
  * @param items - Array of button labels
- * @param includeBack - Whether to include back and cancel buttons
+ * @param addCancel - Whether to include a cancel button
  * @returns 2D array representing keyboard rows and columns
  */
-export function createKeyboard(items: string[], includeBack: boolean = false): string[][] {
+export function createKeyboard(items: string[], addCancel: boolean = false): string[][] {
   const keyboard: string[][] = []
 
   // Handle empty items
   if (items.length === 0) {
-    return includeBack ? [['⬅️ Back', '❌ Cancel']] : [['❌ Cancel']]
+    return addCancel ? [['❌ Cancel']] : []
   }
 
   // Single column for 3 or fewer items
@@ -29,10 +29,8 @@ export function createKeyboard(items: string[], includeBack: boolean = false): s
     }
   }
 
-  // Add navigation buttons
-  if (includeBack) {
-    keyboard.push(['⬅️ Back', '❌ Cancel'])
-  } else {
+  // Add cancel button
+  if (addCancel) {
     keyboard.push(['❌ Cancel'])
   }
 
@@ -72,7 +70,6 @@ export function extractIntensityFromLabel(label: string | undefined): string {
 
   // Match pattern: "intensity (X.X MET)"
   const match = label.match(/^(.+?)\s*\([\d.]+\s*MET\)$/)
-  
   if (match && match[1]) {
     return match[1].trim()
   }
