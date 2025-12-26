@@ -1,23 +1,24 @@
 ![SummerBodyBot Banner](./assets/banner.svg)
 
-SummerBodyBot is a Telegram bot designed to track and record competition scores among Aalto guilds and within teams. Participants can register, join or create teams, log weekly activities to earn points, and view various rankings and statistics.
+SummerBodyBot is a Telegram bot designed to track and record activity scores among Aalto guilds and within teams. Participants can register, join or create teams, log activities to earn points, and view various rankings and statistics via the bot and a Metabase dashboard.
 
 ## Features
 
-- 🏆 Guild-based competition tracking
-- 👥 Team creation and management
-- 📊 Real-time leaderboards and statistics
-- 🏃 Activity logging (exercise, sports, wellness)
-- 📈 Points calculation and ranking system
+- 🏆 **Guild-based competition tracking**: Compete for your guild's glory.
+- 👥 **Team management**: Create or join teams to compete with friends.
+- 📊 **Real-time leaderboards**: Track your progress and rankings instantly.
+- 🏃 **Activity logging**: Log exercise and wellness activities with ease.
+- 📈 **Metabase integration**: Visual analytics and dashboards for deep insights.
+- 🛠️ **Administrative tools**: Scripts for managing guilds and test data.
 
 ## Tech Stack
 
-- **Bun** - Runtime environment
-- **Telegraf** - Telegram bot framework
-- **MongoDB** - Database
-- **Mongoose** - ODM for MongoDB
-- **Podman** - Containerization
-- **Metabase** - Analytics and dashboard
+- **Bun** - Fast JavaScript/TypeScript runtime
+- **Telegraf** - Modern Telegram bot framework
+- **Postgres** - Relational database for persistent storage
+- **Podman** - Containerization for easy deployment
+- **Metabase** - Business intelligence and analytics
+- **VitePress** - Documentation site generator
 
 ## Quick Start
 
@@ -28,62 +29,69 @@ SummerBodyBot is a Telegram bot designed to track and record competition scores 
 
 ### For Developers
 
-Full development setup: [CONTRIBUTING.md](docs/CONTRIBUTING.md)
+For detailed setup instructions, see the [CONTRIBUTING.md](docs/CONTRIBUTING.md) and the [Documentation](https://eppuruotsalainen.github.io/activity-challenge-bot/).
 
 ## Available Commands
+
+### Local Development
 ```bash
 bun start                   # Start the bot
-bun run populate            # Add test data
-bun run clear               # Remove test data
+bun dev                     # Start the bot in watch mode
 bun test                    # Run tests
 bun test:watch              # Run tests in watch mode
 bun test:coverage           # Run tests with coverage report
-bun run pod:up              # Start the Podman pod
-bun run pod:down            # Remove the Podman pod
+bun run lint                # Run ESLint
+```
+
+### Podman Operations
+```bash
+bun run pod:up              # Start the Podman pod (detached)
+bun run pod:down            # Stop and remove the Podman pod
+bun run pod:dev             # Start the Podman pod in foreground
+bun run pod:logs            # View bot logs in the pod
+bun run pod:shell           # Open a shell in the bot container
+```
+
+### Data Management
+```bash
+bun run populate            # Add test data locally
+bun run clear               # Remove local test data
 bun run pod:populate        # Add test data to the pod
 bun run pod:clear           # Remove test data from the pod
+bun run pod:init-guilds     # Initialize guilds in the pod
+```
+
+### Documentation
+```bash
+bun run docs:dev            # Start  dev server
+bun run docs:build          # Build VitePress documentation
+```
+
+## Project Structure
+
+```
+.
+├── index.ts                 # Application entry point
+├── src/
+│   ├── bot/                 # Bot initialization and middleware
+│   ├── db/                  # Database queries and schema (Postgres)
+│   ├── flows/               # User interaction flows (Wizards/Scenes)
+│   ├── constants.ts         # Global constants
+│   ├── types/               # TypeScript definitions
+│   └── utils/               # Helper functions
+├── scripts/                 # Maintenance and data scripts
+├── tests/                   # Test files (Bun Test)
+├── docs/                    # Documentation (VitePress)
+└── compose.yaml             # Podman/Docker Compose configuration
 ```
 
 ## Testing
 
-This project uses [Bun's native test framework](https://bun.sh/docs/test/). Tests are located in the `tests/` directory and mirror the structure of `src/`.
-
-### Running Tests
+This project uses [Bun's native test framework](https://bun.sh/docs/test/).
 
 ```bash
 bun test                    # Run all tests
 bun test tests/utils        # Run tests in a specific directory
-bun test:watch              # Run tests in watch mode for development
-```
-
-### Writing Tests
-
-We use Bun's `test` module which is Jest-compatible. Example:
-
-```typescript
-import { describe, expect, test } from "bun:test";
-import { myFunction } from "../src/utils/my-function";
-
-describe("myFunction", () => {
-  test("should return true", () => {
-    expect(myFunction()).toBe(true);
-  });
-});
-```
-## Project Structure
-```
-.
-├── index.js                 # Application entry point
-├── src/
-│   ├── bot.js               # Bot initialization
-│   ├── config/              # Configuration and constants
-│   ├── flows/               # User interaction flows
-│   ├── models/              # Database schemas
-│   ├── services/            # Business logic
-│   └── utils/               # Helper functions
-├── scripts/                 # Development utilities
-├── tests/                   # Test files
-└── docs/                    # Documentation
 ```
 
 ## Contributing
