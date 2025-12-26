@@ -1,3 +1,13 @@
+CREATE TABLE IF NOT EXISTS guilds (
+  name VARCHAR(100) PRIMARY KEY,
+  total_members INTEGER NOT NULL DEFAULT 1,
+  active_members INTEGER DEFAULT 0,
+  participation_percentage DECIMAL(5,2) DEFAULT 0,
+  total_points DECIMAL(15,2) DEFAULT 0,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW() NOT NULL
+);
+
 -- Users/Participants table
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
@@ -5,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
   username VARCHAR(100),
   first_name VARCHAR(100),
   last_name VARCHAR(100),
-  guild VARCHAR(100),
+  guild VARCHAR(100) REFERENCES guilds(name),
   points DECIMAL(10,2) DEFAULT 0 NOT NULL,
   created_at TIMESTAMP DEFAULT NOW() NOT NULL
 );

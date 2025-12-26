@@ -47,7 +47,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./data:/app/data  # Only mount data directory, not entire source code
+      - ./data:/app/data:z  # Only mount data directory, not entire source code
     command: bun index.ts  # Remove --watch for production
 
 volumes:

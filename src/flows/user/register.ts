@@ -1,14 +1,14 @@
 import { Scenes, Markup } from 'telegraf'
 import { findUserByTelegramId, createUser } from '../../db/users'
 import { ERROR_MESSAGE, TERMS_AND_CONDITIONS } from '../../utils/texts'
-import { VALID_GUILDS } from '../../types'
+import { getGuildNames } from '../../db/guilds'
 
 export const registerWizard = new Scenes.WizardScene(
   'register_wizard',
   // Step 1: Check if user exists and show terms
   async (ctx: any) => {
     const user = await findUserByTelegramId(ctx.from.id.toString())
-    
+
     if (user) {
       await ctx.reply(
         "You've already registered! You can start logging activities with /sportsactivity.",
@@ -18,15 +18,15 @@ export const registerWizard = new Scenes.WizardScene(
       )
       return ctx.scene.enter('main_menu')
     }
-    
+
     await ctx.reply(
-      TERMS_AND_CONDITIONS, 
+      TERMS_AND_CONDITIONS,
       Markup.inlineKeyboard([
         [Markup.button.callback('✅ Accept', 'accept_terms')],
         [Markup.button.callback('❌ Decline', 'decline_terms')]
       ])
     )
-    
+
     return ctx.wizard.next()
   }
 )
@@ -34,23 +34,24 @@ export const registerWizard = new Scenes.WizardScene(
 // Handle accept terms
 registerWizard.action('accept_terms', async (ctx: any) => {
   await ctx.editMessageText('✅ You accepted the terms and conditions.')
-  
+
   // Create guild selection buttons
-  const guildButtons = VALID_GUILDS.map((g: string) => 
+  const guilds = await getGuildNames()
+  const guildButtons = guilds.map((g: string) =>
     Markup.button.callback(g, `select_guild_${g}`)
   )
-  
+
   // Arrange buttons in rows of 3
   const guildRows = []
   for (let i = 0; i < guildButtons.length; i += 3) {
     guildRows.push(guildButtons.slice(i, i + 3))
   }
-  
+
   // Balance the last row if needed
   if (guildRows.length > 1 && guildRows[guildRows.length - 1].length < 3) {
     const lastRow = guildRows.pop()
     const prevRow = guildRows.pop()
-    
+
     if (lastRow && prevRow) {
       const combined = prevRow.concat(lastRow)
       if (combined.length <= 5) {
@@ -71,9 +72,9 @@ registerWizard.action('accept_terms', async (ctx: any) => {
       }
     }
   }
-  
+
   guildRows.push([Markup.button.callback('❌ Cancel', 'cancel_registration')])
-  
+
   await ctx.reply('Please select your guild:', Markup.inlineKeyboard(guildRows))
 })
 
@@ -92,11 +93,11 @@ registerWizard.action('decline_terms', async (ctx: any) => {
 // Handle guild selection
 registerWizard.action(/^select_guild_(.+)$/, async (ctx: any) => {
   const guild = ctx.match[1]
-  
+
   const firstName = ctx.from.first_name || ''
   const lastName = ctx.from.last_name || ''
   const username = ctx.from.username || `user_${ctx.from.id}`
-  
+
   try {
     await createUser({
       telegramId: ctx.from.id.toString(),
@@ -105,7 +106,7 @@ registerWizard.action(/^select_guild_(.+)$/, async (ctx: any) => {
       lastName: lastName,
       guild: guild,
     })
-    
+
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] })
     await ctx.reply(
       `🎉 Success! You're now registered to the *${guild}* guild!\n\n` +
@@ -116,7 +117,7 @@ registerWizard.action(/^select_guild_(.+)$/, async (ctx: any) => {
       `If you selected the wrong guild, use /deleteuser to start over.`,
       { parse_mode: 'Markdown' }
     )
-    
+
     // Go to registered user menu
     return ctx.scene.enter('registered_menu')
   } catch (error) {

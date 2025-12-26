@@ -14,29 +14,33 @@ export const guildComparisonScene = new Scenes.BaseScene<any>('guild_comparison'
 guildComparisonScene.enter(async (ctx: any) => {
   try {
     const guilds = await pointService.getGuildLeaderboard()
-    
+
     if (!guilds || guilds.length === 0) {
       await ctx.reply("No guild statistics available yet. Guilds need at least 3 active members with points.")
       return ctx.scene.enter('stats_menu')
     }
 
     let message = '*📊 Guild Comparison*\n\n'
-    
+
     guilds.forEach((guild: any, index: number) => {
       const prefix = getRankPrefix(index)
       const escapedGuild = escapeMarkdown(guild.guild)
       const avgPoints = parseFloat(guild.average_points)
       const totalPoints = parseFloat(guild.total_points)
-      const memberCount = parseInt(guild.member_count)
-      
+      const active = parseInt(guild.active_members)
+      const total = parseInt(guild.total_members)
+      const participation = parseFloat(guild.participation_percentage)
+
       message += `${prefix} *${escapedGuild}*\n`
       message += `   Average: ${escapeMarkdown(avgPoints.toFixed(1))} pts\n`
-      message += `   Total: ${escapeMarkdown(totalPoints.toFixed(0))} pts\n`
-      message += `   Members: ${escapeMarkdown(memberCount.toString())}\n\n`
+      message += `   Total Points: ${escapeMarkdown(totalPoints.toFixed(0))} pts\n`
+      message += `   Active Members: ${escapeMarkdown(active.toString())}\n`
+      message += `   Total Members: ${escapeMarkdown(total.toString())}\n`
+      message += `   Participation: ${escapeMarkdown(participation.toFixed(1))}\\%\n\n`
     })
-    
+
     message += `_Total guilds: ${guilds.length}_`
-    
+
     await ctx.replyWithMarkdownV2(message)
     return ctx.scene.enter('stats_menu')
   } catch (error) {
@@ -54,7 +58,7 @@ guildDetailedStatsScene.enter(async (ctx: any) => {
       pointService.getGuildLeaderboard(),
       pointService.getGuildTopLeaderboard()
     ])
-    
+
     if (!allGuilds || allGuilds.length === 0) {
       await ctx.reply("No guild statistics available yet. Guilds need at least 3 active members with points.")
       return ctx.scene.enter('stats_menu')
@@ -66,20 +70,20 @@ guildDetailedStatsScene.enter(async (ctx: any) => {
 
     let message = '*🔬 Detailed Guild Statistics*\n\n'
     message += '_Avg All vs Top 50%_\n\n'
-    
+
     allGuilds.forEach((guild: any, index: number) => {
       const prefix = getRankPrefix(index)
       const escapedGuild = escapeMarkdown(guild.guild)
       const avgAll = parseFloat(guild.average_points)
       const avgTop = topGuildsMap.get(guild.guild)
       const avgTopStr = avgTop !== undefined ? escapeMarkdown(avgTop.toFixed(1)) : 'N/A'
-      
+
       message += `${prefix} *${escapedGuild}*\n`
       message += `   All: ${escapeMarkdown(avgAll.toFixed(1))} | Top 50%: ${avgTopStr}\n`
     })
-    
+
     message += `\n_Shows consistency of guild performance_`
-    
+
     await ctx.replyWithMarkdownV2(message)
     return ctx.scene.enter('stats_menu')
   } catch (error) {
