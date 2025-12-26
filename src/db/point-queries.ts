@@ -17,16 +17,37 @@ export async function addPointsToUser(
 }
 
 /**
- * Get user's point summary
+ * Get user's point summary including rankings
  */
 export async function getUserSummary(telegramId: string) {
-  const [user] = await sql<User[]>`
+  const [user] = await sql<any[]>`
+    WITH global_stats AS (
+      SELECT 
+        telegram_id,
+        RANK() OVER (ORDER BY points DESC) as global_rank,
+        COUNT(*) OVER () as total_users
+      FROM users
+    ),
+    guild_stats AS (
+      SELECT 
+        telegram_id,
+        RANK() OVER (PARTITION BY guild ORDER BY points DESC) as guild_rank,
+        COUNT(*) OVER (PARTITION BY guild) as guild_users
+      FROM users
+      WHERE guild IS NOT NULL
+    )
     SELECT 
       u.points,
       u.first_name,
       u.username,
-      u.guild
+      u.guild,
+      gs.global_rank,
+      gs.total_users,
+      gus.guild_rank,
+      gus.guild_users
     FROM users u
+    LEFT JOIN global_stats gs ON u.telegram_id = gs.telegram_id
+    LEFT JOIN guild_stats gus ON u.telegram_id = gus.telegram_id
     WHERE u.telegram_id = ${telegramId}
   `
   return user
@@ -97,5 +118,54 @@ export async function getTopUsers(limit: number = 20): Promise<User[]> {
     WHERE points > 0
     ORDER BY points DESC
     LIMIT ${limit}
+  `
+}
+
+/**
+ * Get users nearby in global leaderboard
+ */
+export async function getNearbyUsers(telegramId: string) {
+  return await sql<any[]>`
+    WITH ranked_users AS (
+      SELECT 
+        telegram_id,
+        username,
+        first_name,
+        points,
+        guild,
+        RANK() OVER (ORDER BY points DESC) as rank
+      FROM users
+    ),
+    target_rank AS (
+      SELECT rank FROM ranked_users WHERE telegram_id = ${telegramId}
+    )
+    SELECT * FROM ranked_users
+    WHERE ABS(rank - (SELECT rank FROM target_rank)) <= 2
+    ORDER BY rank
+  `
+}
+
+/**
+ * Get users nearby in guild leaderboard
+ */
+export async function getNearbyGuildUsers(telegramId: string, guild: string) {
+  return await sql<any[]>`
+    WITH ranked_users AS (
+      SELECT 
+        telegram_id,
+        username,
+        first_name,
+        points,
+        guild,
+        RANK() OVER (PARTITION BY guild ORDER BY points DESC) as rank
+      FROM users
+      WHERE guild = ${guild}
+    ),
+    target_rank AS (
+      SELECT rank FROM ranked_users WHERE telegram_id = ${telegramId}
+    )
+    SELECT * FROM ranked_users
+    WHERE ABS(rank - (SELECT rank FROM target_rank)) <= 2
+    ORDER BY rank
   `
 }
