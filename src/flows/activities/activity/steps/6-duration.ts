@@ -93,6 +93,4 @@ export async function handleDurationInput(ctx: any): Promise<void> {
   const metValue = ctx.wizard.state.metValue
   const points = Number(((metValue * minutes) / 60).toFixed(2))
   ctx.wizard.state.calculatedPoints = points
-
-  console.log(`✅ Duration set: ${minutes} min, Points: ${points}`)
 }

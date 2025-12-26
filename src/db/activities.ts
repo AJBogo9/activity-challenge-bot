@@ -9,12 +9,6 @@ export async function createActivity(data: {
   description?: string
   activityDate?: string  // Expected in YYYY-MM-DD format
 }): Promise<Activity> {
-  console.log('🔍 createActivity called with:', {
-    userId: data.userId,
-    activityDate: data.activityDate,
-    activityDateType: typeof data.activityDate
-  })
-  
   // Validate and use the date
   let dateToUse: string
   
@@ -37,8 +31,6 @@ export async function createActivity(data: {
     dateToUse = new Date().toISOString().split('T')[0]
   }
 
-  console.log('🔍 Date being inserted into DB:', dateToUse) // DEBUG
-
   const [activity] = await sql<Activity[]>`
     INSERT INTO activities (user_id, activity_type, duration, points, description, activity_date)
     VALUES (
@@ -51,6 +43,7 @@ export async function createActivity(data: {
     )
     RETURNING *
   `
+  
   return activity
 }
 

@@ -146,8 +146,6 @@ Great work! Keep it up! 💪
 `
 
       await ctx.replyWithMarkdown(successMessage, Markup.removeKeyboard())
-      
-      console.log(`✅ Activity saved for user ${user.id}: ${calculatedPoints} points`)
 
     } catch (error) {
       console.error('Error saving activity:', error)

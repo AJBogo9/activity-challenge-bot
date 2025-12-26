@@ -3,6 +3,20 @@ import Calendar from 'telegram-inline-calendar'
 import { bot } from '../bot/instance'
 import { startDate, endDate } from '../constants'
 
+// Parse dates with explicit handling
+const parseDate = (dateStr: string): Date | false => {
+  if (!dateStr) return false
+  
+  // Parse YYYY-MM-DD format explicitly at noon UTC to avoid timezone issues
+  const [year, month, day] = dateStr.split('-').map(Number)
+  if (!year || !month || !day) return false
+  
+  return new Date(Date.UTC(year, month - 1, day, 12, 0, 0))
+}
+
+const parsedStartDate = parseDate(startDate)
+const parsedEndDate = parseDate(endDate)
+
 /**
  * Calendar for activity logging - respects competition dates
  */
@@ -12,8 +26,8 @@ const activityCalendar = new Calendar(bot, {
   bot_api: 'telegraf',
   close_calendar: true,
   start_week_day: 1, // Monday
-  start_date: startDate ? new Date(startDate) : false,
-  stop_date: endDate ? new Date(endDate) : false,
+  start_date: parsedStartDate,
+  stop_date: parsedEndDate,
   custom_start_msg: '📅 Select the date when you did this activity:'
 })
 
@@ -27,6 +41,7 @@ export async function showActivityCalendar(ctx: any): Promise<any> {
     if (!message) {
       throw new Error('No message context available for calendar')
     }
+    
     return await activityCalendar.startNavCalendar(message)
   } catch (error) {
     console.error('Error showing calendar:', error)
@@ -53,7 +68,6 @@ export function handleCalendarSelection(ctx: any): string | null {
     
     // -1 means calendar navigation (prev/next month), not a date selection
     if (result !== -1 && result) {
-      console.log('📅 Date selected from calendar:', result)
       return result as string
     }
   }

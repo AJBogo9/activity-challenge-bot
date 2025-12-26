@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS activities (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id) NOT NULL,
-  activity_type VARCHAR(50) NOT NULL,
+  activity_type VARCHAR(255) NOT NULL,
   duration INTEGER,  -- in minutes
   points DECIMAL(10,2) NOT NULL,  -- MET-hours (decimal values)
   description TEXT,

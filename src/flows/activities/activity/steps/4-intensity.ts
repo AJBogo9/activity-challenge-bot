@@ -1,6 +1,6 @@
 import { Markup } from 'telegraf'
 import { createKeyboard, addMetValuesToIntensities, extractIntensityFromLabel } from '../helpers/keyboard-builder'
-import { hierarchy, getIntensities, getMetValue, isValidIntensity } from '../helpers/activity-data'
+import { getIntensities, getMetValue, isValidIntensity } from '../helpers/activity-data'
 
 /**
  * Display intensity selection screen with MET values
@@ -20,8 +20,7 @@ export async function showIntensitySelection(ctx: any): Promise<void> {
     intensities, 
     mainCategory, 
     subcategory, 
-    activity, 
-    hierarchy
+    activity,
   )
   const keyboard = createKeyboard(intensitiesWithMET, true)
   

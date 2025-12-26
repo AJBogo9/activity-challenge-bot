@@ -11,7 +11,6 @@ export function createKeyboard(items: string[], includeBack: boolean = false): s
 
   // Handle empty items
   if (items.length === 0) {
-    console.warn('createKeyboard: No items provided')
     return includeBack ? [['⬅️ Back', '❌ Cancel']] : [['❌ Cancel']]
   }
 

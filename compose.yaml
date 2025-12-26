@@ -43,6 +43,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/summer_body
       NODE_ENV: production
       BOT_TOKEN: ${BOT_TOKEN}
+      # Add competition dates
+      COMPETITION_START_DATE: ${COMPETITION_START_DATE}
+      COMPETITION_END_DATE: ${COMPETITION_END_DATE}
     depends_on:
       postgres:
         condition: service_healthy

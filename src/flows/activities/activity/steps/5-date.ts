@@ -52,6 +52,5 @@ export async function handleDateSelection(ctx: any): Promise<void> {
   // If a date was selected (not just calendar navigation)
   if (selectedDate) {
     ctx.wizard.state.activityDate = selectedDate
-    console.log('✅ Date selected and stored:', selectedDate)
   }
 }

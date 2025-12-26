@@ -13,8 +13,13 @@ export const startDate = process.env.COMPETITION_START_DATE || ''
 export const endDate = process.env.COMPETITION_END_DATE || ''
 
 if (startDate && isNaN(Date.parse(startDate))) {
-  throw new Error('COMPETITION_START_DATE must be a valid date')
+  throw new Error(`COMPETITION_START_DATE must be a valid date, got: ${startDate}`)
 }
+
 if (endDate && isNaN(Date.parse(endDate))) {
-  throw new Error('COMPETITION_END_DATE must be a valid date')
+  throw new Error(`COMPETITION_END_DATE must be a valid date, got: ${endDate}`)
+}
+
+if (!startDate || !endDate) {
+  console.warn('⚠️  Competition dates not set! Calendar will show all dates.')
 }

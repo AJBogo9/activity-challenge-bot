@@ -5,8 +5,8 @@ services:
       - ./src:/app/src:ro
       - ./index.ts:/app/index.ts:ro
       - ./scripts:/app/scripts:ro
-      - ./data:/app/data
+      - ./data:/app/data:z
       - /app/node_modules
     command: bun --watch index.ts
     environment:
-      NODE_ENV: development  # Optional but recommended
+      NODE_ENV: development
