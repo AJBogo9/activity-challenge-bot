@@ -1,0 +1,12 @@
+services:
+  app:
+    volumes:
+      # Development-specific mounts
+      - ./src:/app/src:ro
+      - ./index.ts:/app/index.ts:ro
+      - ./scripts:/app/scripts:ro
+      - ./data:/app/data
+      - /app/node_modules
+    command: bun --watch index.ts
+    environment:
+      NODE_ENV: development  # Optional but recommended
