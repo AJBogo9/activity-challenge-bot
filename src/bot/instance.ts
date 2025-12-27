@@ -9,5 +9,25 @@ if (!botToken) {
 }
 
 const agent = new https.Agent({ keepAlive: false })
-
 export const bot = new Telegraf<MyContext>(botToken, { telegram: { agent } })
+
+// Block all non-private chats
+bot.use(async (ctx, next) => {
+  // Only allow private chats (DMs)
+  if (ctx.chat?.type !== 'private') {
+    // Don't try to send messages for my_chat_member events (when bot is added/kicked)
+    if (ctx.updateType === 'my_chat_member') {
+      return
+    }
+    
+    // Try to send warning message, but ignore errors if bot was kicked
+    try {
+      await ctx.reply('⚠️ This bot only works in private messages. Please message me directly.')
+    } catch (error) {
+      // Silently ignore errors (bot was likely kicked or blocked)
+    }
+    return
+  }
+  
+  return next()
+})
