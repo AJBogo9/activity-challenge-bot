@@ -27,8 +27,7 @@ const activityCalendar = new Calendar(bot, {
   close_calendar: true,
   start_week_day: 1, // Monday
   start_date: parsedStartDate,
-  stop_date: parsedEndDate,
-  custom_start_msg: '📅 Select the date when you did this activity:'
+  stop_date: parsedEndDate
 })
 
 /**

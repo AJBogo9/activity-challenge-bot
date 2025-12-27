@@ -25,7 +25,7 @@ export async function showIntensitySelection(ctx: any): Promise<void> {
   const keyboard = createKeyboard(intensitiesWithMET, true)
 
   await ctx.replyWithMarkdown(
-    `🏃 *Log Activity - Step 4/6*\n\n*Activity:* ${activity}\n\nChoose intensity:`,
+    `🏃 *Log Activity - Step 4/7*\n\n*Activity:* ${activity}\n\nChoose intensity:`,
     Markup.keyboard(keyboard).resize().oneTime()
   )
 }

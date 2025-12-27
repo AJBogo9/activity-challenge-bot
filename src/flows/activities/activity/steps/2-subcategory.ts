@@ -16,7 +16,7 @@ export async function showSubcategorySelection(ctx: any): Promise<void> {
   const keyboard = createKeyboard(subcategories, true)
 
   await ctx.replyWithMarkdown(
-    `🏃 *Log Activity - Step 2/6*\n\n*Category:* ${mainCategory}\n\nChoose a subcategory:`,
+    `🏃 *Log Activity - Step 2/7*\n\n*Category:* ${mainCategory}\n\nChoose a subcategory:`,
     Markup.keyboard(keyboard).resize().oneTime()
   )
 }

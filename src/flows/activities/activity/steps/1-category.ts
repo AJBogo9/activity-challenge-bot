@@ -10,7 +10,7 @@ export async function showCategorySelection(ctx: any): Promise<void> {
   const keyboard = createKeyboard(mainCategories, true) // Pass true to add cancel button
   
   await ctx.replyWithMarkdown(
-    '🏃 *Log Activity - Step 1/6*\n\nChoose a main category:',
+    '🏃 *Log Activity - Step 1/7*\n\nChoose a main category:',
     Markup.keyboard(keyboard).resize().oneTime()
   )
 }

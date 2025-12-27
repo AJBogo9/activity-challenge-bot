@@ -15,9 +15,8 @@ export async function showDateSelection(ctx: any): Promise<void> {
   }
 
   // Remove keyboard and show calendar
-  await ctx.reply('Great! Now let\'s select the date.', Markup.removeKeyboard())
   await ctx.replyWithMarkdown(
-    `🏃 *Log Activity - Step 5/6*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*MET Value:* ${metValue}\n\n📅 When did you do this activity?`
+    `🏃 *Log Activity - Step 5/7*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*MET Value:* ${metValue}\n\n📅 When did you do this activity?`
   )
 
   // Show the calendar

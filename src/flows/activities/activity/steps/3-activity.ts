@@ -18,7 +18,7 @@ export async function showActivitySelection(ctx: any): Promise<void> {
   const keyboard = createKeyboard(activities, true)
 
   await ctx.replyWithMarkdown(
-    `🏃 *Log Activity - Step 3/6*\n\n*Subcategory:* ${subcategory}\n\nChoose specific activity:`,
+    `🏃 *Log Activity - Step 3/7*\n\n*Subcategory:* ${subcategory}\n\nChoose specific activity:`,
     Markup.keyboard(keyboard).resize().oneTime()
   )
 }

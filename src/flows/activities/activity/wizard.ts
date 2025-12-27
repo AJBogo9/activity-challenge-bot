@@ -5,7 +5,7 @@ import { showActivitySelection, handleActivitySelection } from './steps/3-activi
 import { showIntensitySelection, handleIntensitySelection } from './steps/4-intensity'
 import { showDateSelection, handleDateSelection } from './steps/5-date'
 import { showDurationSelection, handleDurationInput } from './steps/6-duration'
-import { showConfirmation, handleConfirmation } from './steps/7-confirmation'
+import { showConfirmation, handleConfirmation } from './steps/7-confirm'
 import { handleCancel } from './helpers/navigation'
 
 // Wizard state interface for type safety
@@ -148,7 +148,7 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
   // Step 7: Handle Confirmation → Save (INLINE KEYBOARD)
   async (ctx: any) => {
     // Handle cancel callback for inline keyboard
-    if (ctx.callbackQuery?.data === 'confirmation:cancel') {
+    if (ctx.callbackQuery?.data === 'confirm:cancel') {
       await handleCancel(ctx)
       return
     }

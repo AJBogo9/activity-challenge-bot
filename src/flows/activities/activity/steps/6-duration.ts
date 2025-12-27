@@ -20,7 +20,7 @@ export async function showDurationSelection(ctx: any): Promise<void> {
     : activityDate
 
   await ctx.replyWithMarkdown(
-    `🏃 *Log Activity - Step 6/6*\n\n` +
+    `🏃 *Log Activity - Step 6/7*\n\n` +
     `*Activity:* ${activity}\n` +
     `*Intensity:* ${intensity}\n` +
     `*Date:* ${dateStr}\n` +
