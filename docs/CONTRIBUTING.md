@@ -1,140 +1,135 @@
-Thanks for your intrest in contributing! 🎉
+# Contributing Guide 🎉
 
-# Table of Contents
-- [Table of Contents](#table-of-contents)
-- [Developement Setup](#developement-setup)
+Thanks for your interest in contributing to the Activity Challenge Bot! This guide will help you set up your development environment.
+
+## Table of Contents
+- [Development Setup](#development-setup)
   - [Prerequisites](#prerequisites)
   - [Step 1: Clone the Repository](#step-1-clone-the-repository)
   - [Step 2: Install Dependencies](#step-2-install-dependencies)
-  - [Step 3: Set Up MongoDB with Docker](#step-3-set-up-mongodb-with-docker)
+  - [Step 3: Set Up Services with Podman](#step-3-set-up-services-with-podman)
   - [Step 4: Configure Environment Variables](#step-4-configure-environment-variables)
-- [Optional Setup](#optional-setup)
-  - [Populate Test Data](#populate-test-data)
-  - [Set Up MongoDB Compass](#set-up-mongodb-compass)
-  - [Set Up Metabase](#set-up-metabase)
 - [Development Workflow](#development-workflow)
-  - [Start MongoDB container](#start-mongodb-container)
-  - [Start the Bot](#start-the-bot)
-- [Contributing](#contributing)
-  - [Making Changes](#making-changes)
-  - [Code Standards](#code-standards)
-  - [Questions and Feedback](#questions-and-feedback)
-  - [Resources](#resources)
+  - [Running the Bot](#running-the-bot)
+  - [Managing Data](#managing-data)
+  - [Database Access](#database-access)
+- [Testing](#testing)
+- [Contributing Standards](#contributing-standards)
 
+---
 
-# Developement Setup
+## Development Setup
 
-## Prerequisites
+### Prerequisites
 
-Before you begin, ensure you have the following installed:
+Ensure you have the following installed:
 
-- **Node.js** (v18 or higher) - [Download here](https://nodejs.org/)
-- **npm** (comes with Node.js)
-- **Docker** - [Installation guide](https://docs.docker.com/engine/install/)
-- **Git** - For version control
-- **Telegram Account** - For creating and testing the bot
+- **Bun** (Latest) - [Installation guide](https://bun.sh/docs/installation)
+- **Podman** - [Installation guide](https://podman.io/docs/installation)
+- **Podman Compose** - Often comes with Podman or can be installed via `pip` or package manager.
+- **Git** - For version control.
+- **Telegram Account** - For creating and testing your bot instance.
 
-## Step 1: Clone the Repository
+### Step 1: Clone the Repository
 
-## Step 2: Install Dependencies
 ```bash
-npm install
+git clone https://github.com/EppuRuotsalainen/activity-challenge-bot.git
+cd activity-challenge-bot
 ```
 
-## Step 3: Set Up MongoDB with Docker
+### Step 2: Install Dependencies
 
-Start a MongoDB container:
 ```bash
-docker run -d \
-  --name mongodb \
-  -p 127.0.0.1:27017:27017 \
-  -v mongodb_data:/data/db \
-  mongo:latest
+bun install
 ```
 
-Verify MongoDB is running:
+### Step 3: Set Up Services with Podman
+
+Start the required services (Postgres, Metabase) using Podman Compose:
+
 ```bash
-docker ps
+bun run pod:up
 ```
 
-You should see the `mongodb` container in the list.
-
-## Step 4: Configure Environment Variables
-
-Create a `.env` file in the root directory and copy the `.env.example` contents to the env file.
-
-**Step 4.1: Create Your Telegram Bot**
-
-1. Open Telegram and search for `@BotFather`
-2. Send `/newbot` to create a new bot
-3. Choose a name for your bot (e.g., "SummerBody Dev Bot")
-4. Choose a username ending in 'bot' (e.g., "summerbody_dev_bot")
-5. **Copy the bot token** that BotFather provides to the `.env` file
-
-**Step 4.2: Get Your Telegram User ID**
-
-1. In Telegram, search for `@userinfobot`
-2. Send `/start` to the bot
-3. **Copy your user ID number** to the `.env` file
-
-# Optional Setup
-
-## Populate Test Data
-
-To test the bot with sample data:
+Verify services are running:
 ```bash
-npm run populate
+podman ps
 ```
 
-## Set Up MongoDB Compass
+### Step 4: Configure Environment Variables
 
-MongoDB Compass is a GUI tool for visualizing and analyzing your database schema.
+1. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+2. **Telegram Bot Token**: Create a bot via [@BotFather](https://t.me/BotFather) and paste the token in `.env`.
+3. **Admin User ID**: Get your ID via [@userinfobot](https://t.me/userinfobot) and paste it in `ADMIN_USER_ID`.
+4. **Database Configuration**: The default values in `.env.example` should work with the Podman setup.
 
-## Set Up Metabase
+---
 
-# Development Workflow
+## Development Workflow
 
-## Start MongoDB container
+### Running the Bot
+
+**Local mode (using local Bun):**
 ```bash
-docker start mongodb
+bun dev # Starts with --watch mode
 ```
 
-## Start the Bot
+**Inside Podman:**
 ```bash
-npm start
+bun run pod:dev # Rebuilds and starts the bot container
 ```
 
-You should see output like:
+### Managing Data
+
+Initialize guilds and populate test data:
+```bash
+bun run pod:init-guilds
+bun run pod:populate
 ```
-Bot started
+
+To clear data:
+```bash
+bun run pod:clear
 ```
 
-# Contributing
+### Database Access
 
-## Making Changes
+To access the Postgres database directly inside the container:
+```bash
+bun run pod:db:psql
+```
 
-1. Create a feature branch: `git checkout -b feature/your-feature`
-2. Make your changes and test them
-3. Commit with clear messages
-4. Push and open a Pull request
+---
 
-## Code Standards
+## Testing
 
-- Test features throughtly before creating pull requests
-- Update documentation if needed
+This project uses Bun's native test framework.
 
-## Questions and Feedback
+```bash
+bun test          # Run all tests
+bun test:watch    # Run in watch mode
+bun test:coverage # Generate coverage report
+```
 
-- **Issues**: Report bugs or request features via [GitHub Issues](https://github.com/EppuRuotsalainen/activity-challenge-bot/issues)
-- **Contact**: Reach out to the maintainers for sensitive questions
+---
+
+## Contributing Standards
+
+1. **Branching**: Create a feature branch: `git checkout -b feature/your-feature`.
+2. **Linting**: Run `bun run lint` before committing.
+3. **Tests**: Ensure all tests pass and add new ones for your features.
+4. **Documentation**: Update the `README.md` or `docs/` if your changes affect usage or setup.
+5. **Pull Requests**: Provide a clear description of your changes and why they are needed.
 
 ## Resources
 
 - [Telegraf Documentation](https://telegraf.js.org/)
-- [MongoDB Documentation](https://docs.mongodb.com/)
-- [Node.js Documentation](https://nodejs.org/docs/)
-- [Telegram Bot API](https://core.telegram.org/bots/api)
-- [Metabase Documentation](https://www.metabase.com/docs/latest/)
+- [Bun Documentation](https://bun.sh/docs)
+- [Postgres Documentation](https://www.postgresql.org/docs/)
+- [VitePress Documentation](https://vitepress.dev/)
 
 
 

@@ -4,29 +4,31 @@ layout: home
 hero:
   name: "Activity Challenge Bot"
   text: "Track competition scores among Aalto guilds"
-  tagline: A Telegram bot for managing inter-guild activity challenges
+  tagline: A Telegram bot for managing inter-guild activity challenges with Postgres, Bun, and Metabase.
   actions:
     - theme: brand
-      text: Contributing
+      text: Get Started
       link: /CONTRIBUTING
     - theme: alt
       text: Point System
       link: /point-system
 
 features:
-  - title: Activity Tracking
-    details: Log sports activities and earn points for your guild through an intuitive Telegram interface
-  - title: Guild Competition
-    details: Real-time standings and statistics showing how guilds rank against each other
-  - title: Point-Based System
-    details: Fair scoring system based on activity duration, intensity, and type
+  - title: 🏆 Guild Competition
+    details: Real-time standings and statistics showing how guilds and teams rank against each other.
+  - title: 🏃 Activity Tracking
+    details: Log exercise and wellness activities with ease through an intuitive Telegram interface.
+  - title: 📊 Advanced Analytics
+    details: Deep insights and visual dashboards via Metabase integration.
+  - title: ⚡ Powered by Bun
+    details: Built with the modern Bun runtime for speed and efficiency.
 ---
 
 ## Quick Start
 
-Add the bot to Telegram and start logging activities for your guild.
+Add the bot to Telegram and start logging activities for your guild. See the [Contributing Guide](./CONTRIBUTING.md) for local development setup.
 
 ## Documentation
 
-- [Contributing Guide](./CONTRIBUTING.md) - How to contribute to the project
+- [Contributing Guide](./CONTRIBUTING.md) - How to setup the project locally
 - [Point System](./point-system.md) - How points are calculated and awarded
