@@ -1,4 +1,4 @@
-import { Scenes } from 'telegraf'
+import { Scenes, Markup } from 'telegraf'
 import * as pointService from '../../db/point-queries'
 import { escapeMarkdown } from '../../utils/format-list'
 import { ERROR_MESSAGE } from '../../utils/texts'
@@ -14,7 +14,7 @@ export const guildComparisonScene = new Scenes.BaseScene<any>('guild_comparison'
 guildComparisonScene.enter(async (ctx: any) => {
   try {
     const guilds = await pointService.getGuildLeaderboard()
-
+    
     if (!guilds || guilds.length === 0) {
       await ctx.reply("No guild statistics available yet. Guilds need at least 3 active members with points.")
       return ctx.scene.enter('stats_menu')
@@ -41,7 +41,7 @@ guildComparisonScene.enter(async (ctx: any) => {
 
     message += `_Total guilds: ${guilds.length}_`
 
-    await ctx.replyWithMarkdownV2(message)
+    await ctx.replyWithMarkdownV2(message, Markup.removeKeyboard())
     return ctx.scene.enter('stats_menu')
   } catch (error) {
     await ctx.reply(ERROR_MESSAGE)
@@ -84,7 +84,7 @@ guildDetailedStatsScene.enter(async (ctx: any) => {
 
     message += `\n_Shows consistency of guild performance_`
 
-    await ctx.replyWithMarkdownV2(message)
+    await ctx.replyWithMarkdownV2(message, Markup.removeKeyboard())
     return ctx.scene.enter('stats_menu')
   } catch (error) {
     await ctx.reply(ERROR_MESSAGE)
