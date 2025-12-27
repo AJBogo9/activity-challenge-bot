@@ -31,7 +31,32 @@ CREATE TABLE IF NOT EXISTS activities (
   activity_date DATE DEFAULT CURRENT_DATE
 );
 
+-- Feedback table
+CREATE TABLE IF NOT EXISTS feedback (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  
+  -- Likert scale ratings (1-5)
+  ease_of_use INTEGER CHECK (ease_of_use >= 1 AND ease_of_use <= 5),
+  usefulness INTEGER CHECK (usefulness >= 1 AND usefulness <= 5),
+  overall_satisfaction INTEGER CHECK (overall_satisfaction >= 1 AND overall_satisfaction <= 5),
+  
+  -- Textual feedback (main value)
+  text_feedback TEXT NOT NULL,
+  
+  -- Metadata
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  -- Optional: track if this feedback has been reviewed
+  reviewed BOOLEAN DEFAULT FALSE
+);
+
 -- Indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id);
 CREATE INDEX IF NOT EXISTS idx_activities_user_id ON activities(user_id);
 CREATE INDEX IF NOT EXISTS idx_activities_date ON activities(activity_date);
+
+-- Indexes for feedback table
+CREATE INDEX IF NOT EXISTS idx_feedback_user_id ON feedback(user_id);
+CREATE INDEX IF NOT EXISTS idx_feedback_reviewed ON feedback(reviewed);
+CREATE INDEX IF NOT EXISTS idx_feedback_created_at ON feedback(created_at DESC);

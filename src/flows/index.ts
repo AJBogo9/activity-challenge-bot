@@ -5,7 +5,7 @@ export { menuRouterScene } from './menu/menu-router'
 export { infoMenuScene } from './info/info-menu'
 
 // Information flows
-export { startWizard } from './info/start'
+export { startWizard } from './start'
 export { helpScene } from './info/help'
 export { statsInfoScene } from './info/stats-info'
 export { termsScene } from './info/terms'
@@ -26,3 +26,6 @@ export { sportsActivityWizard } from './activities/activity/wizard'
 export { registerWizard } from './user/register'
 export { deleteUserWizard } from './user/delete'
 export { profileScene } from './user/profile'
+
+// Feedback flow
+export { feedbackWizard } from './feedback'
