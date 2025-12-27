@@ -9,7 +9,8 @@ registeredMenuScene.enter(async (ctx: any) => {
     message,
     Markup.keyboard([
       ['👤 Profile', '💪 Log Activity'],
-      ['📊 Statistics', 'ℹ️ Info']
+      ['📊 Statistics', 'ℹ️ Info'],
+      ['💬 Feedback']  // Added feedback button
     ])
       .resize()
       .persistent()
@@ -34,6 +35,11 @@ registeredMenuScene.hears('📊 Statistics', async (ctx: any) => {
 // Handle Info button - reuse existing info menu
 registeredMenuScene.hears('ℹ️ Info', async (ctx: any) => {
   return ctx.scene.enter('info_menu')
+})
+
+// Handle Feedback button - Enter the feedback wizard
+registeredMenuScene.hears('💬 Feedback', async (ctx: any) => {
+  return ctx.scene.enter('feedback_wizard')
 })
 
 // Handle any other text input

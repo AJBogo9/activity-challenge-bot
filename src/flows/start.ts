@@ -1,6 +1,6 @@
 import { Scenes } from 'telegraf'
-import { escapeMarkdown } from '../../utils/format-list'
-import { INSTRUCTIONS_MESSAGE, WELCOME_MESSAGE } from '../../utils/texts'
+import { INSTRUCTIONS_MESSAGE, WELCOME_MESSAGE } from '../utils/texts'
+import { escapeMarkdown } from '../utils/format-list'
 
 export const startWizard = new Scenes.WizardScene(
   'start_wizard',
