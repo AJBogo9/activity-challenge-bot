@@ -8,11 +8,11 @@ infoMenuScene.enter(async (ctx: any) => {
   
   const keyboard = Markup.inlineKeyboard([
     [
-      Markup.button.callback('📊 How Points Work', 'info:points'),
-      Markup.button.callback('📈 Stats Info', 'info:stats')
+      Markup.button.callback('📊 Points', 'info:points'),
+      Markup.button.callback('📋 Terms', 'info:terms')
     ],
     [
-      Markup.button.callback('📋 Terms', 'info:terms'),
+      Markup.button.callback('🤖 About Bot', 'info:about'),
       Markup.button.callback('👥 Credits', 'info:credits')
     ],
     [Markup.button.callback('⬅️ Back to Main Menu', 'info:back')]
@@ -36,16 +36,16 @@ infoMenuScene.action('info:points', async (ctx: any) => {
   await ctx.scene.enter('how_to_get_points_scene')
 })
 
-// Handle Stats Info button
-infoMenuScene.action('info:stats', async (ctx: any) => {
-  await ctx.answerCbQuery()
-  await ctx.scene.enter('stats_info_scene')
-})
-
 // Handle Terms button
 infoMenuScene.action('info:terms', async (ctx: any) => {
   await ctx.answerCbQuery()
   await ctx.scene.enter('terms_scene')
+})
+
+// Handle About Bot button
+infoMenuScene.action('info:about', async (ctx: any) => {
+  await ctx.answerCbQuery()
+  await ctx.scene.enter('about_bot_scene')
 })
 
 // Handle Credits button

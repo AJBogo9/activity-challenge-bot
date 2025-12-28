@@ -1,5 +1,4 @@
 import { Scenes, Markup } from 'telegraf'
-import { escapeMarkdown } from '../../utils/format-list'
 import { POINTS_INFO_MESSAGE } from '../../utils/texts'
 
 export const howToGetPoints = new Scenes.BaseScene<any>('how_to_get_points_scene')
@@ -10,13 +9,17 @@ howToGetPoints.enter(async (ctx: any) => {
   ])
 
   if (ctx.callbackQuery) {
-    await ctx.editMessageText(escapeMarkdown(POINTS_INFO_MESSAGE), {
+    await ctx.editMessageText(POINTS_INFO_MESSAGE, {
       parse_mode: 'MarkdownV2',
+      link_preview_options: { is_disabled: true },
       ...keyboard
     })
     await ctx.answerCbQuery()
   } else {
-    await ctx.replyWithMarkdownV2(escapeMarkdown(POINTS_INFO_MESSAGE), keyboard)
+    await ctx.replyWithMarkdownV2(POINTS_INFO_MESSAGE, {
+      link_preview_options: { is_disabled: true },
+      ...keyboard
+    })
   }
 })
 
