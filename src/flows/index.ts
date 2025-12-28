@@ -6,7 +6,6 @@ export { infoMenuScene } from './info/info-menu'
 
 // Information flows
 export { startWizard } from './start'
-export { helpScene } from './info/help'
 export { statsInfoScene } from './info/stats-info'
 export { termsScene } from './info/terms'
 export { howToGetPoints } from './info/how-to-points'

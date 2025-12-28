@@ -1,12 +1,29 @@
-import { Scenes } from 'telegraf'
+import { Scenes, Markup } from 'telegraf'
 import { escapeMarkdown } from '../../utils/format-list'
 import { TERMS_AND_CONDITIONS } from '../../utils/texts'
 
 export const termsScene = new Scenes.BaseScene<any>('terms_scene')
 
 termsScene.enter(async (ctx: any) => {
-  await ctx.replyWithMarkdownV2(escapeMarkdown(TERMS_AND_CONDITIONS))
-  await ctx.scene.leave()
+  const keyboard = Markup.inlineKeyboard([
+    [Markup.button.callback('⬅️ Back to Info Menu', 'terms:back')]
+  ])
 
+  // Edit the existing message (from info menu click)
+  if (ctx.callbackQuery) {
+    await ctx.editMessageText(escapeMarkdown(TERMS_AND_CONDITIONS), {
+      parse_mode: 'MarkdownV2',
+      ...keyboard
+    })
+    await ctx.answerCbQuery()
+  } else {
+    // Fallback: if somehow called directly, send new message
+    await ctx.replyWithMarkdownV2(escapeMarkdown(TERMS_AND_CONDITIONS), keyboard)
+  }
+})
+
+// Handle back button - return to info menu
+termsScene.action('terms:back', async (ctx: any) => {
+  await ctx.answerCbQuery()
   await ctx.scene.enter('info_menu')
 })
