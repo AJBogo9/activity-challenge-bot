@@ -53,7 +53,7 @@ deleteUserScene.action('delete:confirm', async (ctx: any) => {
     await deleteUser(userId)
 
     await ctx.editMessageText(
-      '✅ *Account Deleted*\n\nYour account has been successfully deleted. You can register again anytime using /register.',
+      '✅ *Account Deleted*\n\nYour account has been successfully deleted.',
       { parse_mode: 'Markdown' }
     )
     
