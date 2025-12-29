@@ -30,14 +30,6 @@ export async function createUser(data: {
   return result[0]
 }
 
-export async function updateUserPoints(userId: number, pointsToAdd: number): Promise<void> {
-  await sql`
-    UPDATE users 
-    SET points = points + ${Number(pointsToAdd)}
-    WHERE id = ${userId}
-  `
-}
-
 export async function deleteUser(telegramId: string): Promise<void> {
   await sql`
     DELETE FROM users 

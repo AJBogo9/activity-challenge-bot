@@ -1,120 +1,118 @@
 /**
  * Centralized text constants for the bot
  * Organized by feature/context for easy maintenance
+ * All messages are properly escaped for MarkdownV2
  */
 
 export const ERROR_MESSAGE = 
-  "Something went wrong while processing your request. Please try again. " +
+  "Something went wrong while processing your request\\. Please try again\\. " +
   "We've logged the error for further review, but if the issue persists or you need " +
-  "immediate help, contact @EppuRuotsalainen on Telegram."
+  "immediate help, contact @EppuRuotsalainen on Telegram\\."
 
 
 export const PRIVATE_CHAT_HELP = `*Help and Commands Overview* 🛠️
 
-/start - Get introduction & instructions to get basic information about the competition.
+/start \\- Get introduction & instructions to get basic information about the competition\\.
 
-/register - Initiate your registration and set up your profile.
+/register \\- Initiate your registration and set up your profile\\.
 
-/createteam - Form a new team.
+/createteam \\- Form a new team\\.
 
-/jointeam - Join an existing team. You will need the team ID, provided to who created the team.
+/jointeam \\- Join an existing team\\. You will need the team ID, provided to who created the team\\.
 
-/addexercise - Log your Kilometer-based and Hour-based training.
+/addexercise \\- Log your Kilometer\\-based and Hour\\-based training\\.
 
-/weekscores - Log your weekly achievements to earn points every Sunday.
+/weekscores \\- Log your weekly achievements to earn points every Sunday\\.
 
-/howtogetpoints - Discover the various ways to earn points.
+/howtogetpoints \\- Discover the various ways to earn points\\.
 
-/statsinfo - Show commands for getting rankings and stats.
+/statsinfo \\- Show commands for getting rankings and stats\\.
 
-/terms - Read current terms and conditions.
+/terms \\- Read current terms and conditions\\.
 
-If there is something that you did not understand or something problematic comes up you can send me a message on Telegram @EppuRuotsalainen.`
+If there is something that you did not understand or something problematic comes up you can send me a message on Telegram @EppuRuotsalainen\\.`
 
 export const GROUP_CHAT_HELP = `*Help and Commands Overview* 🛠️
 
-/leaderboards - View 30 teams with most points and their rankings.
+/leaderboards \\- View 30 teams with most points and their rankings\\.
 
-/team - Check your team members' contributions.
+/team \\- Check your team members' contributions\\.
 
-/summary - Get your personal points summary.
+/summary \\- Get your personal points summary\\.
 
-/topguilds - See guild standings in the competition.
+/topguilds \\- See guild standings in the competition\\.
 
-/topguildsall - Compare guild points in more detail.
+/topguildsall \\- Compare guild points in more detail\\.
 
-/topusers - See top 15 users in the competition
+/topusers \\- See top 15 users in the competition
 
-Please interact with me in a private chat for full features and more detailed commands.`
+Please interact with me in a private chat for full features and more detailed commands\\.`
 
-export const POINTS_INFO_MESSAGE = `*How to Earn Points* 🌟
+export const POINTS_INFO_MESSAGE = `*How Points Work*
 
-You can log your Kilometer-based and Hour-based training at any time with the command /addexercise, and all other activities once a week on Sundays using the command /weekscores. Here's how you can earn them:
+Your points are calculated using MET\\-hours, a standard measure that accounts for both the intensity and duration of your activities\\.
 
-1. *Kilometer-based Activities*:
-   - Running/Walking: 1 point per km
-   - Cycling: 0.25 points per km
-   - Swimming: 4 points per km
-   - Ice Skating: 0.25 points per km
-   - Skiing: 0.5 points per km
+*The Formula:* Points \\= \\(MET × Duration in minutes\\) ÷ 60
 
-2. *Hour-based Training*:
-   - Low Intensity: 2 point per hour
-   - Moderate Intensity: 4 points per hour
-   - Vigorous Intensity: 8 points per hour
+*What are METs?* MET \\(Metabolic Equivalent of Task\\) measures how intense an activity is:
+\\- 1 MET \\= sitting quietly
+\\- 3 METs \\= walking casually
+\\- 8 METs \\= running
+\\- 12\\+ METs \\= intense sports
 
-3. *Sports Sessions*: 5 points for participating in a sports session (for example, your guild's regular weekly session or a sports try-out / jogging session).
+Higher intensity activities have higher MET values and earn more points per minute\\.
 
-4. *New Sport*: 5 points for trying a new or long-unpracticed sport.
+Source: https://pacompendium\\.com/adult\\-compendium/`
 
-5. *New Healthy Recipe*: 5 points for trying out a new healthy recipe this week.
+export const WELCOME_MESSAGE = `*Welcome to the Kesäkuntoon Competition\\!* 🎉
 
-6. *Good Sleep*: 8 points for sleeping 7+ hours at least 5 nights in a week.
+This competition, organised by Aava's Sport Committee, is designed to encourage a healthier lifestyle through friendly competition\\. As a participant, you'll earn points by engaging in various health and fitness activities, contributing both to your personal score and your team's overall performance\\.
 
-7. *Meditation*: 5 points for meditating at least 10 minutes on 5 days during the past week.
+_Every point counts\\!_`
 
-8. *Less Alcohol*: 10 points for consuming at most 5 portions of alcohol during the week.`
-
-export const WELCOME_MESSAGE = `*Welcome to the Kesäkuntoon Competition!* 🎉
-
-This competition, organised by Aava's Sport Committee, is designed to encourage a healthier lifestyle through friendly competition. As a participant, you'll earn points by engaging in various health and fitness activities, contributing both to your personal score and your team's overall performance.
-
-_Every point counts!_`
-
-export const INSTRUCTIONS_MESSAGE = `*Getting Started:*
-
-1. *Register*: Begin by registering with the command /register.
-
-2. *Team Participation*: You may choose to team up with other fellow students, but participation as an individual is also welcome. If you decide to form or join a team, use the /createteam or /jointeam commands.
-
-3. *Earning Points & Tracking Progress*: Use /howtogetpoints to learn how to get points. Amp up the excitement by checking rankings and stats — learn more with command /statsinfo.
-
-4. *Assistance*: Need help? The /help command lists all available commands and their functions.`
-
-export const STATS_INFO_MESSAGE = `*Discover Your Stats and Rankings!* 🏆
+export const STATS_INFO_MESSAGE = `*Discover Your Stats and Rankings\\!* 🏆
 
 Use these commands to track your and your team's progress:
 
-/leaderboards - See top 15 teams in the competition
+/leaderboards \\- See top 15 teams in the competition
 
-/team - Check your team members' contributions
+/team \\- Check your team members' contributions
 
-/summary - Get your personal points summary
+/summary \\- Get your personal points summary
 
-/topguilds - See guild standings in the competition
+/topguilds \\- See guild standings in the competition
 
-/topguildsall - Compare guild points in more detail
+/topguildsall \\- Compare guild points in more detail
 
-/topusers - See top 15 participants in the competition
+/topusers \\- See top 15 participants in the competition
 
-Stay motivated and see how your efforts stack up against the competition!`
+Stay motivated and see how your efforts stack up against the competition\\!`
 
 export const TERMS_AND_CONDITIONS = `*Terms and Conditions*
 
-Using SummerBodyBot, you agree to the following terms and conditions. This bot is designed to collect and record scores for participants in the competition among Aalto guilds, as well as within teams. Please note that the functionality of the bot may be modified or discontinued at any time without prior notice. The administrators and developers of SummerBodyBot are not liable for any adverse outcomes that may result from participation in the competition or use of the bot.
+By using this bot, you agree to these terms\\.
 
-Participation in the competition and use of SummerBodyBot are provided free of charge for members of Aalto guilds. In order to track scores, the bot gathers certain user information, which will not be sold or disclosed to any third party. Users may request deletion of their personal data at any time.
+*About the Bot*
+This bot tracks activity points for the Aalto guild competition\\. It's free to use and open source\\.
 
-Offensive team names or inappropriate behavior during the competition are strictly prohibited. Any team found engaging in such actions will be disqualified, and the associated user may be banned from further participation. All collected data will be deleted after the conclusion of the competition.
+*Your Data*
+We collect your Telegram ID, username, and activity logs\\. Your data won't be shared with third parties\\. You can request deletion anytime\\.
 
-The most current version of these terms and conditions is available via the /terms command. These terms may be updated at any time without prior notice.`
+*Rules*
+• No offensive names or behavior
+• Violations may result in disqualification
+
+*Important*
+The bot may change or stop at any time\\. We're not liable for issues from using it\\. Terms may update without notice\\.
+
+Questions? Contact @EppuRuotsalainen`
+
+export const ABOUT_BOT_MESSAGE = `*About This Bot*
+
+This bot is *completely open source* and *free to use\\!*
+
+*Open Source & Community\\-Driven*
+
+The entire codebase is publicly available on GitHub\\. Anyone can view the code, learn from it, or use it for their own projects\\.
+
+*Repository:* [github\\.com/AJBogo9/activity\\-challenge\\-bot](https://github.com/AJBogo9/activity-challenge-bot)`

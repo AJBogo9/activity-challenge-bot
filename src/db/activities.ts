@@ -7,44 +7,19 @@ export async function createActivity(data: {
   duration: number
   points: number
   description?: string
-  activityDate?: string  // Expected in YYYY-MM-DD format
-}): Promise<Activity> {
-  // Validate and use the date
-  let dateToUse: string
-  
-  if (data.activityDate) {
-    // If it's already in YYYY-MM-DD format, use it directly
-    if (/^\d{4}-\d{2}-\d{2}$/.test(data.activityDate)) {
-      dateToUse = data.activityDate
-    } else {
-      // Try to parse and convert
-      const date = new Date(data.activityDate)
-      if (isNaN(date.getTime())) {
-        console.error('Invalid date provided:', data.activityDate)
-        dateToUse = new Date().toISOString().split('T')[0]
-      } else {
-        dateToUse = date.toISOString().split('T')[0]
-      }
-    }
-  } else {
-    // Default to today in YYYY-MM-DD format
-    dateToUse = new Date().toISOString().split('T')[0]
-  }
-
-  const [activity] = await sql<Activity[]>`
+  activityDate: Date
+}): Promise<void> {
+  await sql`
     INSERT INTO activities (user_id, activity_type, duration, points, description, activity_date)
     VALUES (
       ${data.userId}, 
       ${data.activityType}, 
       ${Math.round(data.duration)},
-      ${Number(data.points)},
+      ${data.points},
       ${data.description ?? null},
-      ${dateToUse}
+      ${data.activityDate}
     )
-    RETURNING *
   `
-  
-  return activity
 }
 
 export async function getActivitiesByUser(userId: number): Promise<Activity[]> {

@@ -1,5 +1,4 @@
-import { Markup } from 'telegraf'
-import { handleCalendarSelection, showActivityCalendar } from '../../../../utils/calendar'
+import { handleCalendarSelection, showActivityCalendar } from '../../../utils/calendar'
 
 /**
  * Display date selection screen with calendar
@@ -14,21 +13,14 @@ export async function showDateSelection(ctx: any): Promise<void> {
     return
   }
 
-  // Remove keyboard and show calendar
-  await ctx.replyWithMarkdown(
-    `🏃 *Log Activity - Step 5/7*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*MET Value:* ${metValue}\n\n📅 When did you do this activity?`
+  // Edit the existing message to show date selection prompt
+  await ctx.editMessageText(
+    `🏃 *Log Activity - Step 5/7*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*MET Value:* ${metValue}\n\n📅 When did you do this activity?`,
+    { parse_mode: 'Markdown' }
   )
 
-  // Show the calendar
+  // Show the calendar in a new message (calendar widget needs its own message)
   await showActivityCalendar(ctx)
-
-  // Add Cancel button below the calendar
-  await ctx.reply(
-    'Need to cancel?',
-    Markup.inlineKeyboard([
-      [Markup.button.callback('❌ Cancel', 'date:cancel')]
-    ])
-  )
 }
 
 /**

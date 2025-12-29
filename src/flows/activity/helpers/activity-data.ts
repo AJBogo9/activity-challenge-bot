@@ -1,4 +1,4 @@
-import activitiesData from '../../../../../data/processed/4_level_hierarchy.json'
+import activitiesData from '../../../../data/processed/4_level_hierarchy.json'
 
 /**
  * Type definition for the 4-level activity hierarchy
@@ -86,24 +86,6 @@ export function getMetValue(
 ): number {
   const metData = hierarchy[mainCategory]?.[subcategory]?.[activity]?.[intensity]?.[0]
   return metData?.met_value || 0
-}
-
-/**
- * Get examples for a specific activity and intensity
- * @param mainCategory - The main category
- * @param subcategory - The subcategory
- * @param activity - The activity name
- * @param intensity - The intensity level
- * @returns Examples string, or empty string if not found
- */
-export function getExamples(
-  mainCategory: string,
-  subcategory: string,
-  activity: string,
-  intensity: string
-): string {
-  const metData = hierarchy[mainCategory]?.[subcategory]?.[activity]?.[intensity]?.[0]
-  return metData?.examples || ''
 }
 
 /**

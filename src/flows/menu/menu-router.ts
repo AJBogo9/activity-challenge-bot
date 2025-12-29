@@ -13,11 +13,11 @@ menuRouterScene.enter(async (ctx: any) => {
       await ctx.scene.enter('registered_menu')
     } else {
       // User is not registered - go to unregistered menu
-      await ctx.scene.enter('main_menu')
+      await ctx.scene.enter('unregistered_menu')
     }
   } catch (error) {
     console.error('Error checking user registration:', error)
     // Default to unregistered menu on error
-    await ctx.scene.enter('main_menu')
+    await ctx.scene.enter('unregistered_menu')
   }
 })
