@@ -19,7 +19,7 @@ export { topUsersScene } from './stats/top-users'
 export { statsMenuScene } from './stats/stats-menu'
 
 // Activity flows
-export { sportsActivityWizard } from './activities/activity/wizard'
+export { sportsActivityWizard } from './activity/wizard'
 
 // User flows
 export { registerWizard } from './user/register'
