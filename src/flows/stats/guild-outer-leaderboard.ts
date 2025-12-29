@@ -26,7 +26,7 @@ guildLeaderboardScene.enter(async (ctx: any) => {
     
     guilds.forEach((guild: any, index: number) => {
       const prefix = getRankPrefix(index)
-      const escapedGuild = guild.guild.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&')
+      const escapedGuild = guild.guild.replace(/[\\_*[\]()~`>#+\-=|{}.!]/g, '\\$&')
       const points = parseFloat(guild.average_points).toFixed(1)
       const active = guild.active_members
       const total = guild.total_members
