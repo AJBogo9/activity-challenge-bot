@@ -67,10 +67,6 @@ deleteUserScene.action('delete:confirm', async (ctx: any) => {
 
 deleteUserScene.action('delete:cancel', async (ctx: any) => {
   await ctx.answerCbQuery()
-  await ctx.editMessageText(
-    '❌ *Deletion Canceled*\n\nYour account is safe.',
-    { parse_mode: 'Markdown' }
-  )
   await ctx.scene.enter('profile')
 })
 
