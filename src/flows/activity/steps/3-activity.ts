@@ -1,9 +1,8 @@
 import { Markup } from 'telegraf'
-import { createKeyboard } from '../helpers/keyboard-builder'
 import { getActivities, isValidActivity } from '../helpers/activity-data'
 
 /**
- * Display activity selection screen
+ * Display activity selection screen with inline keyboard
  */
 export async function showActivitySelection(ctx: any): Promise<void> {
   const mainCategory = ctx.wizard.state.mainCategory
@@ -15,47 +14,73 @@ export async function showActivitySelection(ctx: any): Promise<void> {
   }
 
   const activities = getActivities(mainCategory, subcategory)
-  const keyboard = createKeyboard(activities, true)
+  
+  // Create inline keyboard buttons (2 per row)
+  const buttons = []
+  for (let i = 0; i < activities.length; i += 2) {
+    const row = [
+      Markup.button.callback(activities[i], `activity:${activities[i]}`)
+    ]
+    if (i + 1 < activities.length) {
+      row.push(Markup.button.callback(activities[i + 1], `activity:${activities[i + 1]}`))
+    }
+    buttons.push(row)
+  }
+  
+  // Add cancel button
+  buttons.push([Markup.button.callback('❌ Cancel', 'activity:cancel')])
 
-  await ctx.replyWithMarkdown(
+  // Edit the existing message instead of sending a new one
+  await ctx.editMessageText(
     `🏃 *Log Activity - Step 3/7*\n\n*Subcategory:* ${subcategory}\n\nChoose specific activity:`,
-    Markup.keyboard(keyboard).resize().oneTime()
+    {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard(buttons)
+    }
   )
 }
 
 /**
- * Handle activity selection from user input
+ * Handle activity selection from inline button callback
  * @returns true if activity was selected successfully, false otherwise
  */
 export async function handleActivitySelection(ctx: any): Promise<boolean> {
-  // Only process text messages
-  if (!ctx.message?.text) {
+  // Only process callback queries
+  if (!ctx.callbackQuery?.data) {
     return false
   }
 
-  const selectedActivity = ctx.message.text.trim()
+  const data = ctx.callbackQuery.data
 
   // Handle cancel
-  if (selectedActivity === '❌ Cancel') {
+  if (data === 'activity:cancel') {
     return false // Let wizard handle the cancel
   }
 
+  // Extract activity from callback data
+  if (!data.startsWith('activity:')) {
+    await ctx.answerCbQuery()
+    return false
+  }
+
+  const selectedActivity = data.replace('activity:', '')
   const mainCategory = ctx.wizard.state.mainCategory
   const subcategory = ctx.wizard.state.subcategory
 
   // Validate we have required state
   if (!mainCategory || !subcategory) {
-    await ctx.reply('❌ Error: Missing category information. Please start over.')
+    await ctx.answerCbQuery('❌ Missing category information')
     return false
   }
 
   // Validate activity
   if (!isValidActivity(mainCategory, subcategory, selectedActivity)) {
-    await ctx.reply('❌ Invalid activity. Please choose from the options provided.')
+    await ctx.answerCbQuery('❌ Invalid activity')
     return false
   }
 
   // Store in wizard state
   ctx.wizard.state.activity = selectedActivity
+  await ctx.answerCbQuery()
   return true
 }

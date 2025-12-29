@@ -42,17 +42,36 @@ export async function showConfirmation(ctx: any): Promise<void> {
 _Please review the information above. Is everything correct?_
 `
 
-  await ctx.replyWithMarkdown(
-    summary,
-    Markup.inlineKeyboard([
-      [
-        Markup.button.callback('✅ Confirm & Save', 'confirm:save'),
-      ],
-      [
-        Markup.button.callback('❌ Cancel', 'confirm:cancel')
-      ]
-    ])
-  )
+  // Try to edit the existing message
+  try {
+    await ctx.editMessageText(
+      summary,
+      {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+          [
+            Markup.button.callback('✅ Confirm & Save', 'confirm:save'),
+          ],
+          [
+            Markup.button.callback('❌ Cancel', 'confirm:cancel')
+          ]
+        ])
+      }
+    )
+  } catch (error) {
+    // If editing fails, send a new message
+    await ctx.replyWithMarkdown(
+      summary,
+      Markup.inlineKeyboard([
+        [
+          Markup.button.callback('✅ Confirm & Save', 'confirm:save'),
+        ],
+        [
+          Markup.button.callback('❌ Cancel', 'confirm:cancel')
+        ]
+      ])
+    )
+  }
 }
 
 /**
@@ -89,11 +108,11 @@ export async function handleConfirmation(ctx: any): Promise<void> {
     try {
       // Find user
       const user = await findUserByTelegramId(ctx.from.id.toString())
-      
+
       if (!user) {
-        await ctx.reply(
+        await ctx.editMessageText(
           '❌ User not found. Please register first with /start',
-          Markup.removeKeyboard()
+          { parse_mode: 'Markdown' }
         )
         return ctx.scene.enter('registered_menu')
       }
@@ -143,13 +162,12 @@ export async function handleConfirmation(ctx: any): Promise<void> {
 Great work! Keep it up! 💪
 `
 
-      await ctx.replyWithMarkdown(successMessage, Markup.removeKeyboard())
-
+      await ctx.editMessageText(successMessage, { parse_mode: 'Markdown' })
     } catch (error) {
       console.error('Error saving activity:', error)
-      await ctx.reply(
+      await ctx.editMessageText(
         '❌ An error occurred while saving your activity. Please try again later.',
-        Markup.removeKeyboard()
+        { parse_mode: 'Markdown' }
       )
     }
 

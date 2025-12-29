@@ -1,9 +1,8 @@
 import { Markup } from 'telegraf'
-import { createKeyboard, addMetValuesToIntensities, extractIntensityFromLabel } from '../helpers/keyboard-builder'
 import { getIntensities, getMetValue, isValidIntensity } from '../helpers/activity-data'
 
 /**
- * Display intensity selection screen with MET values
+ * Display intensity selection screen with MET values using inline keyboard
  */
 export async function showIntensitySelection(ctx: any): Promise<void> {
   const mainCategory = ctx.wizard.state.mainCategory
@@ -16,56 +15,70 @@ export async function showIntensitySelection(ctx: any): Promise<void> {
   }
 
   const intensities = getIntensities(mainCategory, subcategory, activity)
-  const intensitiesWithMET = addMetValuesToIntensities(
-    intensities, 
-    mainCategory, 
-    subcategory, 
-    activity,
-  )
-  const keyboard = createKeyboard(intensitiesWithMET, true)
+  
+  // Create inline keyboard buttons with MET values (1 per row for readability)
+  const buttons = intensities.map(intensity => {
+    const metValue = getMetValue(mainCategory, subcategory, activity, intensity)
+    const label = `${intensity} (${metValue} MET)`
+    return [Markup.button.callback(label, `intensity:${intensity}`)]
+  })
+  
+  // Add cancel button
+  buttons.push([Markup.button.callback('❌ Cancel', 'intensity:cancel')])
 
-  await ctx.replyWithMarkdown(
+  // Edit the existing message instead of sending a new one
+  await ctx.editMessageText(
     `🏃 *Log Activity - Step 4/7*\n\n*Activity:* ${activity}\n\nChoose intensity:`,
-    Markup.keyboard(keyboard).resize().oneTime()
+    {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard(buttons)
+    }
   )
 }
 
 /**
- * Handle intensity selection from user input
+ * Handle intensity selection from inline button callback
  * @returns true if intensity was selected successfully, false otherwise
  */
 export async function handleIntensitySelection(ctx: any): Promise<boolean> {
-  // Only process text messages
-  if (!ctx.message?.text) {
+  // Only process callback queries
+  if (!ctx.callbackQuery?.data) {
     return false
   }
 
-  const input = ctx.message.text.trim()
+  const data = ctx.callbackQuery.data
 
-  // Handle cancel (before extracting intensity)
-  if (input === '❌ Cancel') {
+  // Handle cancel
+  if (data === 'intensity:cancel') {
     return false // Let wizard handle the cancel
   }
 
-  const selectedIntensity = extractIntensityFromLabel(input)
+  // Extract intensity from callback data
+  if (!data.startsWith('intensity:')) {
+    await ctx.answerCbQuery()
+    return false
+  }
+
+  const selectedIntensity = data.replace('intensity:', '')
   const mainCategory = ctx.wizard.state.mainCategory
   const subcategory = ctx.wizard.state.subcategory
   const activity = ctx.wizard.state.activity
 
   // Validate we have required state
   if (!mainCategory || !subcategory || !activity) {
-    await ctx.reply('❌ Error: Missing activity information. Please start over.')
+    await ctx.answerCbQuery('❌ Missing activity information')
     return false
   }
 
   // Validate intensity
   if (!isValidIntensity(mainCategory, subcategory, activity, selectedIntensity)) {
-    await ctx.reply('❌ Invalid intensity. Please choose from the options provided.')
+    await ctx.answerCbQuery('❌ Invalid intensity')
     return false
   }
 
   // Store intensity and MET value in wizard state
   ctx.wizard.state.intensity = selectedIntensity
   ctx.wizard.state.metValue = getMetValue(mainCategory, subcategory, activity, selectedIntensity)
+  await ctx.answerCbQuery()
   return true
 }

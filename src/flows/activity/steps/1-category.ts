@@ -1,44 +1,69 @@
 import { Markup } from 'telegraf'
-import { createKeyboard } from '../helpers/keyboard-builder'
 import { getMainCategories, isValidCategory } from '../helpers/activity-data'
 
 /**
- * Display category selection screen
+ * Display category selection screen with inline keyboard
  */
 export async function showCategorySelection(ctx: any): Promise<void> {
   const mainCategories = getMainCategories()
-  const keyboard = createKeyboard(mainCategories, true) // Pass true to add cancel button
   
-  await ctx.replyWithMarkdown(
+  // Create inline keyboard buttons (2 per row)
+  const buttons = []
+  for (let i = 0; i < mainCategories.length; i += 2) {
+    const row = [
+      Markup.button.callback(mainCategories[i], `category:${mainCategories[i]}`)
+    ]
+    if (i + 1 < mainCategories.length) {
+      row.push(Markup.button.callback(mainCategories[i + 1], `category:${mainCategories[i + 1]}`))
+    }
+    buttons.push(row)
+  }
+  
+  // Add cancel button
+  buttons.push([Markup.button.callback('❌ Cancel', 'category:cancel')])
+
+  const message = await ctx.replyWithMarkdown(
     '🏃 *Log Activity - Step 1/7*\n\nChoose a main category:',
-    Markup.keyboard(keyboard).resize().oneTime()
+    Markup.inlineKeyboard(buttons)
   )
+  
+  // Store message ID for editing later
+  ctx.wizard.state.messageId = message.message_id
 }
 
 /**
- * Handle category selection from user input
+ * Handle category selection from inline button callback
  * @returns true if category was selected successfully, false otherwise
  */
 export async function handleCategorySelection(ctx: any): Promise<boolean> {
-  // Only process text messages
-  if (!ctx.message?.text) {
+  // Only process callback queries
+  if (!ctx.callbackQuery?.data) {
     return false
   }
 
-  const selectedCategory = ctx.message.text.trim()
+  const data = ctx.callbackQuery.data
 
   // Handle cancel
-  if (selectedCategory === '❌ Cancel') {
+  if (data === 'category:cancel') {
     return false // Let wizard handle the cancel
   }
 
+  // Extract category from callback data
+  if (!data.startsWith('category:')) {
+    await ctx.answerCbQuery()
+    return false
+  }
+
+  const selectedCategory = data.replace('category:', '')
+
   // Validate category
   if (!isValidCategory(selectedCategory)) {
-    await ctx.reply('❌ Invalid category. Please choose from the options provided.')
+    await ctx.answerCbQuery('❌ Invalid category')
     return false
   }
 
   // Store in wizard state
   ctx.wizard.state.mainCategory = selectedCategory
+  await ctx.answerCbQuery()
   return true
 }

@@ -19,31 +19,64 @@ export async function showDurationSelection(ctx: any): Promise<void> {
     ? activityDate.toLocaleDateString() 
     : activityDate
 
-  await ctx.replyWithMarkdown(
-    `🏃 *Log Activity - Step 6/7*\n\n` +
-    `*Activity:* ${activity}\n` +
-    `*Intensity:* ${intensity}\n` +
-    `*Date:* ${dateStr}\n` +
-    `*MET Value:* ${metValue}\n\n` +
-    `⏱️ How many minutes did you exercise?\n\n` +
-    `_Tap a quick option below or type a custom number:_`,
-    Markup.inlineKeyboard([
-      [
-        Markup.button.callback('15 min', 'duration:15'),
-        Markup.button.callback('20 min', 'duration:20'),
-        Markup.button.callback('30 min', 'duration:30')
-      ],
-      [
-        Markup.button.callback('45 min', 'duration:45'),
-        Markup.button.callback('60 min', 'duration:60'),
-        Markup.button.callback('90 min', 'duration:90')
-      ],
-      [
-        Markup.button.callback('120 min', 'duration:120'),
-        Markup.button.callback('❌ Cancel', 'duration:cancel')
-      ]
-    ])
-  )
+  // Try to edit the calendar message (the last message sent by the bot)
+  try {
+    await ctx.editMessageText(
+      `🏃 *Log Activity - Step 6/7*\n\n` +
+      `*Activity:* ${activity}\n` +
+      `*Intensity:* ${intensity}\n` +
+      `*Date:* ${dateStr}\n` +
+      `*MET Value:* ${metValue}\n\n` +
+      `⏱️ How many minutes did you exercise?\n\n` +
+      `_Tap a quick option below or type a custom number:_`,
+      {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+          [
+            Markup.button.callback('15 min', 'duration:15'),
+            Markup.button.callback('20 min', 'duration:20'),
+            Markup.button.callback('30 min', 'duration:30')
+          ],
+          [
+            Markup.button.callback('45 min', 'duration:45'),
+            Markup.button.callback('60 min', 'duration:60'),
+            Markup.button.callback('90 min', 'duration:90')
+          ],
+          [
+            Markup.button.callback('120 min', 'duration:120'),
+            Markup.button.callback('❌ Cancel', 'duration:cancel')
+          ]
+        ])
+      }
+    )
+  } catch (error) {
+    // If editing fails (e.g., calendar message can't be edited), send a new message
+    await ctx.replyWithMarkdown(
+      `🏃 *Log Activity - Step 6/7*\n\n` +
+      `*Activity:* ${activity}\n` +
+      `*Intensity:* ${intensity}\n` +
+      `*Date:* ${dateStr}\n` +
+      `*MET Value:* ${metValue}\n\n` +
+      `⏱️ How many minutes did you exercise?\n\n` +
+      `_Tap a quick option below or type a custom number:_`,
+      Markup.inlineKeyboard([
+        [
+          Markup.button.callback('15 min', 'duration:15'),
+          Markup.button.callback('20 min', 'duration:20'),
+          Markup.button.callback('30 min', 'duration:30')
+        ],
+        [
+          Markup.button.callback('45 min', 'duration:45'),
+          Markup.button.callback('60 min', 'duration:60'),
+          Markup.button.callback('90 min', 'duration:90')
+        ],
+        [
+          Markup.button.callback('120 min', 'duration:120'),
+          Markup.button.callback('❌ Cancel', 'duration:cancel')
+        ]
+      ])
+    )
+  }
 }
 
 /**
