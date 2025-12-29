@@ -1,7 +1,7 @@
 import { Scenes, Markup } from 'telegraf'
-import * as pointService from '../../db/point-queries'
 import { formatList } from '../../utils/format-list'
 import { ERROR_MESSAGE } from '../../utils/texts'
+import { getGuildLeaderboard } from '../../db'
 
 function getRankPrefix(index: number): string {
   const medals = ['🥇', '🥈', '🥉']
@@ -17,7 +17,7 @@ export const guildLeaderboardScene = new Scenes.BaseScene<any>('guild_leaderboar
 
 guildLeaderboardScene.enter(async (ctx: any) => {
   try {
-    const guilds = await pointService.getGuildLeaderboard()
+    const guilds = await getGuildLeaderboard()
     
     let message = '*Guild Leaderboard \\(by average points\\)* 🏆\n\n'
     

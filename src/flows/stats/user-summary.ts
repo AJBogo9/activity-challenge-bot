@@ -1,8 +1,8 @@
 import { Scenes, Markup } from 'telegraf'
-import { getUserSummary, getNearbyUsers, getNearbyGuildUsers } from '../../db/point-queries'
 import { findUserByTelegramId } from '../../db/users'
 import { ERROR_MESSAGE } from '../../utils/texts'
 import { escapeMarkdown, getRankPrefix } from '../../utils/format-list'
+import { getNearbyGuildUsers, getNearbyUsers, getUserSummary } from '../../db'
 
 export const userSummaryScene = new Scenes.BaseScene<any>('user_summary')
 

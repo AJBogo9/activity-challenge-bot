@@ -1,6 +1,5 @@
 import { Markup } from 'telegraf'
-import { findUserByTelegramId, updateUserPoints } from '../../../../db/users'
-import { createActivity } from '../../../../db/activities'
+import { addPointsToUser, createActivity, findUserByTelegramId } from '../../../../db'
 
 /**
  * Display confirmation screen with activity summary
@@ -119,7 +118,7 @@ export async function handleConfirmation(ctx: any): Promise<void> {
       })
 
       // Update user points
-      await updateUserPoints(user.id, calculatedPoints)
+      await addPointsToUser(user.id, calculatedPoints)
 
       // Format date for display
       const dateStr = activityDate instanceof Date 

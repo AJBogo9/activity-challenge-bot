@@ -4,15 +4,11 @@ import { User } from '../types'
 /**
  * Add points to a user
  */
-export async function addPointsToUser(
-  telegramId: string,
-  points: number
-): Promise<void> {
-  // Update user points
+export async function addPointsToUser(userId: number, pointsToAdd: number): Promise<void> {
   await sql`
     UPDATE users 
-    SET points = points + ${points}
-    WHERE telegram_id = ${telegramId}
+    SET points = points + ${pointsToAdd}
+    WHERE id = ${userId}
   `
 }
 
@@ -54,7 +50,7 @@ export async function getUserSummary(telegramId: string) {
 }
 
 /**
- * Get guild leaderboard (guilds with 3+ members)
+ * Get guild leaderboard
  * Ordered by average points per member
  */
 export async function getGuildLeaderboard() {
@@ -71,40 +67,6 @@ export async function getGuildLeaderboard() {
     WHERE g.is_active = TRUE
     GROUP BY g.name, g.total_members
     HAVING COUNT(u.id) >= 3
-    ORDER BY average_points DESC
-  `
-}
-
-/**
- * Get guild leaderboard based on top 50% of members
- */
-export async function getGuildTopLeaderboard() {
-  return await sql`
-    WITH ranked_users AS (
-      SELECT 
-        u.guild,
-        u.points,
-        ROW_NUMBER() OVER (PARTITION BY u.guild ORDER BY u.points DESC) as rank,
-        g.total_members
-      FROM users u
-      JOIN guilds g ON u.guild = g.name
-      WHERE u.points > 0 AND g.is_active = TRUE
-    ),
-    top_half AS (
-      SELECT 
-        guild,
-        points,
-        total_members
-      FROM ranked_users
-      WHERE rank <= CEIL(total_members / 2.0)
-    )
-    SELECT 
-      guild,
-      total_members,
-      ROUND(AVG(points), 1) as average_points
-    FROM top_half
-    GROUP BY guild, total_members
-    HAVING total_members >= 3
     ORDER BY average_points DESC
   `
 }

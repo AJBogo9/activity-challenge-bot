@@ -1,7 +1,7 @@
 import { Scenes, Markup } from 'telegraf'
-import { getTopUsers } from '../../db/point-queries'
 import { formatList } from '../../utils/format-list'
 import { ERROR_MESSAGE } from '../../utils/texts'
+import { getTopUsers } from '../../db'
 
 function getRankPrefix(index: number): string {
   const medals = ['🥇', '🥈', '🥉']

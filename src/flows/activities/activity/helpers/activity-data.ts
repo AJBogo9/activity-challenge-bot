@@ -89,24 +89,6 @@ export function getMetValue(
 }
 
 /**
- * Get examples for a specific activity and intensity
- * @param mainCategory - The main category
- * @param subcategory - The subcategory
- * @param activity - The activity name
- * @param intensity - The intensity level
- * @returns Examples string, or empty string if not found
- */
-export function getExamples(
-  mainCategory: string,
-  subcategory: string,
-  activity: string,
-  intensity: string
-): string {
-  const metData = hierarchy[mainCategory]?.[subcategory]?.[activity]?.[intensity]?.[0]
-  return metData?.examples || ''
-}
-
-/**
  * Validate if a main category exists
  * @param category - Category to validate
  * @returns true if valid

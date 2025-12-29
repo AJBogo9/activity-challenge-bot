@@ -1,7 +1,7 @@
 import { Scenes, Markup } from 'telegraf'
-import * as pointService from '../../db/point-queries'
 import { escapeMarkdown } from '../../utils/format-list'
 import { ERROR_MESSAGE } from '../../utils/texts'
+import { getGuildLeaderboard } from '../../db'
 
 function getRankPrefix(index: number): string {
   const medals = ['🥇', '🥈', '🥉']
@@ -13,7 +13,7 @@ export const guildComparisonScene = new Scenes.BaseScene<any>('guild_comparison'
 
 guildComparisonScene.enter(async (ctx: any) => {
   try {
-    const guilds = await pointService.getGuildLeaderboard()
+    const guilds = await getGuildLeaderboard()
     
     let message = '*📊 Guild Comparison*\n\n'
     
