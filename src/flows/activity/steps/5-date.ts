@@ -1,5 +1,5 @@
 import { Markup } from 'telegraf'
-import { handleCalendarSelection, showActivityCalendar } from '../../../../utils/calendar'
+import { handleCalendarSelection, showActivityCalendar } from '../../../utils/calendar'
 
 /**
  * Display date selection screen with calendar

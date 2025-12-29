@@ -1,4 +1,4 @@
-import activitiesData from '../../../../../data/processed/4_level_hierarchy.json'
+import activitiesData from '../../../../data/processed/4_level_hierarchy.json'
 
 /**
  * Type definition for the 4-level activity hierarchy

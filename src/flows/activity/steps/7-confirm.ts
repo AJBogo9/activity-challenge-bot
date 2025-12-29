@@ -1,5 +1,5 @@
 import { Markup } from 'telegraf'
-import { addPointsToUser, createActivity, findUserByTelegramId } from '../../../../db'
+import { addPointsToUser, createActivity, findUserByTelegramId } from '../../../db'
 
 /**
  * Display confirmation screen with activity summary
