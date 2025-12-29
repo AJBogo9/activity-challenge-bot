@@ -1,5 +1,5 @@
 // Menu flows
-export { mainMenuScene } from './menu/main-menu'
+export { mainMenuScene } from './menu/unregistered-menu'
 export { registeredMenuScene } from './menu/registered-menu'
 export { menuRouterScene } from './menu/menu-router'
 export { infoMenuScene } from './info/info-menu'
@@ -22,9 +22,11 @@ export { statsMenuScene } from './stats/stats-menu'
 export { sportsActivityWizard } from './activity/wizard'
 
 // User flows
-export { registerWizard } from './user/register'
-export { deleteUserWizard } from './user/delete'
-export { profileScene } from './user/profile'
+export { registerWizard } from './register'
+export { deleteUserScene } from './user/delete'
+export { profileScene } from './user/profile-menu'
+export { userProfileInfoScene } from './user/user-profile-info'
+export { activityHistoryScene } from './user/activity-history'
 
 // Feedback flow
 export { feedbackWizard } from './feedback'

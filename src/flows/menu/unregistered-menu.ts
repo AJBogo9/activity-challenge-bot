@@ -1,6 +1,6 @@
 import { Scenes, Markup } from 'telegraf'
 
-export const mainMenuScene = new Scenes.BaseScene<any>('main_menu')
+export const mainMenuScene = new Scenes.BaseScene<any>('unregistered_menu')
 
 mainMenuScene.enter(async (ctx: any) => {
   const message = '🏠 *Main Menu*\n\nChoose an option:'

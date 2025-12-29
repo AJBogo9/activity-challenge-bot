@@ -1,7 +1,6 @@
 import { Scenes, Markup } from 'telegraf'
-import { findUserByTelegramId, createUser } from '../../db/users'
-import { ERROR_MESSAGE, TERMS_AND_CONDITIONS } from '../../utils/texts'
-import { getGuildNames } from '../../db/guilds'
+import { createUser, findUserByTelegramId, getGuildNames } from '../db'
+import { ERROR_MESSAGE, TERMS_AND_CONDITIONS } from '../utils/texts'
 
 export const registerWizard = new Scenes.WizardScene(
   'register_wizard',
@@ -16,7 +15,7 @@ export const registerWizard = new Scenes.WizardScene(
           .resize()
           .persistent()
       )
-      return ctx.scene.enter('main_menu')
+      return ctx.scene.enter('unregistered_menu')
     }
 
     await ctx.reply(
@@ -87,7 +86,7 @@ registerWizard.action('decline_terms', async (ctx: any) => {
       .resize()
       .persistent()
   )
-  return ctx.scene.enter('main_menu')
+  return ctx.scene.enter('unregistered_menu')
 })
 
 // Handle guild selection
@@ -129,7 +128,7 @@ registerWizard.action(/^select_guild_(.+)$/, async (ctx: any) => {
         .resize()
         .persistent()
     )
-    return ctx.scene.enter('main_menu')
+    return ctx.scene.enter('unregistered_menu')
   }
 })
 
@@ -142,5 +141,5 @@ registerWizard.action('cancel_registration', async (ctx: any) => {
       .resize()
       .persistent()
   )
-  return ctx.scene.enter('main_menu')
+  return ctx.scene.enter('unregistered_menu')
 })
