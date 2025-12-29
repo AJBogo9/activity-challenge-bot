@@ -6,15 +6,15 @@ export { infoMenuScene } from './info/info-menu'
 
 // Information flows
 export { startWizard } from './start'
-export { statsInfoScene } from './info/stats-info'
 export { termsScene } from './info/terms'
-export { howToGetPoints } from './info/how-to-points'
+export { howToGetPoints } from './info/points'
 export { creditsScene } from './info/credits'
+export { aboutBotScene } from './info/about'
 
 // Statistics flows
 export { userSummaryScene } from './stats/user-summary'
-export { guildStandingsScene, guildTopStandingsScene } from './stats/guild-standings'
-export { guildComparisonScene } from './stats/guild-comparison'
+export { guildLeaderboardScene } from './stats/guild-outer-leaderboard'
+export { guildComparisonScene } from './stats/guild-inner-leaderboard'
 export { topUsersScene } from './stats/top-users'
 export { statsMenuScene } from './stats/stats-menu'
 

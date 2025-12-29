@@ -1,4 +1,4 @@
-import { Scenes } from 'telegraf'
+import { Scenes, Markup } from 'telegraf'
 import { getTopUsers } from '../../db/point-queries'
 import { formatList } from '../../utils/format-list'
 import { ERROR_MESSAGE } from '../../utils/texts'
@@ -9,7 +9,6 @@ function getRankPrefix(index: number): string {
   return `${index + 1}`
 }
 
-// topusers command
 export const topUsersScene = new Scenes.BaseScene<any>('top_users')
 
 topUsersScene.enter(async (ctx: any) => {
@@ -20,7 +19,7 @@ topUsersScene.enter(async (ctx: any) => {
       await ctx.reply("No users found.")
       return ctx.scene.enter('stats_menu')
     }
-
+    
     let message = "*Top 15 Participants \\(total points\\)* ⭐\n\n"
     const titlePadding = 21
     const valuePadding = 6
@@ -31,13 +30,28 @@ topUsersScene.enter(async (ctx: any) => {
       message += prefix + formatList(displayName, user.points, titlePadding, valuePadding) + '\n'
     })
     
-    await ctx.replyWithMarkdownV2(message)
+    const keyboard = Markup.inlineKeyboard([
+      [Markup.button.callback('⬅️ Back to Stats Menu', 'topusers:back')]
+    ])
     
-    // Return to stats_menu so the keyboard keeps working
-    return ctx.scene.enter('stats_menu')
+    if (ctx.callbackQuery) {
+      await ctx.editMessageText(message, {
+        parse_mode: 'MarkdownV2',
+        ...keyboard
+      })
+      await ctx.answerCbQuery()
+    } else {
+      await ctx.replyWithMarkdownV2(message, keyboard)
+    }
+    
   } catch (error) {
     console.error('Error fetching top users:', error)
     await ctx.reply(ERROR_MESSAGE)
     return ctx.scene.enter('stats_menu')
   }
+})
+
+topUsersScene.action('topusers:back', async (ctx: any) => {
+  await ctx.answerCbQuery()
+  await ctx.scene.enter('stats_menu')
 })

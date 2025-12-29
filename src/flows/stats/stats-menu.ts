@@ -7,44 +7,68 @@ statsMenuScene.enter(async (ctx: any) => {
 
 Choose what statistics you'd like to view:`
 
-  await ctx.replyWithMarkdown(
-    message,
-    Markup.keyboard([
-      ['👤 My Summary', '🏆 Top Users'],
-      ['🏛️ Guild Standings', '⚔️ Guild Comparison'],
-      ['🔙 Back to Main Menu']
-    ])
-      .resize()
-      .persistent()
-  )
+  const keyboard = Markup.inlineKeyboard([
+    [
+      Markup.button.callback('👤 My Summary', 'stats:summary'),
+      Markup.button.callback('🏆 Top Users', 'stats:top')
+    ],
+    [
+      Markup.button.callback('🏛️ Guild vs Guild', 'stats:guilds'),
+      Markup.button.callback('⚔️ Guild Leaderboard', 'stats:compare')
+    ],
+    [Markup.button.callback('🔙 Back to Main Menu', 'stats:back')]
+  ])
+
+  // Check if we're editing an existing message or sending a new one
+  if (ctx.callbackQuery) {
+    try {
+      await ctx.editMessageText(message, {
+        parse_mode: 'Markdown',
+        ...keyboard
+      })
+    } catch (error: any) {
+      // Ignore "message is not modified" errors
+      if (!error.description?.includes('message is not modified')) {
+        throw error
+      }
+    }
+    await ctx.answerCbQuery()
+  } else {
+    await ctx.replyWithMarkdown(message, keyboard)
+  }
 })
 
-// My Summary - Personal stats
-statsMenuScene.hears('👤 My Summary', async (ctx: any) => {
-  return ctx.scene.enter('user_summary')
+// Handle My Summary button
+statsMenuScene.action('stats:summary', async (ctx: any) => {
+  await ctx.answerCbQuery()
+  await ctx.scene.enter('user_summary')
 })
 
-// Top Users - Overall leaderboard
-statsMenuScene.hears('🏆 Top Users', async (ctx: any) => {
-  return ctx.scene.enter('top_users')
+// Handle Top Users button
+statsMenuScene.action('stats:top', async (ctx: any) => {
+  await ctx.answerCbQuery()
+  await ctx.scene.enter('top_users')
 })
 
-// Guild Standings - Overall guild rankings
-statsMenuScene.hears('🏛️ Guild Standings', async (ctx: any) => {
-  return ctx.scene.enter('guild_standings')
+// Handle Guild Leaderboard button
+statsMenuScene.action('stats:guilds', async (ctx: any) => {
+  await ctx.answerCbQuery()
+  await ctx.scene.enter('guild_leaderboard')  // Changed from 'guild_standings'
 })
 
-// Guild Comparison - Compare guilds
-statsMenuScene.hears('⚔️ Guild Comparison', async (ctx: any) => {
-  return ctx.scene.enter('guild_comparison')
+// Handle Guild Comparison button
+statsMenuScene.action('stats:compare', async (ctx: any) => {
+  await ctx.answerCbQuery()
+  await ctx.scene.enter('guild_comparison')
 })
 
-// Back to Main Menu
-statsMenuScene.hears('🔙 Back to Main Menu', async (ctx: any) => {
-  return ctx.scene.enter('registered_menu')
+// Handle Back button - return to main menu
+statsMenuScene.action('stats:back', async (ctx: any) => {
+  await ctx.answerCbQuery()
+  await ctx.scene.enter('registered_menu')
 })
 
-// Handle any other text input
+// Handle any text input - remind to use buttons
 statsMenuScene.on('text', async (ctx: any) => {
-  await ctx.reply('Please use the buttons below to navigate the statistics menu.')
+  await ctx.reply('Please use the buttons above to navigate the statistics menu.')
 })
