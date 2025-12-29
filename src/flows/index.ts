@@ -22,7 +22,7 @@ export { statsMenuScene } from './stats/stats-menu'
 export { sportsActivityWizard } from './activity/wizard'
 
 // User flows
-export { registerWizard } from './register'
+export { registerWizard } from './register/wizard'
 export { deleteUserScene } from './user/delete'
 export { profileScene } from './user/profile-menu'
 export { userProfileInfoScene } from './user/user-profile-info'
