@@ -21,7 +21,7 @@ export async function showTermsStep(ctx: any) {
   await ctx.reply(
     TERMS_AND_CONDITIONS,
     {
-      parse_mode: 'Markdown',
+      parse_mode: 'MarkdownV2',
       ...Markup.inlineKeyboard([
         [Markup.button.callback('✅ Accept', 'accept_terms')],
         [Markup.button.callback('❌ Decline', 'decline_terms')]
