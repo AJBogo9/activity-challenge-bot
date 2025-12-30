@@ -1,22 +1,22 @@
-import { Scenes, Markup } from 'telegraf'
-import { PersistentMenu } from '../../utils/persistent-menu'
+import { Scenes } from 'telegraf'
+import { TwoMessageManager } from '../../utils/two-message-manager'
 
 export const registeredMenuScene = new Scenes.BaseScene<any>('registered_menu')
 
 registeredMenuScene.enter(async (ctx: any) => {
-  const message = '🏠 *Main Menu*\n\nWhat would you like to do?'
+  // Initialize the two-message system for registered users
+  await TwoMessageManager.init(ctx)
   
-  await ctx.replyWithMarkdown(
-    message,
-    Markup.keyboard([
-      ['👤 Profile', '💪 Log Activity'],
-      ['📊 Statistics', 'ℹ️ Info'],
-      ['💬 Feedback']
-    ])
-      .resize()
-      .persistent()
+  // Update keyboard for registered state (full menu)
+  await TwoMessageManager.updateKeyboard(ctx, [
+    ['👤 Profile', '💪 Log Activity'],
+    ['📊 Statistics', 'ℹ️ Info'],
+    ['💬 Feedback']
+  ])
+  
+  // Show content in content message
+  await TwoMessageManager.updateContent(
+    ctx,
+    '🏠 *Welcome Back!*\n\nUse the menu below to navigate.'
   )
-  
-  // Automatically show info menu
-  await ctx.scene.enter('info_menu')
 })

@@ -1,26 +1,16 @@
 import { Scenes, Markup } from 'telegraf'
 import { TERMS_AND_CONDITIONS } from '../../utils/texts'
-import { PersistentMenu } from '../../utils/persistent-menu'
+import { TwoMessageManager } from '../../utils/two-message-manager'
 
 export const termsScene = new Scenes.BaseScene<any>('terms_scene')
-PersistentMenu.registerReplyKeyboardHandlers(termsScene, 'terms_scene')
 
 termsScene.enter(async (ctx: any) => {
   const keyboard = Markup.inlineKeyboard([
     [Markup.button.callback('⬅️ Back to Info Menu', 'terms:back')]
   ])
 
-  // Edit the existing message (from info menu click)
-  if (ctx.callbackQuery) {
-    await ctx.editMessageText(TERMS_AND_CONDITIONS, {
-      parse_mode: 'MarkdownV2',
-      ...keyboard
-    })
-    await ctx.answerCbQuery()
-  } else {
-    // Fallback: if somehow called directly, send new message
-    await ctx.replyWithMarkdownV2(TERMS_AND_CONDITIONS, keyboard)
-  }
+  await TwoMessageManager.updateContent(ctx, TERMS_AND_CONDITIONS, keyboard)
+  await ctx.answerCbQuery().catch(() => {}) // Answer callback if it exists
 })
 
 // Handle back button - return to info menu

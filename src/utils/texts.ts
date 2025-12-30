@@ -6,8 +6,7 @@
 
 export const ERROR_MESSAGE = 
   "Something went wrong while processing your request\\. Please try again\\. " +
-  "We've logged the error for further review, but if the issue persists or you need " +
-  "immediate help, contact @EppuRuotsalainen on Telegram\\."
+  "We've logged the error for further review, but if the issue persists or you need "
 
 
 export const PRIVATE_CHAT_HELP = `*Help and Commands Overview* 🛠️
@@ -28,9 +27,7 @@ export const PRIVATE_CHAT_HELP = `*Help and Commands Overview* 🛠️
 
 /statsinfo \\- Show commands for getting rankings and stats\\.
 
-/terms \\- Read current terms and conditions\\.
-
-If there is something that you did not understand or something problematic comes up you can send me a message on Telegram @EppuRuotsalainen\\.`
+/terms \\- Read current terms and conditions\\.`
 
 export const GROUP_CHAT_HELP = `*Help and Commands Overview* 🛠️
 
@@ -103,9 +100,7 @@ We collect your Telegram ID, username, and activity logs\\. Your data won't be s
 • Violations may result in disqualification
 
 *Important*
-The bot may change or stop at any time\\. We're not liable for issues from using it\\. Terms may update without notice\\.
-
-Questions? Contact @EppuRuotsalainen`
+The bot may change or stop at any time\\. We're not liable for issues from using it\\. Terms may update without notice\\.`
 
 export const ABOUT_BOT_MESSAGE = `*About This Bot*
 

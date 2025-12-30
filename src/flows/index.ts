@@ -5,7 +5,6 @@ export { menuRouterScene } from './menu/menu-router'
 export { infoMenuScene } from './info/info-menu'
 
 // Information flows
-export { startWizard } from './start'
 export { termsScene } from './info/terms'
 export { howToGetPoints } from './info/points'
 export { creditsScene } from './info/credits'

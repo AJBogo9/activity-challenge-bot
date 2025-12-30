@@ -1,12 +1,13 @@
 import { Scenes, Markup } from 'telegraf'
-import { PersistentMenu } from '../../utils/persistent-menu'
+import { TwoMessageManager } from '../../utils/two-message-manager'
 
 export const statsMenuScene = new Scenes.BaseScene<any>('stats_menu')
 
 statsMenuScene.enter(async (ctx: any) => {
   const message = `📊 *Statistics Menu*
+
 Choose what statistics you'd like to view:`
-  
+
   const keyboard = Markup.inlineKeyboard([
     [
       Markup.button.callback('👤 My Summary', 'stats:summary'),
@@ -15,11 +16,10 @@ Choose what statistics you'd like to view:`
     [
       Markup.button.callback('🏛️ Guild vs Guild', 'stats:guilds'),
       Markup.button.callback('⚔️ Guild Leaderboard', 'stats:compare')
-    ],
-    [Markup.button.callback('🔙 Back to Main Menu', 'stats:back')]
+    ]
   ])
 
-  await PersistentMenu.updateSubmenu(ctx, message, keyboard)
+  await TwoMessageManager.updateContent(ctx, message, keyboard)
 })
 
 // Handle My Summary button
@@ -44,11 +44,4 @@ statsMenuScene.action('stats:guilds', async (ctx: any) => {
 statsMenuScene.action('stats:compare', async (ctx: any) => {
   await ctx.answerCbQuery()
   await ctx.scene.enter('guild_comparison')
-})
-
-// Handle Back button - return to main menu
-statsMenuScene.action('stats:back', async (ctx: any) => {
-  await ctx.answerCbQuery()
-  await PersistentMenu.deleteSubmenu(ctx)
-  await ctx.scene.enter('registered_menu')
 })

@@ -1,19 +1,17 @@
-import { Scenes, Markup } from 'telegraf'
+import { Scenes } from 'telegraf'
+import { TwoMessageManager } from '../../utils/two-message-manager'
 
 export const mainMenuScene = new Scenes.BaseScene<any>('unregistered_menu')
 
 mainMenuScene.enter(async (ctx: any) => {
-  const message = '🏠 *Main Menu*\n\nChoose an option:'
+  // Initialize the two-message system for unregistered users
+  await TwoMessageManager.init(ctx)
   
-  await ctx.replyWithMarkdown(
-    message,
-    Markup.keyboard([
-      ['ℹ️ Info'],
-      ['📝 Register']
-    ])
-      .resize()
-      .persistent()
-  )
+  // Update keyboard for unregistered state
+  await TwoMessageManager.updateKeyboard(ctx, [
+    ['ℹ️ Info'],
+    ['📝 Register']
+  ])
   
   // Automatically show info menu
   await ctx.scene.enter('info_menu')

@@ -1,5 +1,6 @@
 import { Scenes, Markup } from 'telegraf'
 import { findUserByTelegramId } from '../../db/users'
+import { TwoMessageManager } from '../../utils/two-message-manager'
 
 export const userProfileInfoScene = new Scenes.BaseScene<any>('user_profile_info')
 
@@ -8,7 +9,10 @@ userProfileInfoScene.enter(async (ctx: any) => {
     const user = await findUserByTelegramId(ctx.from.id.toString())
 
     if (!user) {
-      await ctx.reply('User not found. Please register first.')
+      await TwoMessageManager.updateContent(
+        ctx,
+        'User not found. Please register first.'
+      )
       await ctx.scene.enter('registered_menu')
       return
     }
@@ -24,19 +28,17 @@ userProfileInfoScene.enter(async (ctx: any) => {
       [Markup.button.callback('⬅️ Back to Profile', 'user_profile_info:back')]
     ])
 
-    // Check if we're editing an existing message or sending a new one
+    await TwoMessageManager.updateContent(ctx, summary, keyboard)
+
     if (ctx.callbackQuery) {
-      await ctx.editMessageText(summary, {
-        parse_mode: 'Markdown',
-        ...keyboard
-      })
       await ctx.answerCbQuery()
-    } else {
-      await ctx.replyWithMarkdown(summary, keyboard)
     }
   } catch (error) {
     console.error('Error fetching user summary:', error)
-    await ctx.reply('An error occurred while fetching your profile.')
+    await TwoMessageManager.updateContent(
+      ctx,
+      '❌ An error occurred while fetching your profile.'
+    )
     await ctx.scene.enter('profile')
   }
 })
@@ -46,7 +48,7 @@ userProfileInfoScene.action('user_profile_info:back', async (ctx: any) => {
   await ctx.scene.enter('profile')
 })
 
-// Handle any text input - remind to use buttons
+// Handle any text input - delete it silently
 userProfileInfoScene.on('text', async (ctx: any) => {
-  await ctx.reply('Please use the buttons above to navigate.')
+  await TwoMessageManager.deleteUserMessage(ctx)
 })

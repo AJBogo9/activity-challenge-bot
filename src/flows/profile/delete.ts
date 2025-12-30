@@ -1,6 +1,7 @@
 import { Scenes, Markup } from 'telegraf'
 import { findUserByTelegramId, deleteUser } from '../../db/users'
 import { ERROR_MESSAGE } from '../../utils/texts'
+import { TwoMessageManager } from '../../utils/two-message-manager'
 
 export const deleteUserScene = new Scenes.BaseScene<any>('delete_user_wizard')
 
@@ -9,8 +10,13 @@ deleteUserScene.enter(async (ctx: any) => {
   const user = await findUserByTelegramId(userId)
 
   if (!user) {
-    await ctx.reply('User not found. Please /register first.')
-    await ctx.scene.enter('menu_router')
+    await TwoMessageManager.updateContent(
+      ctx,
+      'User not found. Please register first.',
+      Markup.inlineKeyboard([
+        [Markup.button.callback('⬅️ Back to Profile', 'delete:back')]
+      ])
+    )
     return
   }
 
@@ -25,42 +31,50 @@ deleteUserScene.enter(async (ctx: any) => {
     ]
   ])
 
-  // Check if we're editing an existing message or sending a new one
+  await TwoMessageManager.updateContent(ctx, message, keyboard)
+  
+  // Answer callback query if it exists
   if (ctx.callbackQuery) {
-    await ctx.editMessageText(message, {
-      parse_mode: 'Markdown',
-      ...keyboard
-    })
     await ctx.answerCbQuery()
-  } else {
-    await ctx.replyWithMarkdown(message, keyboard)
   }
 })
 
 deleteUserScene.action('delete:confirm', async (ctx: any) => {
   await ctx.answerCbQuery()
+
   const userId = ctx.from.id.toString()
 
   try {
     const user = await findUserByTelegramId(userId)
 
     if (!user) {
-      await ctx.editMessageText('User not found or already deleted.')
+      await TwoMessageManager.updateContent(
+        ctx,
+        'User not found or already deleted.'
+      )
+      
+      // Wait a moment before redirecting
+      await new Promise(resolve => setTimeout(resolve, 2000))
       await ctx.scene.enter('menu_router')
       return
     }
 
     await deleteUser(userId)
 
-    await ctx.editMessageText(
-      '✅ *Account Deleted*\n\nYour account has been successfully deleted.',
-      { parse_mode: 'Markdown' }
+    await TwoMessageManager.updateContent(
+      ctx,
+      '✅ *Account Deleted*\n\nYour account has been successfully deleted.'
     )
-    
+
+    // Wait a moment before redirecting
+    await new Promise(resolve => setTimeout(resolve, 2000))
     await ctx.scene.enter('menu_router')
   } catch (error) {
     console.error('Error deleting user:', error)
-    await ctx.editMessageText(ERROR_MESSAGE)
+    await TwoMessageManager.updateContent(ctx, ERROR_MESSAGE)
+    
+    // Wait a moment before redirecting
+    await new Promise(resolve => setTimeout(resolve, 2000))
     await ctx.scene.enter('menu_router')
   }
 })
@@ -70,7 +84,17 @@ deleteUserScene.action('delete:cancel', async (ctx: any) => {
   await ctx.scene.enter('profile')
 })
 
-// Handle any text input - remind to use buttons
+// Handle any text input - delete it and remind to use buttons
 deleteUserScene.on('text', async (ctx: any) => {
-  await ctx.reply('Please use the buttons above to confirm or cancel the deletion.')
+  await TwoMessageManager.deleteUserMessage(ctx)
+  await TwoMessageManager.updateContent(
+    ctx,
+    '⚠️ Please use the buttons to confirm or cancel the deletion.',
+    Markup.inlineKeyboard([
+      [
+        Markup.button.callback('✅ Yes, delete', 'delete:confirm'),
+        Markup.button.callback('❌ No, cancel', 'delete:cancel')
+      ]
+    ])
+  )
 })

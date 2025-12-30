@@ -171,7 +171,7 @@ Great work! Keep it up! 💪
       )
     }
 
-    // Return to main menu
+    // Return to main menu - this will reinitialize TwoMessageManager
     return ctx.scene.enter('registered_menu')
   }
 }

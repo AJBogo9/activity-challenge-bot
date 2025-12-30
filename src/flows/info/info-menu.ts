@@ -1,15 +1,9 @@
 import { Scenes, Markup } from 'telegraf'
-import { PersistentMenu } from '../../utils/persistent-menu'
+import { TwoMessageManager } from '../../utils/two-message-manager'
 
 export const infoMenuScene = new Scenes.BaseScene<any>('info_menu')
 
-// Register reply keyboard handlers for navigation
-PersistentMenu.registerReplyKeyboardHandlers(infoMenuScene, 'info_menu')
-
-// Enter the info menu - show inline keyboard
 infoMenuScene.enter(async (ctx: any) => {
-  console.log('INFO MENU ENTER - submenuMessageId:', ctx.session?.submenuMessageId)
-  
   const message = 'ℹ️ *Information Menu*\n\nWhat would you like to know?'
   
   const keyboard = Markup.inlineKeyboard([
@@ -23,8 +17,7 @@ infoMenuScene.enter(async (ctx: any) => {
     ]
   ])
 
-  await PersistentMenu.updateSubmenu(ctx, message, keyboard)
-  console.log('AFTER UPDATE - submenuMessageId:', ctx.session?.submenuMessageId)
+  await TwoMessageManager.updateContent(ctx, message, keyboard)
 })
 
 // Handle How Points Work button

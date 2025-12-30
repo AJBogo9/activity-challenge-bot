@@ -6,6 +6,7 @@ import { setupBotCommands } from './src/bot/setup'
 import { closeDb } from './src/db'
 import * as flows from './src/flows'
 import { registerGlobalHandlers } from './src/bot/handlers/handlers'
+import { TwoMessageManager } from './src/utils/two-message-manager'
 
 type MyContext = Scenes.SceneContext
 
@@ -18,12 +19,10 @@ const stage = new Scenes.Stage<MyContext>(Object.values(flows) as any[])
 // Register middleware IN ORDER
 bot.use(session())
 bot.use(stage.middleware())
-
-// Global navigation middleware - AFTER stage middleware so ctx.scene exists
 bot.use(async (ctx, next) => {
   if (ctx.message && 'text' in ctx.message) {
     const text = ctx.message.text
-    
+
     // Map of reply keyboard buttons to their target scenes
     const navigationMap: Record<string, string> = {
       '📝 Register': 'register_wizard',
@@ -33,21 +32,16 @@ bot.use(async (ctx, next) => {
       '📊 Statistics': 'stats_menu',
       '💬 Feedback': 'feedback_wizard'
     }
-    
+
     // Check if this is a navigation button
     if (navigationMap[text]) {
       // Delete the user's message to keep chat clean
-      try {
-        await ctx.deleteMessage()
-      } catch (error) {
-        // Silently ignore if deletion fails
-      }
+      await TwoMessageManager.deleteUserMessage(ctx)
       
       // Navigate to the target scene
       return ctx.scene.enter(navigationMap[text])
     }
   }
-  
   return next()
 })
 
