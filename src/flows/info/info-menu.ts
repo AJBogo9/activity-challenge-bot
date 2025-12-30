@@ -3,9 +3,15 @@ import { PersistentMenu } from '../../utils/persistent-menu'
 
 export const infoMenuScene = new Scenes.BaseScene<any>('info_menu')
 
+// Register reply keyboard handlers for navigation
+PersistentMenu.registerReplyKeyboardHandlers(infoMenuScene, 'info_menu')
+
 // Enter the info menu - show inline keyboard
 infoMenuScene.enter(async (ctx: any) => {
+  console.log('INFO MENU ENTER - submenuMessageId:', ctx.session?.submenuMessageId)
+  
   const message = 'ℹ️ *Information Menu*\n\nWhat would you like to know?'
+  
   const keyboard = Markup.inlineKeyboard([
     [
       Markup.button.callback('📊 Points', 'info:points'),
@@ -14,11 +20,11 @@ infoMenuScene.enter(async (ctx: any) => {
     [
       Markup.button.callback('🤖 About Bot', 'info:about'),
       Markup.button.callback('👥 Credits', 'info:credits')
-    ],
-    [Markup.button.callback('⬅️ Back to Main Menu', 'info:back')]
+    ]
   ])
 
   await PersistentMenu.updateSubmenu(ctx, message, keyboard)
+  console.log('AFTER UPDATE - submenuMessageId:', ctx.session?.submenuMessageId)
 })
 
 // Handle How Points Work button
@@ -43,19 +49,4 @@ infoMenuScene.action('info:about', async (ctx: any) => {
 infoMenuScene.action('info:credits', async (ctx: any) => {
   await ctx.answerCbQuery()
   await ctx.scene.enter('credits')
-})
-
-// Handle Back button - return to main menu
-infoMenuScene.action('info:back', async (ctx: any) => {
-  await ctx.answerCbQuery()
-  await PersistentMenu.deleteSubmenu(ctx)
-  await ctx.scene.enter('menu_router')
-})
-
-// Register reply keyboard handlers for cross-menu navigation
-PersistentMenu.registerReplyKeyboardHandlers(infoMenuScene, 'info_menu')
-
-// Handle any other text input - remind to use buttons
-infoMenuScene.on('text', async (ctx: any) => {
-  await ctx.reply('Please use the buttons above to navigate the menu.')
 })

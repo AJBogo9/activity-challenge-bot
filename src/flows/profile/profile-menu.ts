@@ -42,11 +42,3 @@ profileScene.action('profile:back', async (ctx: any) => {
   await PersistentMenu.deleteSubmenu(ctx)
   await ctx.scene.enter('menu_router')
 })
-
-// Register reply keyboard handlers for cross-menu navigation
-PersistentMenu.registerReplyKeyboardHandlers(profileScene, 'profile')
-
-// Handle any other text input - remind to use buttons
-profileScene.on('text', async (ctx: any) => {
-  await ctx.reply('Please use the buttons above to navigate the menu.')
-})

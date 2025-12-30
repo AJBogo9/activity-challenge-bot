@@ -6,7 +6,7 @@ import { createGuildButtons } from '../helpers/keyboard-builder'
 
 export async function showTermsStep(ctx: any) {
   const user = await findUserByTelegramId(ctx.from.id.toString())
-
+  
   if (user) {
     await ctx.reply(
       "You've already registered! You can start logging activities with /sportsactivity.",
@@ -18,16 +18,38 @@ export async function showTermsStep(ctx: any) {
     return
   }
 
-  await ctx.reply(
-    TERMS_AND_CONDITIONS,
-    {
-      parse_mode: 'MarkdownV2',
-      ...Markup.inlineKeyboard([
-        [Markup.button.callback('✅ Accept', 'accept_terms')],
-        [Markup.button.callback('❌ Decline', 'decline_terms')]
-      ])
+  const keyboard = Markup.inlineKeyboard([
+    [Markup.button.callback('✅ Accept', 'accept_terms')],
+    [Markup.button.callback('❌ Decline', 'decline_terms')]
+  ])
+
+  // Try to edit the existing info menu message
+  try {
+    if (ctx.session?.submenuMessageId) {
+      await ctx.telegram.editMessageText(
+        ctx.chat.id,
+        ctx.session.submenuMessageId,
+        undefined,
+        TERMS_AND_CONDITIONS,
+        {
+          parse_mode: 'MarkdownV2',
+          ...keyboard
+        }
+      )
+    } else {
+      throw new Error('No submenu message to edit')
     }
-  )
+  } catch (error) {
+    // Fallback: create new message if edit fails
+    const message = await ctx.reply(
+      TERMS_AND_CONDITIONS,
+      {
+        parse_mode: 'MarkdownV2',
+        ...keyboard
+      }
+    )
+    ctx.session.submenuMessageId = message.message_id
+  }
 }
 
 export async function handleTermsResponse(ctx: any): Promise<boolean> {
@@ -42,17 +64,17 @@ export async function handleTermsResponse(ctx: any): Promise<boolean> {
   if (data === 'decline_terms') {
     try {
       await ctx.answerCbQuery()
-      await ctx.editMessageReplyMarkup({ inline_keyboard: [] })
+      await ctx.editMessageText(
+        '❌ You declined the terms and conditions.\n\nYou can try again from the main menu.',
+        { parse_mode: 'Markdown' }
+      )
     } catch (error) {
       // Message might be too old to edit
+      await ctx.reply(
+        '❌ You declined the terms and conditions.\n\nYou can try again from the main menu.'
+      )
     }
     
-    await ctx.reply(
-      'You did not accept the terms and conditions necessary to enter the competition.\n\nYou can try again from the main menu.',
-      Markup.keyboard([['⬅️ Back to Main Menu']])
-        .resize()
-        .persistent()
-    )
     await ctx.scene.enter('unregistered_menu')
     return false
   }
@@ -62,12 +84,21 @@ export async function handleTermsResponse(ctx: any): Promise<boolean> {
     try {
       await ctx.answerCbQuery()
       await ctx.editMessageText('✅ You accepted the terms and conditions.')
-
-      // Load and show guild selection
+      
+      // Load and show guild selection - edit the same message
       const guilds = await getGuildNames()
       const guildRows = createGuildButtons(guilds)
-
-      await ctx.reply('Please select your guild:', Markup.inlineKeyboard(guildRows))
+      
+      await ctx.telegram.editMessageText(
+        ctx.chat.id,
+        ctx.session.submenuMessageId,
+        undefined,
+        '✅ Terms accepted!\n\n*Please select your guild:*',
+        {
+          parse_mode: 'Markdown',
+          ...Markup.inlineKeyboard(guildRows)
+        }
+      )
       
       return true
     } catch (error) {

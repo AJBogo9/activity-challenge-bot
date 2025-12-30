@@ -1,7 +1,11 @@
 import { Scenes, Markup } from 'telegraf'
 import { POINTS_INFO_MESSAGE } from '../../utils/texts'
+import { PersistentMenu } from '../../utils/persistent-menu'
 
 export const howToGetPoints = new Scenes.BaseScene<any>('how_to_get_points_scene')
+
+// Register reply keyboard handlers so user can navigate away
+PersistentMenu.registerReplyKeyboardHandlers(howToGetPoints, 'how_to_get_points_scene')
 
 howToGetPoints.enter(async (ctx: any) => {
   const keyboard = Markup.inlineKeyboard([

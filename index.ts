@@ -6,9 +6,11 @@ import { setupBotCommands } from './src/bot/setup'
 import { closeDb } from './src/db'
 import * as flows from './src/flows'
 import { registerGlobalHandlers } from './src/bot/handlers/handlers'
-import { initializeContributors } from './src/flows/info/credits'
 
 type MyContext = Scenes.SceneContext
+
+// Build timestamp
+const BUILD_TIME = new Date().toISOString()
 
 // Setup scenes stage
 const stage = new Scenes.Stage<MyContext>(Object.values(flows) as any[])
@@ -16,6 +18,38 @@ const stage = new Scenes.Stage<MyContext>(Object.values(flows) as any[])
 // Register middleware IN ORDER
 bot.use(session())
 bot.use(stage.middleware())
+
+// Global navigation middleware - AFTER stage middleware so ctx.scene exists
+bot.use(async (ctx, next) => {
+  if (ctx.message && 'text' in ctx.message) {
+    const text = ctx.message.text
+    
+    // Map of reply keyboard buttons to their target scenes
+    const navigationMap: Record<string, string> = {
+      '📝 Register': 'register_wizard',
+      'ℹ️ Info': 'info_menu',
+      '👤 Profile': 'profile',
+      '💪 Log Activity': 'sports_activity_wizard',
+      '📊 Statistics': 'stats_menu',
+      '💬 Feedback': 'feedback_wizard'
+    }
+    
+    // Check if this is a navigation button
+    if (navigationMap[text]) {
+      // Delete the user's message to keep chat clean
+      try {
+        await ctx.deleteMessage()
+      } catch (error) {
+        // Silently ignore if deletion fails
+      }
+      
+      // Navigate to the target scene
+      return ctx.scene.enter(navigationMap[text])
+    }
+  }
+  
+  return next()
+})
 
 // Register global handlers AFTER stage middleware
 // This way ctx.wizard will exist when callbacks are processed
@@ -29,16 +63,12 @@ async function main() {
   try {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
     console.log('🚀 Starting Activity Challenge Bot...')
+    console.log(`📅 Build: ${BUILD_TIME}`)
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
 
     // Setup database (create tables)
     console.log('📊 Setting up database...')
     await runMigrations()
-    console.log('')
-
-    // Initialize contributors list
-    console.log('👥 Fetching contributors...')
-    await initializeContributors()
     console.log('')
 
     // Setup bot commands menu
@@ -52,6 +82,7 @@ async function main() {
 
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
     console.log('✅ Bot is now running and listening for messages')
+    console.log(`📅 Build: ${BUILD_TIME}`)
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
 
     // Graceful shutdown handlers
@@ -67,7 +98,6 @@ async function main() {
 
     process.once('SIGINT', () => shutdown('SIGINT'))
     process.once('SIGTERM', () => shutdown('SIGTERM'))
-
   } catch (error) {
     console.error('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
     console.error('❌ Failed to start bot:', error)

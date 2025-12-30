@@ -1,7 +1,9 @@
 import { Scenes, Markup } from 'telegraf'
 import { ABOUT_BOT_MESSAGE } from '../../utils/texts'
+import { PersistentMenu } from '../../utils/persistent-menu'
 
 export const aboutBotScene = new Scenes.BaseScene<any>('about_bot_scene')
+PersistentMenu.registerReplyKeyboardHandlers(aboutBotScene, 'about_bot_scene')
 
 aboutBotScene.enter(async (ctx: any) => {
   const keyboard = Markup.inlineKeyboard([

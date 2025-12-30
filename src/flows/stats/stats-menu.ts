@@ -52,11 +52,3 @@ statsMenuScene.action('stats:back', async (ctx: any) => {
   await PersistentMenu.deleteSubmenu(ctx)
   await ctx.scene.enter('registered_menu')
 })
-
-// Register reply keyboard handlers for cross-menu navigation
-PersistentMenu.registerReplyKeyboardHandlers(statsMenuScene, 'stats_menu')
-
-// Handle any other text input - remind to use buttons
-statsMenuScene.on('text', async (ctx: any) => {
-  await ctx.reply('Please use the buttons above to navigate the statistics menu.')
-})

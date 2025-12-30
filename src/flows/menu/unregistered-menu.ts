@@ -11,17 +11,10 @@ mainMenuScene.enter(async (ctx: any) => {
       ['ℹ️ Info'],
       ['📝 Register']
     ])
-    .resize()
-    .persistent()
+      .resize()
+      .persistent()
   )
-})
-
-// Handle Info button
-mainMenuScene.hears('ℹ️ Info', async (ctx: any) => {
+  
+  // Automatically show info menu
   await ctx.scene.enter('info_menu')
-})
-
-// Handle Register button
-mainMenuScene.hears('📝 Register', async (ctx: any) => {
-  await ctx.scene.enter('register_wizard')
 })
