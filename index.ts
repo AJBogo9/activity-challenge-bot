@@ -14,7 +14,20 @@ type MyContext = Scenes.SceneContext
 const stage = new Scenes.Stage<MyContext>(Object.values(flows) as any[])
 
 // Register middleware IN ORDER
+// Register middleware IN ORDER
 bot.use(session())
+
+// Debug logging middleware
+bot.use(async (ctx, next) => {
+  console.log('📨 Received update:', {
+    type: ctx.updateType,
+    from: ctx.from?.id,
+    username: ctx.from?.username,
+    text: (ctx.message as any)?.text
+  })
+  return next()
+})
+
 bot.use(stage.middleware())
 
 // Register global handlers AFTER stage middleware
