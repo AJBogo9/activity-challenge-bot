@@ -37,3 +37,7 @@ coverage/
 # VitePress
 docs/.vitepress/dist
 docs/.vitepress/cache
+
+# Kubernetes config files
+kubeconfig
+**/kubeconfig

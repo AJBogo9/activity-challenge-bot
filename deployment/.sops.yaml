@@ -1,0 +1,13 @@
+creation_rules:
+  # Encrypt Talos cluster secrets
+  - path_regex: clusters/.*talos/tal.*\.yaml$
+    age: age18jj73k865cqfaew3pmshqrqwfmns78jj8ppd8kj8m6lxd8cn63vq0kaa6q
+
+  # Encrypt global provider secrets (HCloud Token)
+  - path_regex: secrets\.sops\.yaml$
+    age: age18jj73k865cqfaew3pmshqrqwfmns78jj8ppd8kj8m6lxd8cn63vq0kaa6q
+
+  # Encrypt Kubernetes application secrets
+  - path_regex: infrastructure/.*\.sops\.yaml$
+    age: age18jj73k865cqfaew3pmshqrqwfmns78jj8ppd8kj8m6lxd8cn63vq0kaa6q
+  
