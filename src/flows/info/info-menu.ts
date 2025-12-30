@@ -1,11 +1,11 @@
 import { Scenes, Markup } from 'telegraf'
+import { PersistentMenu } from '../../utils/persistent-menu'
 
 export const infoMenuScene = new Scenes.BaseScene<any>('info_menu')
 
 // Enter the info menu - show inline keyboard
 infoMenuScene.enter(async (ctx: any) => {
   const message = 'ℹ️ *Information Menu*\n\nWhat would you like to know?'
-  
   const keyboard = Markup.inlineKeyboard([
     [
       Markup.button.callback('📊 Points', 'info:points'),
@@ -18,16 +18,7 @@ infoMenuScene.enter(async (ctx: any) => {
     [Markup.button.callback('⬅️ Back to Main Menu', 'info:back')]
   ])
 
-  // Check if we're editing an existing message or sending a new one
-  if (ctx.callbackQuery) {
-    await ctx.editMessageText(message, {
-      parse_mode: 'Markdown',
-      ...keyboard
-    })
-    await ctx.answerCbQuery()
-  } else {
-    await ctx.replyWithMarkdown(message, keyboard)
-  }
+  await PersistentMenu.updateSubmenu(ctx, message, keyboard)
 })
 
 // Handle How Points Work button
@@ -57,10 +48,14 @@ infoMenuScene.action('info:credits', async (ctx: any) => {
 // Handle Back button - return to main menu
 infoMenuScene.action('info:back', async (ctx: any) => {
   await ctx.answerCbQuery()
+  await PersistentMenu.deleteSubmenu(ctx)
   await ctx.scene.enter('menu_router')
 })
 
-// Handle any text input - remind to use buttons
+// Register reply keyboard handlers for cross-menu navigation
+PersistentMenu.registerReplyKeyboardHandlers(infoMenuScene, 'info_menu')
+
+// Handle any other text input - remind to use buttons
 infoMenuScene.on('text', async (ctx: any) => {
   await ctx.reply('Please use the buttons above to navigate the menu.')
 })

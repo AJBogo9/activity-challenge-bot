@@ -1,12 +1,12 @@
 import { Scenes, Markup } from 'telegraf'
+import { PersistentMenu } from '../../utils/persistent-menu'
 
 export const statsMenuScene = new Scenes.BaseScene<any>('stats_menu')
 
 statsMenuScene.enter(async (ctx: any) => {
   const message = `📊 *Statistics Menu*
-
 Choose what statistics you'd like to view:`
-
+  
   const keyboard = Markup.inlineKeyboard([
     [
       Markup.button.callback('👤 My Summary', 'stats:summary'),
@@ -19,23 +19,7 @@ Choose what statistics you'd like to view:`
     [Markup.button.callback('🔙 Back to Main Menu', 'stats:back')]
   ])
 
-  // Check if we're editing an existing message or sending a new one
-  if (ctx.callbackQuery) {
-    try {
-      await ctx.editMessageText(message, {
-        parse_mode: 'Markdown',
-        ...keyboard
-      })
-    } catch (error: any) {
-      // Ignore "message is not modified" errors
-      if (!error.description?.includes('message is not modified')) {
-        throw error
-      }
-    }
-    await ctx.answerCbQuery()
-  } else {
-    await ctx.replyWithMarkdown(message, keyboard)
-  }
+  await PersistentMenu.updateSubmenu(ctx, message, keyboard)
 })
 
 // Handle My Summary button
@@ -53,7 +37,7 @@ statsMenuScene.action('stats:top', async (ctx: any) => {
 // Handle Guild Leaderboard button
 statsMenuScene.action('stats:guilds', async (ctx: any) => {
   await ctx.answerCbQuery()
-  await ctx.scene.enter('guild_leaderboard')  // Changed from 'guild_standings'
+  await ctx.scene.enter('guild_leaderboard')
 })
 
 // Handle Guild Comparison button
@@ -65,10 +49,14 @@ statsMenuScene.action('stats:compare', async (ctx: any) => {
 // Handle Back button - return to main menu
 statsMenuScene.action('stats:back', async (ctx: any) => {
   await ctx.answerCbQuery()
+  await PersistentMenu.deleteSubmenu(ctx)
   await ctx.scene.enter('registered_menu')
 })
 
-// Handle any text input - remind to use buttons
+// Register reply keyboard handlers for cross-menu navigation
+PersistentMenu.registerReplyKeyboardHandlers(statsMenuScene, 'stats_menu')
+
+// Handle any other text input - remind to use buttons
 statsMenuScene.on('text', async (ctx: any) => {
   await ctx.reply('Please use the buttons above to navigate the statistics menu.')
 })

@@ -1,11 +1,11 @@
 import { Scenes, Markup } from 'telegraf'
+import { PersistentMenu } from '../../utils/persistent-menu'
 
 export const profileScene = new Scenes.BaseScene<any>('profile')
 
 // Enter the profile menu - show inline keyboard
 profileScene.enter(async (ctx: any) => {
   const message = '👤 *Profile*\n\nWhat would you like to view?'
-
   const keyboard = Markup.inlineKeyboard([
     [
       Markup.button.callback('📊 User Summary', 'profile:summary'),
@@ -15,16 +15,7 @@ profileScene.enter(async (ctx: any) => {
     [Markup.button.callback('⬅️ Back to Main Menu', 'profile:back')]
   ])
 
-  // Check if we're editing an existing message or sending a new one
-  if (ctx.callbackQuery) {
-    await ctx.editMessageText(message, {
-      parse_mode: 'Markdown',
-      ...keyboard
-    })
-    await ctx.answerCbQuery()
-  } else {
-    await ctx.replyWithMarkdown(message, keyboard)
-  }
+  await PersistentMenu.updateSubmenu(ctx, message, keyboard)
 })
 
 // Handle User Summary - navigate to separate scene
@@ -48,10 +39,14 @@ profileScene.action('profile:delete', async (ctx: any) => {
 // Handle Back to Main Menu
 profileScene.action('profile:back', async (ctx: any) => {
   await ctx.answerCbQuery()
+  await PersistentMenu.deleteSubmenu(ctx)
   await ctx.scene.enter('menu_router')
 })
 
-// Handle any text input - remind to use buttons
+// Register reply keyboard handlers for cross-menu navigation
+PersistentMenu.registerReplyKeyboardHandlers(profileScene, 'profile')
+
+// Handle any other text input - remind to use buttons
 profileScene.on('text', async (ctx: any) => {
   await ctx.reply('Please use the buttons above to navigate the menu.')
 })

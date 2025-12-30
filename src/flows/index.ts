@@ -23,10 +23,10 @@ export { sportsActivityWizard } from './activity/wizard'
 
 // User flows
 export { registerWizard } from './register/wizard'
-export { deleteUserScene } from './user/delete'
-export { profileScene } from './user/profile-menu'
-export { userProfileInfoScene } from './user/user-profile-info'
-export { activityHistoryScene } from './user/activity-history'
+export { deleteUserScene } from './profile/delete'
+export { profileScene } from './profile/profile-menu'
+export { userProfileInfoScene } from './profile/user-profile-info'
+export { activityHistoryScene } from './profile/activity-history'
 
 // Feedback flow
 export { feedbackWizard } from './feedback'
