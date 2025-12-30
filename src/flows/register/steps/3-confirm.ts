@@ -1,6 +1,7 @@
 import { Markup } from 'telegraf'
 import { createUser } from '../../../db'
 import { escapeMarkdownV2 } from '../helpers/format'
+import { TwoMessageManager } from '../../../utils/two-message-manager'
 
 export async function handleConfirmation(ctx: any) {
   // Wait for callback query
@@ -18,7 +19,7 @@ export async function handleConfirmation(ctx: any) {
     } catch (error) {
       // Message might be too old to edit
     }
-    
+
     ctx.wizard.state.pendingUser = null
     
     await ctx.reply(
@@ -27,6 +28,7 @@ export async function handleConfirmation(ctx: any) {
         .resize()
         .persistent()
     )
+    
     await ctx.scene.enter('unregistered_menu')
     return
   }
@@ -35,9 +37,8 @@ export async function handleConfirmation(ctx: any) {
   if (data === 'confirm_profile') {
     try {
       await ctx.answerCbQuery()
-      
-      const userData = ctx.wizard.state.pendingUser
 
+      const userData = ctx.wizard.state.pendingUser
       if (!userData) {
         await ctx.reply('Session expired. Please start registration again.')
         await ctx.scene.enter('unregistered_menu')
@@ -53,22 +54,23 @@ export async function handleConfirmation(ctx: any) {
       }
 
       const escapedGuild = escapeMarkdownV2(userData.guild)
-
+      
+      // FIXED: Just send success message without keyboard
+      // The registered_menu will create the proper keyboard
       await ctx.reply(
-        `🎉 *Success\\!* You're now registered to the *${escapedGuild}* guild\\!\n\n`,
-        { 
-          parse_mode: 'MarkdownV2',
-          ...Markup.keyboard([['⬅️ Back to Main Menu']])
-            .resize()
-            .persistent()
-        }
+        `🎉 *Success\\!* You're now registered to the *${escapedGuild}* guild\\!`,
+        { parse_mode: 'MarkdownV2' }
       )
 
       // Clear wizard state
       ctx.wizard.state.pendingUser = null
-
+      
+      // Clean up any old messages before entering registered menu
+      await TwoMessageManager.cleanup(ctx)
+      
       await ctx.scene.leave()
       await ctx.scene.enter('registered_menu')
+      
     } catch (error) {
       console.error('Error creating user:', error)
       
@@ -77,14 +79,14 @@ export async function handleConfirmation(ctx: any) {
       } catch (editError) {
         await ctx.reply('There was an error during registration.')
       }
-      
+
       await ctx.reply(
         'Please try again.',
         Markup.keyboard([['⬅️ Back to Main Menu']])
           .resize()
           .persistent()
       )
-      
+
       ctx.wizard.state.pendingUser = null
       await ctx.scene.enter('unregistered_menu')
     }

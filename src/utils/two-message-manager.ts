@@ -4,8 +4,15 @@ export class TwoMessageManager {
   /**
    * Initialize the two persistent messages
    * Call this once when user starts or returns to main menu
+   * @param ctx - Telegraf context
+   * @param buttons - Optional custom keyboard layout. If not provided, uses default registered layout
+   * @param keyboardText - Text to display above the keyboard
    */
-  static async init(ctx: any) {
+  static async init(
+    ctx: any,
+    buttons?: string[][],
+    keyboardText = '📱 *Main Navigation*'
+  ) {
     // Delete old messages if they exist
     await this.cleanup(ctx)
 
@@ -13,30 +20,41 @@ export class TwoMessageManager {
     const contentMsg = await ctx.reply('⏳ Loading...')
     ctx.session.contentMessageId = contentMsg.message_id
 
+    // Default buttons for registered users
+    const defaultButtons = [
+      ['👤 Profile', '💪 Log Activity'],
+      ['📊 Statistics', 'ℹ️ Info'],
+      ['💬 Feedback']
+    ]
+
     // Create reply keyboard message (stays at bottom)
-    const keyboardMsg = await ctx.reply(
-      '📱 *Main Navigation*',
-      {
-        parse_mode: 'Markdown',
-        ...Markup.keyboard([
-          ['👤 Profile', '💪 Log Activity'],
-          ['📊 Statistics', 'ℹ️ Info'],
-          ['💬 Feedback']
-        ])
-          .resize()
-          .persistent()
-      }
-    )
+    const keyboardMsg = await ctx.reply(keyboardText, {
+      parse_mode: 'Markdown',
+      ...Markup.keyboard(buttons || defaultButtons)
+        .resize()
+        .persistent()
+    })
     ctx.session.keyboardMessageId = keyboardMsg.message_id
   }
 
   /**
    * Update the content message with new text and inline keyboard
+   * Also tracks the current scene to prevent duplicate updates
    */
   static async updateContent(ctx: any, text: string, inlineKeyboard?: any) {
     try {
       if (!ctx.session?.contentMessageId) {
         throw new Error('No content message exists')
+      }
+
+      // Store current scene and content for comparison
+      const currentSceneId = ctx.scene.current?.id
+      const lastSceneId = ctx.session.lastSceneId
+      const lastContent = ctx.session.lastContent
+
+      // If we're in the same scene with the same content, skip update
+      if (currentSceneId === lastSceneId && text === lastContent) {
+        return
       }
 
       await ctx.telegram.editMessageText(
@@ -49,10 +67,18 @@ export class TwoMessageManager {
           ...inlineKeyboard
         }
       )
+
+      // Track the scene and content we just displayed
+      ctx.session.lastSceneId = currentSceneId
+      ctx.session.lastContent = text
     } catch (error) {
       // If edit fails (message too old or deleted), create new content message
       const contentMsg = await ctx.replyWithMarkdown(text, inlineKeyboard)
       ctx.session.contentMessageId = contentMsg.message_id
+      
+      // Track the scene and content
+      ctx.session.lastSceneId = ctx.scene.current?.id
+      ctx.session.lastContent = text
     }
   }
 
@@ -77,13 +103,10 @@ export class TwoMessageManager {
       )
     } catch (error) {
       // If edit fails, create new keyboard message
-      const keyboardMsg = await ctx.reply(
-        text,
-        {
-          parse_mode: 'Markdown',
-          ...Markup.keyboard(buttons).resize().persistent()
-        }
-      )
+      const keyboardMsg = await ctx.reply(text, {
+        parse_mode: 'Markdown',
+        ...Markup.keyboard(buttons).resize().persistent()
+      })
       ctx.session.keyboardMessageId = keyboardMsg.message_id
     }
   }
@@ -109,6 +132,8 @@ export class TwoMessageManager {
 
     delete ctx.session.contentMessageId
     delete ctx.session.keyboardMessageId
+    delete ctx.session.lastSceneId
+    delete ctx.session.lastContent
   }
 
   /**
