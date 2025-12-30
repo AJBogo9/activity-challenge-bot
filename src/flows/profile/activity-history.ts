@@ -1,4 +1,4 @@
-import { Scenes, Markup } from 'telegraf'
+import { Scenes } from 'telegraf'
 import { findUserByTelegramId } from '../../db/users'
 import { getActivitiesByUser } from '../../db/activities'
 import { TwoMessageManager } from '../../utils/two-message-manager'
@@ -19,13 +19,10 @@ activityHistoryScene.enter(async (ctx: any) => {
     }
 
     const activities = await getActivitiesByUser(user.id)
-    const keyboard = Markup.inlineKeyboard([
-      [Markup.button.callback('⬅️ Back to Profile', 'activity_history:back')]
-    ])
 
     if (activities.length === 0) {
       const message = '📜 *Activity History*\n\nYou haven\'t logged any activities yet.'
-      await TwoMessageManager.updateContent(ctx, message, keyboard)
+      await TwoMessageManager.updateContent(ctx, message)
       
       if (ctx.callbackQuery) {
         await ctx.answerCbQuery()
@@ -89,16 +86,11 @@ activityHistoryScene.enter(async (ctx: any) => {
       
       // Send remaining chunks as separate messages
       for (let i = 1; i < chunks.length; i++) {
-        if (i === chunks.length - 1) {
-          // Add keyboard only to the last chunk
-          await ctx.replyWithMarkdown(chunks[i], keyboard)
-        } else {
-          await ctx.replyWithMarkdown(chunks[i])
-        }
+        await ctx.replyWithMarkdown(chunks[i])
       }
     } else {
       // Single message fits - use updateContent
-      await TwoMessageManager.updateContent(ctx, message, keyboard)
+      await TwoMessageManager.updateContent(ctx, message)
       
       if (ctx.callbackQuery) {
         await ctx.answerCbQuery()
@@ -114,12 +106,12 @@ activityHistoryScene.enter(async (ctx: any) => {
   }
 })
 
-activityHistoryScene.action('activity_history:back', async (ctx: any) => {
-  await ctx.answerCbQuery()
-  await ctx.scene.enter('profile')
-})
-
-// Handle any text input - delete it and remind to use buttons
+// Handle reply keyboard navigation
 activityHistoryScene.on('text', async (ctx: any) => {
-  await TwoMessageManager.deleteUserMessage(ctx)
+  const handled = await TwoMessageManager.handleNavigation(ctx, ctx.message.text)
+  
+  if (!handled) {
+    // If not a navigation button, just delete the message
+    await TwoMessageManager.deleteUserMessage(ctx)
+  }
 })

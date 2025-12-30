@@ -1,4 +1,4 @@
-import { Scenes, Markup } from 'telegraf'
+import { Scenes } from 'telegraf'
 import { findUserByTelegramId } from '../../db/users'
 import { TwoMessageManager } from '../../utils/two-message-manager'
 
@@ -7,7 +7,7 @@ export const userProfileInfoScene = new Scenes.BaseScene<any>('user_profile_info
 userProfileInfoScene.enter(async (ctx: any) => {
   try {
     const user = await findUserByTelegramId(ctx.from.id.toString())
-
+    
     if (!user) {
       await TwoMessageManager.updateContent(
         ctx,
@@ -24,12 +24,8 @@ userProfileInfoScene.enter(async (ctx: any) => {
 🏛️ *Guild:* ${user.guild || 'None'}
 🎯 *Total Points:* ${user.points || 0}`
 
-    const keyboard = Markup.inlineKeyboard([
-      [Markup.button.callback('⬅️ Back to Profile', 'user_profile_info:back')]
-    ])
-
-    await TwoMessageManager.updateContent(ctx, summary, keyboard)
-
+    await TwoMessageManager.updateContent(ctx, summary)
+    
     if (ctx.callbackQuery) {
       await ctx.answerCbQuery()
     }
@@ -43,12 +39,12 @@ userProfileInfoScene.enter(async (ctx: any) => {
   }
 })
 
-userProfileInfoScene.action('user_profile_info:back', async (ctx: any) => {
-  await ctx.answerCbQuery()
-  await ctx.scene.enter('profile')
-})
-
-// Handle any text input - delete it silently
+// Handle reply keyboard navigation
 userProfileInfoScene.on('text', async (ctx: any) => {
-  await TwoMessageManager.deleteUserMessage(ctx)
+  const handled = await TwoMessageManager.handleNavigation(ctx, ctx.message.text)
+  
+  if (!handled) {
+    // If not a navigation button, just delete the message
+    await TwoMessageManager.deleteUserMessage(ctx)
+  }
 })
