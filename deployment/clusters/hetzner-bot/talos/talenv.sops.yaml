@@ -1,0 +1,17 @@
+BOT_DOMAIN: ENC[AES256_GCM,data:pir7acePtj7WwF8mTXstMr+f,iv:xg3kq4u0+6D4rFGOuT1wOHiWIS0lIa5MQ9AMNmIi4jM=,tag:bzZMRSfP5JbacW+KlSJ01w==,type:str]
+LOAD_BALANCER_IP: ENC[AES256_GCM,data:F9jwYw1aHQ==,iv:bVlseFwhmJqnjvf4qoTWrTwmoX2/NRsfbwFIqrnirFU=,tag:ty+GxpnoohXUwDrzfedInA==,type:str]
+sops:
+    age:
+        - recipient: age18jj73k865cqfaew3pmshqrqwfmns78jj8ppd8kj8m6lxd8cn63vq0kaa6q
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBZb2VZZDBqTmd6SnFjL2Nx
+            YXN4T0t3Q1I2ZDhOR0pMeHNWM0Z5YXRUNFM0CjhRS0c3MGVtcC9oelBqd2cwQm5P
+            NWRHSXF4ajZiR3RYWWZQMHJWOUFJNmsKLS0tIGE4cDNCMXR1dytpaU5IODNhcS9I
+            OFpaSkxUdlVjc3Vrc0lLR29WQUFudmcKwzzc82KV2V60CPp5VJS4nMZhzHg3CW1S
+            Qc/I5l+SsVEVlvZDBcidt88MdVHCOXJyQRrIlK4Px0eQMrITR0HB1A==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2025-12-30T13:51:20Z"
+    mac: ENC[AES256_GCM,data:HCiOd4UN3z4skqomNA3Xf81BAstsLgSg0APFYyUOv683e5yD0OOB2YNQiiI+0ekHjTbC+pD1PxoxTG0ZBI1PLtDgqNF4JFbJwt51i5mLiTczWB1lYKTHdTGIxJ2QdKZ/TQaK8qLxWqsPDe3qCdUk0RCl4Ucd3gP+GJby7PbisyE=,iv:KQDzk5GOqcyyvyTMY18ehrSdgl/rsQOQztwu+65b1KM=,tag:jOt3xTDHwSKDkWRrMG4TSQ==,type:str]
+    unencrypted_suffix: _unencrypted
+    version: 3.11.0
