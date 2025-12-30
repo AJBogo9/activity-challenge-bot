@@ -16,13 +16,11 @@ interface RegisterWizardState {
 
 export const registerWizard = new Scenes.WizardScene<any>(
   'register_wizard',
-  
   // Step 0: Show Terms & Conditions
   async (ctx: any) => {
     await showTermsStep(ctx)
     return ctx.wizard.next()
   },
-
   // Step 1: Handle Terms Response → Show Guild Selection
   async (ctx: any) => {
     const accepted = await handleTermsResponse(ctx)
@@ -30,10 +28,8 @@ export const registerWizard = new Scenes.WizardScene<any>(
       // User declined or already registered
       return
     }
-
     return ctx.wizard.next()
   },
-
   // Step 2: Handle Guild Selection → Show Confirmation
   async (ctx: any) => {
     const selected = await handleGuildSelection(ctx)
@@ -41,10 +37,8 @@ export const registerWizard = new Scenes.WizardScene<any>(
       // Wait for valid guild selection
       return
     }
-
     return ctx.wizard.next()
   },
-
   // Step 3: Handle Confirmation → Create User
   async (ctx: any) => {
     await handleConfirmation(ctx)
