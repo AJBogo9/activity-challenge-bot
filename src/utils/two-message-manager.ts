@@ -112,6 +112,44 @@ export class TwoMessageManager {
   }
 
   /**
+   * Navigate to a scene, but only if not already there
+   * Automatically deletes user messages to keep chat clean
+   */
+  static async navigateToScene(ctx: any, sceneId: string) {
+    // Delete the user's message first
+    await this.deleteUserMessage(ctx)
+    
+    // Only enter if not already in that scene
+    if (ctx.scene.current?.id !== sceneId) {
+      await ctx.scene.enter(sceneId)
+    }
+  }
+
+  /**
+   * Handle keyboard button navigation
+   * Maps button text to scene IDs
+   */
+  static async handleNavigation(ctx: any, buttonText: string) {
+    // Map of reply keyboard buttons to their target scenes
+    const navigationMap: Record<string, string> = {
+      '📝 Register': 'register_wizard',
+      'ℹ️ Info': 'info_menu',
+      '👤 Profile': 'profile',
+      '💪 Log Activity': 'activity_wizard',
+      '📊 Statistics': 'stats_menu',
+      '💬 Feedback': 'feedback_wizard'
+    }
+
+    const targetScene = navigationMap[buttonText]
+    if (targetScene) {
+      await this.navigateToScene(ctx, targetScene)
+      return true
+    }
+    
+    return false
+  }
+
+  /**
    * Cleanup old messages
    */
   static async cleanup(ctx: any) {

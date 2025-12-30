@@ -21,32 +21,15 @@ bot.use(session())
 bot.use(stage.middleware())
 bot.use(async (ctx, next) => {
   if (ctx.message && 'text' in ctx.message) {
-    const text = ctx.message.text
-
-    // Map of reply keyboard buttons to their target scenes
-    const navigationMap: Record<string, string> = {
-      '📝 Register': 'register_wizard',
-      'ℹ️ Info': 'info_menu',
-      '👤 Profile': 'profile',
-      '💪 Log Activity': 'sports_activity_wizard',
-      '📊 Statistics': 'stats_menu',
-      '💬 Feedback': 'feedback_wizard'
-    }
-
-    // Check if this is a navigation button
-    if (navigationMap[text]) {
-      // Delete the user's message to keep chat clean
-      await TwoMessageManager.deleteUserMessage(ctx)
-      
-      // Navigate to the target scene
-      return ctx.scene.enter(navigationMap[text])
+    const handled = await TwoMessageManager.handleNavigation(ctx, ctx.message.text)
+    if (handled) {
+      return
     }
   }
   return next()
 })
 
 // Register global handlers AFTER stage middleware
-// This way ctx.wizard will exist when callbacks are processed
 registerGlobalHandlers()
 
 // Register commands
