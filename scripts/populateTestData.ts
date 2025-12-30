@@ -1,6 +1,6 @@
 import { sql, closeDb } from '../src/db'
 import { createUser } from '../src/db/users'
-import { addPointsToUser } from '../src/db/point-queries'
+import { addPointsToUser } from '../src/db/points'
 import { getGuildNames } from '../src/db/guilds'
 
 async function populateData() {
@@ -74,7 +74,7 @@ async function populateData() {
 
         // Award the total points from activities to the user
         try {
-          await addPointsToUser(telegramId, totalPoints)
+          await addPointsToUser(user.id, totalPoints)
         } catch (error) {
           console.error(`Error awarding points to user ${telegramId}:`, error)
         }
