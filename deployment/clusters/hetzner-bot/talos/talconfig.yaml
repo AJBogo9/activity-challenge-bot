@@ -1,0 +1,22 @@
+clusterName: hetzner-bot-cluster
+talosVersion: v1.11.5
+kubernetesVersion: v1.32.0
+endpoint: https://94.130.226.120:6443
+allowSchedulingOnControlPlanes: true
+
+cniConfig:
+  name: none
+
+nodes:
+  - hostname: node-01
+    ipAddress: 94.130.226.120
+    controlPlane: true
+    installDiskSelector:
+      model: "Standard NVMe"
+
+controlPlane:
+  schematic: 
+    customization:
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/qemu-guest-agent
