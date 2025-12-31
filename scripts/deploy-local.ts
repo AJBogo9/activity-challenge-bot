@@ -43,8 +43,8 @@ if (tofuCheck.exitCode !== 0) {
 }
 
 // Check docker access
-const dockerCheck = spawnSync(["docker", "ps"], { stdio: "ignore" });
-if (dockerCheck.status !== 0) {
+const dockerCheck = spawnSync(["docker", "ps"], { stdio: ["ignore", "ignore", "ignore"] });
+if (dockerCheck.exitCode !== 0) {
     console.error("Error: Docker cannot be accessed.");
     console.error("Please ensure you have permissions (e.g., add user to 'docker' group) or run with sudo.");
     console.error("If you recently added your user to the group, run 'newgrp docker' to apply changes.");
