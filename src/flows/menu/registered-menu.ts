@@ -11,9 +11,6 @@ registeredMenuScene.enter(async (ctx: any) => {
     ['💬 Feedback']
   ])
   
-  // Show content in content message
-  await TwoMessageManager.updateContent(
-    ctx,
-    '🏠 *Welcome Back!*\n\nUse the menu below to navigate.'
-  )
+  // Automatically show info menu
+  await ctx.scene.enter('info_menu')
 })
