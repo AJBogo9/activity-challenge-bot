@@ -1,4 +1,5 @@
 import { Markup } from 'telegraf'
+import { TwoMessageManager } from '../../../utils/two-message-manager'
 import { getIntensities, getMetValue, isValidIntensity } from '../helpers/activity-data'
 
 /**
@@ -8,9 +9,12 @@ export async function showIntensitySelection(ctx: any): Promise<void> {
   const mainCategory = ctx.wizard.state.mainCategory
   const subcategory = ctx.wizard.state.subcategory
   const activity = ctx.wizard.state.activity
-
+  
   if (!mainCategory || !subcategory || !activity) {
-    await ctx.reply('❌ Error: Missing activity information. Please start over.')
+    await TwoMessageManager.updateContent(
+      ctx,
+      '❌ Error: Missing activity information. Please start over.'
+    )
     return
   }
 
@@ -26,14 +30,10 @@ export async function showIntensitySelection(ctx: any): Promise<void> {
   // Add cancel button
   buttons.push([Markup.button.callback('❌ Cancel', 'intensity:cancel')])
 
-  // Edit the existing message instead of sending a new one
-  await ctx.editMessageText(
-    `🏃 *Log Activity - Step 4/7*\n\n*Activity:* ${activity}\n\nChoose intensity:`,
-    {
-      parse_mode: 'Markdown',
-      ...Markup.inlineKeyboard(buttons)
-    }
-  )
+  const message = `🏃 *Log Activity - Step 4/7*\n\n*Activity:* ${activity}\n\nChoose intensity:`
+  const keyboard = Markup.inlineKeyboard(buttons)
+
+  await TwoMessageManager.updateContent(ctx, message, keyboard)
 }
 
 /**

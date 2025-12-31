@@ -14,8 +14,10 @@ export async function showTermsStep(ctx: any) {
   }
 
   const keyboard = Markup.inlineKeyboard([
-    [Markup.button.callback('✅ Accept', 'accept_terms')],
-    [Markup.button.callback('❌ Decline', 'decline_terms')]
+    [
+      Markup.button.callback('❌ Decline', 'decline_terms'), 
+      Markup.button.callback('✅ Accept', 'accept_terms')
+    ],
   ])
 
   await TwoMessageManager.updateContent(ctx, TERMS_AND_CONDITIONS, keyboard)

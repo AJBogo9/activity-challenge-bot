@@ -1,3 +1,4 @@
+import { TwoMessageManager } from '../../../utils/two-message-manager'
 import { handleCalendarSelection, showActivityCalendar } from '../../../utils/calendar'
 
 /**
@@ -7,18 +8,20 @@ export async function showDateSelection(ctx: any): Promise<void> {
   const activity = ctx.wizard.state.activity
   const intensity = ctx.wizard.state.intensity
   const metValue = ctx.wizard.state.metValue
-
+  
   if (!activity || !intensity) {
-    await ctx.reply('❌ Error: Missing activity information. Please start over.')
+    await TwoMessageManager.updateContent(
+      ctx,
+      '❌ Error: Missing activity information. Please start over.'
+    )
     return
   }
 
-  // Edit the existing message to show date selection prompt
-  await ctx.editMessageText(
-    `🏃 *Log Activity - Step 5/7*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*MET Value:* ${metValue}\n\n📅 When did you do this activity?`,
-    { parse_mode: 'Markdown' }
-  )
-
+  // Update the content message with date selection prompt
+  const message = `🏃 *Log Activity - Step 5/7*\n\n*Activity:* ${activity}\n*Intensity:* ${intensity}\n*MET Value:* ${metValue}\n\n📅 When did you do this activity?`
+  
+  await TwoMessageManager.updateContent(ctx, message)
+  
   // Show the calendar in a new message (calendar widget needs its own message)
   await showActivityCalendar(ctx)
 }
@@ -35,7 +38,7 @@ export async function handleDateSelection(ctx: any): Promise<void> {
 
   // Use the calendar handler to get the selected date
   const selectedDate = handleCalendarSelection(ctx)
-
+  
   // If a date was selected (not just calendar navigation)
   if (selectedDate) {
     ctx.wizard.state.activityDate = selectedDate

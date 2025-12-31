@@ -23,8 +23,8 @@ deleteUserScene.enter(async (ctx: any) => {
 
   const keyboard = Markup.inlineKeyboard([
     [
-      Markup.button.callback('✅ Yes, delete', 'delete:confirm'),
-      Markup.button.callback('❌ No, cancel', 'delete:cancel')
+      Markup.button.callback('❌ No, cancel', 'delete:cancel'),
+      Markup.button.callback('✅ Yes, delete', 'delete:confirm')
     ]
   ])
 

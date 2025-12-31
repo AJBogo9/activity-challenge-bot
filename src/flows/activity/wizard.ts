@@ -1,4 +1,5 @@
 import { Scenes } from 'telegraf'
+import { TwoMessageManager } from '../../utils/two-message-manager'
 import { showCategorySelection, handleCategorySelection } from './steps/1-category'
 import { showSubcategorySelection, handleSubcategorySelection } from './steps/2-subcategory'
 import { showActivitySelection, handleActivitySelection } from './steps/3-activity'
@@ -17,20 +18,21 @@ interface WizardState {
   metValue?: number
   activityDate?: Date
   duration?: number
+  calculatedPoints?: number
 }
 
-export const sportsActivityWizard = new Scenes.WizardScene<any>(
-  'sports_activity_wizard',
+export const activityWizard = new Scenes.WizardScene<any>(
+  'activity_wizard',
   
-  // Step 0: Category Selection (INLINE KEYBOARD)
+  // Step 0: Show Category Selection (edit content message only)
   async (ctx: any) => {
+    // Just show the category selection - don't initialize
     await showCategorySelection(ctx)
     return ctx.wizard.next()
   },
 
-  // Step 1: Handle Category → Show Subcategory (INLINE KEYBOARD)
+  // Step 1: Handle Category → Show Subcategory
   async (ctx: any) => {
-    // Handle cancel callback for inline keyboard
     if (ctx.callbackQuery?.data === 'category:cancel') {
       await handleCancel(ctx)
       return
@@ -38,7 +40,6 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
 
     const success = await handleCategorySelection(ctx)
     if (!success || !ctx.wizard.state.mainCategory) {
-      // Wait for valid selection
       return
     }
 
@@ -46,9 +47,8 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
     return ctx.wizard.next()
   },
 
-  // Step 2: Handle Subcategory → Show Activity (INLINE KEYBOARD)
+  // Step 2: Handle Subcategory → Show Activity
   async (ctx: any) => {
-    // Handle cancel callback for inline keyboard
     if (ctx.callbackQuery?.data === 'subcategory:cancel') {
       await handleCancel(ctx)
       return
@@ -56,7 +56,6 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
 
     const success = await handleSubcategorySelection(ctx)
     if (!success || !ctx.wizard.state.subcategory) {
-      // Wait for valid selection
       return
     }
 
@@ -64,9 +63,8 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
     return ctx.wizard.next()
   },
 
-  // Step 3: Handle Activity → Show Intensity (INLINE KEYBOARD)
+  // Step 3: Handle Activity → Show Intensity
   async (ctx: any) => {
-    // Handle cancel callback for inline keyboard
     if (ctx.callbackQuery?.data === 'activity:cancel') {
       await handleCancel(ctx)
       return
@@ -74,7 +72,6 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
 
     const success = await handleActivitySelection(ctx)
     if (!success || !ctx.wizard.state.activity) {
-      // Wait for valid selection
       return
     }
 
@@ -82,9 +79,8 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
     return ctx.wizard.next()
   },
 
-  // Step 4: Handle Intensity → Show Date (INLINE KEYBOARD)
+  // Step 4: Handle Intensity → Show Date
   async (ctx: any) => {
-    // Handle cancel callback for inline keyboard
     if (ctx.callbackQuery?.data === 'intensity:cancel') {
       await handleCancel(ctx)
       return
@@ -92,7 +88,6 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
 
     const success = await handleIntensitySelection(ctx)
     if (!success || !ctx.wizard.state.intensity) {
-      // Wait for valid selection
       return
     }
 
@@ -100,28 +95,22 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
     return ctx.wizard.next()
   },
 
-  // Step 5: Handle Date → Show Duration (INLINE KEYBOARD)
+  // Step 5: Handle Date → Show Duration
   async (ctx: any) => {
-    // Handle cancel callback for inline keyboard
     if (ctx.callbackQuery?.data === 'date:cancel') {
       await handleCancel(ctx)
       return
     }
 
-    // Handle date selection (calendar callback)
     await handleDateSelection(ctx)
     
-    // If date not selected yet, wait
     if (!ctx.wizard.state.activityDate) {
-      // Could be calendar navigation or no selection yet
-      // Just answer callback if present and stay on this step
       if (ctx.callbackQuery) {
         await ctx.answerCbQuery()
       }
       return
     }
 
-    // Date was selected, proceed
     if (ctx.callbackQuery) {
       await ctx.answerCbQuery()
     }
@@ -129,9 +118,8 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
     return ctx.wizard.next()
   },
 
-  // Step 6: Handle Duration → Show Confirmation (INLINE KEYBOARD)
+  // Step 6: Handle Duration → Show Confirmation
   async (ctx: any) => {
-    // Handle cancel callback for inline keyboard
     if (ctx.callbackQuery?.data === 'duration:cancel') {
       await handleCancel(ctx)
       return
@@ -139,7 +127,6 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
 
     await handleDurationInput(ctx)
     if (!ctx.wizard.state.duration) {
-      // Wait for valid duration input
       return
     }
 
@@ -147,9 +134,8 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
     return ctx.wizard.next()
   },
 
-  // Step 7: Handle Confirmation → Save (INLINE KEYBOARD)
+  // Step 7: Handle Confirmation → Save
   async (ctx: any) => {
-    // Handle cancel callback for inline keyboard
     if (ctx.callbackQuery?.data === 'confirm:cancel') {
       await handleCancel(ctx)
       return
@@ -158,3 +144,9 @@ export const sportsActivityWizard = new Scenes.WizardScene<any>(
     await handleConfirmation(ctx)
   }
 )
+
+// Clean up on wizard leave
+activityWizard.leave(async (ctx: any) => {
+  // Clear wizard state
+  ctx.wizard.state = {}
+})

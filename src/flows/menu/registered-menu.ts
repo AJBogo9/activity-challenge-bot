@@ -10,7 +10,7 @@ registeredMenuScene.enter(async (ctx: any) => {
     ['📊 Statistics', 'ℹ️ Info'],
     ['💬 Feedback']
   ])
-  
-  // Automatically show info menu
-  await ctx.scene.enter('info_menu')
+
+  // Automatically show info menu using centralized navigation
+  await TwoMessageManager.enterScene(ctx, 'info_menu')
 })

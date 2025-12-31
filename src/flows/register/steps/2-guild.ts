@@ -51,8 +51,10 @@ export async function handleGuildSelection(ctx: any): Promise<boolean> {
       ctx,
       confirmationMessage,
       Markup.inlineKeyboard([
-        [Markup.button.callback('✅ Confirm Registration', 'confirm_profile')],
-        [Markup.button.callback('❌ Cancel', 'cancel_profile')]
+        [
+          Markup.button.callback('❌ Cancel', 'cancel_profile'),
+          Markup.button.callback('✅ Confirm', 'confirm_profile')
+        ]
       ])
     )
 

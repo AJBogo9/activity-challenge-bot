@@ -126,6 +126,17 @@ export class TwoMessageManager {
   }
 
   /**
+   * Navigate to a scene without deleting user messages
+   * Useful for programmatic navigation (e.g., from .enter() hooks)
+   */
+  static async enterScene(ctx: any, sceneId: string) {
+    // Only enter if not already in that scene
+    if (ctx.scene.current?.id !== sceneId) {
+      await ctx.scene.enter(sceneId)
+    }
+  }
+
+  /**
    * Handle keyboard button navigation
    * Maps button text to scene IDs
    */
