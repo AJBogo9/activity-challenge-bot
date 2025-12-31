@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { getRankPrefix, escapeMarkdown } from "../src/utils/format-list";
+import { getRankPrefix, escapeMarkdown } from "../src/utils";
 
 describe("Ranking Utilities", () => {
     test("should return medals for top 3 rankings", () => {

@@ -1,7 +1,6 @@
 import { Scenes } from 'telegraf'
-import { findUserByTelegramId } from '../../db/users'
-import { getActivitiesByUser } from '../../db/activities'
-import { TwoMessageManager } from '../../utils/two-message-manager'
+import { findUserByTelegramId, getActivitiesByUser } from '../../db'
+import { TwoMessageManager } from '../../utils'
 
 export const activityHistoryScene = new Scenes.BaseScene<any>('activity_history')
 

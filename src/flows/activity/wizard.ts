@@ -1,5 +1,4 @@
 import { Scenes } from 'telegraf'
-import { TwoMessageManager } from '../../utils/two-message-manager'
 import { showCategorySelection, handleCategorySelection } from './steps/1-category'
 import { showSubcategorySelection, handleSubcategorySelection } from './steps/2-subcategory'
 import { showActivitySelection, handleActivitySelection } from './steps/3-activity'

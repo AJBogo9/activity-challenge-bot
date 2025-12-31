@@ -1,7 +1,7 @@
 // src/bot/middleware.ts
 import { Scenes, session, Telegraf } from 'telegraf'
 import * as flows from '../flows'
-import { TwoMessageManager } from '../utils/two-message-manager'
+import { TwoMessageManager } from '../utils'
 
 type MyContext = Scenes.SceneContext
 

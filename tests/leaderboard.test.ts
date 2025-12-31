@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { formatList, escapeMarkdown } from "../src/utils/format-list";
+import { formatList, escapeMarkdown } from "../src/utils";
 
 describe("Leaderboard Formatting", () => {
     test("should format numbers correctly with padding", () => {

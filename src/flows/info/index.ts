@@ -1,0 +1,5 @@
+export { infoMenuScene } from './info-menu'
+export { aboutBotScene } from './about'
+export { creditsScene } from './credits'
+export { howToGetPoints } from './points'
+export { termsScene } from './terms'

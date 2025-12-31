@@ -1,7 +1,6 @@
 import { Scenes, Markup } from 'telegraf'
-import { findUserByTelegramId, deleteUser } from '../../db/users'
-import { ERROR_MESSAGE } from '../../utils/texts'
-import { TwoMessageManager } from '../../utils/two-message-manager'
+import { findUserByTelegramId, deleteUser } from '../../db'
+import { ERROR_MESSAGE, TwoMessageManager } from '../../utils'
 
 export const deleteUserScene = new Scenes.BaseScene<any>('delete_user_wizard')
 

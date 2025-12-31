@@ -1,9 +1,6 @@
 import { Scenes } from 'telegraf'
-import { escapeMarkdown, formatList } from '../../utils/format-list'
-import { ERROR_MESSAGE } from '../../utils/texts'
-import { findUserByTelegramId } from '../../db/users'
-import { TwoMessageManager } from '../../utils/two-message-manager'
-import { getTopGuildMembers } from '../../db'
+import { ERROR_MESSAGE, TwoMessageManager, escapeMarkdown, formatList } from '../../utils'
+import { findUserByTelegramId, getTopGuildMembers } from '../../db'
 
 function getRankPrefix(index: number): string {
   const medals = ['🥇', '🥈', '🥉']

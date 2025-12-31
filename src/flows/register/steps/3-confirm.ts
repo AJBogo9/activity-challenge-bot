@@ -1,6 +1,6 @@
 import { createUser } from '../../../db'
 import { escapeMarkdownV2 } from '../helpers/format'
-import { TwoMessageManager } from '../../../utils/two-message-manager'
+import { TwoMessageManager } from '../../../utils'
 
 export async function handleConfirmation(ctx: any) {
   // Wait for callback query

@@ -1,6 +1,7 @@
 import { Markup } from 'telegraf'
-import { TwoMessageManager } from '../../../utils/two-message-manager'
+import { TwoMessageManager } from '../../../utils'
 import { getMainCategories, isValidCategory } from '../helpers/activity-data'
+
 
 /**
  * Display category selection screen with inline keyboard
