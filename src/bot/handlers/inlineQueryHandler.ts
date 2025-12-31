@@ -1,6 +1,6 @@
 import { Context } from 'telegraf'
 import Fuse from 'fuse.js'
-import activitiesData from '../../../data/processed/4_level_hierarchy.json'
+import activitiesData from '../../../data/processed/activity-hierarchy.json'
 
 interface ActivityData {
   met_value: number
