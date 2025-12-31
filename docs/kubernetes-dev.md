@@ -45,6 +45,14 @@ bun run cluster:logs
 ### Registry Connection Issues
 If the registry cannot be connected to the cluster network, ensure Docker has permissions and the `talos-registry` container is not conflicting with an old instance. You can run `bun run cluster:destroy` to wipe the state.
 
+### Docker Permission Denied
+If you encounter a `permission denied` error when connecting to the Docker API (e.g., when running `bun run cluster:setup`), ensure your user is in the `docker` group.
+
+If you've recently added yourself to the group, you can apply the changes in your current shell without logging out by running:
+```bash
+newgrp docker
+```
+
 ## Available Commands
 
 - `bun run cluster:setup`: Create the cluster and local registry.

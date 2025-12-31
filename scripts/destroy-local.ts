@@ -25,6 +25,7 @@ if (!dockerCheck.success) {
     console.error("Error: Docker cannot be accessed.");
     console.error("Docker output:", dockerCheck.stderr);
     console.error("Please ensure you have permissions (e.g., add user to 'docker' group) or run with sudo.");
+    console.error("If you recently added your user to the group, run 'newgrp docker' to apply changes.");
     process.exit(1);
 }
 
