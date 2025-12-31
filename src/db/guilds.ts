@@ -19,3 +19,24 @@ export async function getGuildNames(): Promise<string[]> {
     const guilds = await getActiveGuilds()
     return guilds.map(g => g.name)
 }
+
+
+/**
+ * Get top guild members
+ * @param guildName - The name of the guild
+ * @param limit - Maximum number of members to return (default: 15)
+ */
+export async function getTopGuildMembers(guildName: string, limit: number = 15) {
+  return await sql`
+    SELECT 
+      telegram_id,
+      first_name,
+      username,
+      points
+    FROM users
+    WHERE guild = ${guildName}
+      AND points > 0
+    ORDER BY points DESC
+    LIMIT ${limit}
+  `
+}

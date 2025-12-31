@@ -14,8 +14,8 @@ Choose what statistics you'd like to view:`
       Markup.button.callback('🏆 Top Users', 'stats:top')
     ],
     [
-      Markup.button.callback('🏛️ Guild vs Guild', 'stats:guilds'),
-      Markup.button.callback('⚔️ Guild Leaderboard', 'stats:compare')
+      Markup.button.callback('🏆 Guild Rankings', 'stats:guild_rankings'),
+      Markup.button.callback('👥 My Guild', 'stats:my_guild')
     ]
   ])
 
@@ -34,14 +34,14 @@ statsMenuScene.action('stats:top', async (ctx: any) => {
   await ctx.scene.enter('top_users')
 })
 
-// Handle Guild Leaderboard button
-statsMenuScene.action('stats:guilds', async (ctx: any) => {
+// Handle Guild Rankings button (Guild vs Guild)
+statsMenuScene.action('stats:guild_rankings', async (ctx: any) => {
   await ctx.answerCbQuery()
-  await ctx.scene.enter('guild_leaderboard')
+  await ctx.scene.enter('guild_rankings')
 })
 
-// Handle Guild Comparison button
-statsMenuScene.action('stats:compare', async (ctx: any) => {
+// Handle My Guild button (Guild inner leaderboard)
+statsMenuScene.action('stats:my_guild', async (ctx: any) => {
   await ctx.answerCbQuery()
-  await ctx.scene.enter('guild_comparison')
+  await ctx.scene.enter('my_guild_leaderboard')
 })

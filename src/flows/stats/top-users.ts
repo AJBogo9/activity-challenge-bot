@@ -15,7 +15,7 @@ export const topUsersScene = new Scenes.BaseScene<any>('top_users')
 topUsersScene.enter(async (ctx: any) => {
   try {
     const users = await getTopUsers(15)
-
+    
     if (!users || users.length === 0) {
       await TwoMessageManager.updateContent(ctx, "No users found.")
       await ctx.scene.enter('stats_menu')
@@ -32,28 +32,21 @@ topUsersScene.enter(async (ctx: any) => {
       message += prefix + formatList(displayName, user.points, titlePadding, valuePadding) + '\n'
     })
 
-    // No keyboard anymore
+    await TwoMessageManager.updateContent(ctx, message)
+    
     if (ctx.callbackQuery) {
-      await ctx.editMessageText(message, {
-        parse_mode: 'MarkdownV2'
-      })
       await ctx.answerCbQuery()
-    } else {
-      await ctx.replyWithMarkdownV2(message)
     }
   } catch (error) {
     console.error('Error fetching top users:', error)
-    await ctx.reply(ERROR_MESSAGE)
+    await TwoMessageManager.updateContent(ctx, ERROR_MESSAGE)
     await ctx.scene.enter('stats_menu')
   }
 })
 
-// Handle reply keyboard navigation
 topUsersScene.on('text', async (ctx: any) => {
   const handled = await TwoMessageManager.handleNavigation(ctx, ctx.message.text)
-  
   if (!handled) {
-    // If not a navigation button, just delete the message
     await TwoMessageManager.deleteUserMessage(ctx)
   }
 })
