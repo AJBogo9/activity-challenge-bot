@@ -1,4 +1,4 @@
-import { Scenes, Markup } from 'telegraf'
+import { Scenes } from 'telegraf'
 import { findUserByTelegramId } from '../../db/users'
 import { ERROR_MESSAGE } from '../../utils/texts'
 import { escapeMarkdown, getRankPrefix } from '../../utils/format-list'
@@ -65,11 +65,8 @@ userSummaryScene.enter(async (ctx: any) => {
       }
     }
 
-    const keyboard = Markup.inlineKeyboard([
-      [Markup.button.callback('⬅️ Back to Stats Menu', 'summary:back')]
-    ])
-
-    await TwoMessageManager.updateContent(ctx, message, keyboard)
+    // No keyboard anymore
+    await TwoMessageManager.updateContent(ctx, message)
 
     if (ctx.callbackQuery) {
       await ctx.answerCbQuery()
@@ -81,13 +78,12 @@ userSummaryScene.enter(async (ctx: any) => {
   }
 })
 
-// Handle back button - return to stats menu
-userSummaryScene.action('summary:back', async (ctx: any) => {
-  await ctx.answerCbQuery()
-  await ctx.scene.enter('stats_menu')
-})
-
-// Handle any text input - delete it silently
+// Handle reply keyboard navigation
 userSummaryScene.on('text', async (ctx: any) => {
-  await TwoMessageManager.deleteUserMessage(ctx)
+  const handled = await TwoMessageManager.handleNavigation(ctx, ctx.message.text)
+  
+  if (!handled) {
+    // If not a navigation button, just delete the message
+    await TwoMessageManager.deleteUserMessage(ctx)
+  }
 })

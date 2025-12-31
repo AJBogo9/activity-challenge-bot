@@ -1,7 +1,8 @@
-import { Scenes, Markup } from 'telegraf'
+import { Scenes } from 'telegraf'
 import { formatList } from '../../utils/format-list'
 import { ERROR_MESSAGE } from '../../utils/texts'
 import { getGuildLeaderboard } from '../../db'
+import { TwoMessageManager } from '../../utils/two-message-manager'
 
 function getRankPrefix(index: number): string {
   const medals = ['🥇', '🥈', '🥉']
@@ -18,12 +19,11 @@ export const guildLeaderboardScene = new Scenes.BaseScene<any>('guild_leaderboar
 guildLeaderboardScene.enter(async (ctx: any) => {
   try {
     const guilds = await getGuildLeaderboard()
-    
+
     let message = '*Guild Leaderboard \\(by average points\\)* 🏆\n\n'
-    
     const guildPadding = 15
     const pointPadding = 6
-    
+
     guilds.forEach((guild: any, index: number) => {
       const prefix = getRankPrefix(index)
       const escapedGuild = guild.guild.replace(/[\\_*[\]()~`>#+\-=|{}.!]/g, '\\$&')
@@ -31,21 +31,18 @@ guildLeaderboardScene.enter(async (ctx: any) => {
       const active = guild.active_members
       const total = guild.total_members
       const percent = guild.participation_percentage
+
       const label = `${escapedGuild} \\(${active}/${total} \\- ${percent}%\\)`
       message += prefix + formatList(label, points, guildPadding, pointPadding) + '\n'
     })
-    
+
     message += `\n_Total guilds: ${guilds.length}_`
-    
-    const keyboard = Markup.inlineKeyboard([
-      [Markup.button.callback('⬅️ Back to Stats Menu', 'guildleaderboard:back')]
-    ])
-    
+
+    // No keyboard anymore
     if (ctx.callbackQuery) {
       try {
         await ctx.editMessageText(message, {
-          parse_mode: 'MarkdownV2',
-          ...keyboard
+          parse_mode: 'MarkdownV2'
         })
       } catch (error: any) {
         // Ignore "message is not modified" errors
@@ -55,17 +52,21 @@ guildLeaderboardScene.enter(async (ctx: any) => {
       }
       await ctx.answerCbQuery()
     } else {
-      await ctx.replyWithMarkdownV2(message, keyboard)
+      await ctx.replyWithMarkdownV2(message)
     }
-    
   } catch (error) {
     console.error('Error in guild leaderboard scene:', error)
     await ctx.reply(ERROR_MESSAGE)
-    return ctx.scene.enter('stats_menu')
+    await ctx.scene.enter('stats_menu')
   }
 })
 
-guildLeaderboardScene.action('guildleaderboard:back', async (ctx: any) => {
-  await ctx.answerCbQuery()
-  await ctx.scene.enter('stats_menu')
+// Handle reply keyboard navigation
+guildLeaderboardScene.on('text', async (ctx: any) => {
+  const handled = await TwoMessageManager.handleNavigation(ctx, ctx.message.text)
+  
+  if (!handled) {
+    // If not a navigation button, just delete the message
+    await TwoMessageManager.deleteUserMessage(ctx)
+  }
 })
