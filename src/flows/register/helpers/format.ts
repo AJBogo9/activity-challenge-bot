@@ -1,5 +1,5 @@
 export const escapeMarkdownV2 = (text: string) => {
-  return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&')
+  return text.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, '\\$&')
 }
 
 export function formatConfirmationMessage(userData: any) {
