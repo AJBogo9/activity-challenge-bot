@@ -3,7 +3,7 @@ import { bot } from './src/bot/instance'
 import { registerCommands } from './src/bot/commands'
 import { runMigrations } from './src/db/migrate'
 import { setupBotCommands } from './src/bot/setup'
-import { closeDb } from './src/db'
+import { closeDb, initDb } from './src/db'  // ← ADD initDb here
 import * as flows from './src/flows'
 import { registerGlobalHandlers } from './src/bot/handlers/handlers'
 import { TwoMessageManager } from './src/utils/two-message-manager'
@@ -43,8 +43,13 @@ async function main() {
     console.log(`📅 Build: ${BUILD_TIME}`)
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
 
+    // Initialize database connection
+    console.log('📊 Connecting to database...')
+    await initDb()
+    console.log('')
+
     // Setup database (create tables)
-    console.log('📊 Setting up database...')
+    console.log('📊 Running migrations...')
     await runMigrations()
     console.log('')
 
