@@ -5,7 +5,13 @@ metadata:
   namespace: bot-system
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: activity-challenge-bot
   template:
+    metadata:
+      labels:
+        app: activity-challenge-bot
     spec:
       containers:
         - name: bot
@@ -50,11 +56,10 @@ spec:
                 secretKeyRef:
                   name: bot-secrets
                   key: MB_ENCRYPTION_SECRET_KEY
-            resources:
-              requests:
-                cpu: "100m"
-                memory: "128Mi"
-              limits:
-                cpu: "500m"
-                memory: "256Mi"
-            
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
