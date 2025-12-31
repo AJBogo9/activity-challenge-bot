@@ -77,7 +77,6 @@ export async function getGuildLeaderboard() {
 export async function getTopUsers(limit: number = 20): Promise<User[]> {
   return await sql<User[]>`
     SELECT * FROM users
-    WHERE points > 0
     ORDER BY points DESC
     LIMIT ${limit}
   `

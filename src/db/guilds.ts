@@ -35,7 +35,6 @@ export async function getTopGuildMembers(guildName: string, limit: number = 15) 
       points
     FROM users
     WHERE guild = ${guildName}
-      AND points > 0
     ORDER BY points DESC
     LIMIT ${limit}
   `

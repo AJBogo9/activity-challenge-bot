@@ -18,11 +18,20 @@ function getRankPrefix(index: number): string {
 export const myGuildLeaderboardScene = new Scenes.BaseScene<any>('my_guild_leaderboard')
 
 myGuildLeaderboardScene.enter(async (ctx: any) => {
+  console.log('=== ENTERING MY GUILD LEADERBOARD SCENE ===')
+  console.log('Current scene:', ctx.scene.current?.id)
+  console.log('Session contentMessageId:', ctx.session?.contentMessageId)
+  
   try {
     const userId = ctx.from.id.toString()
+    console.log('User ID:', userId)
+    
     const user = await findUserByTelegramId(userId)
+    console.log('User found:', user)
+    console.log('User guild:', user?.guild)
     
     if (!user || !user.guild) {
+      console.log('No user or guild found, going back to stats_menu')
       await TwoMessageManager.updateContent(
         ctx,
         "You need to be in a guild to view this leaderboard\\."
@@ -31,10 +40,11 @@ myGuildLeaderboardScene.enter(async (ctx: any) => {
       return
     }
 
-    // Get top members from the user's guild
     const guildMembers = await getTopGuildMembers(user.guild, 15)
+    console.log('Fetched guild members:', guildMembers?.length)
     
     if (!guildMembers || guildMembers.length === 0) {
+      console.log('No guild members found, going back to stats_menu')
       await TwoMessageManager.updateContent(
         ctx,
         `No active members found in ${escapeMarkdown(user.guild)}\\.`
