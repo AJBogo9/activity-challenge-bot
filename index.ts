@@ -1,80 +1,20 @@
-import { Scenes, session } from 'telegraf'
-import { bot } from './src/bot/instance'
-import { registerCommands } from './src/bot/commands'
-import { runMigrations } from './src/db/migrate'
-import { setupBotCommands } from './src/bot/setup'
-import { closeDb, initDb } from './src/db'  // ← ADD initDb here
-import * as flows from './src/flows'
-import { registerGlobalHandlers } from './src/bot/handlers/handlers'
-import { TwoMessageManager } from './src/utils/two-message-manager'
+// index.ts
+import { startBot } from './src/bot/start'
+import { closeDb } from './src/db'
 
-type MyContext = Scenes.SceneContext
-
-// Build timestamp
-const BUILD_TIME = new Date().toISOString()
-
-// Setup scenes stage
-const stage = new Scenes.Stage<MyContext>(Object.values(flows) as any[])
-
-// Register middleware IN ORDER
-bot.use(session())
-bot.use(stage.middleware())
-bot.use(async (ctx, next) => {
-  if (ctx.message && 'text' in ctx.message) {
-    const handled = await TwoMessageManager.handleNavigation(ctx, ctx.message.text)
-    if (handled) {
-      return
-    }
-  }
-  return next()
-})
-
-// Register global handlers AFTER stage middleware
-registerGlobalHandlers()
-
-// Register commands
-registerCommands()
-
-// Main startup function
-async function main() {
+/**
+ * Main entry point
+ */
+async function main(): Promise<void> {
   try {
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-    console.log('🚀 Starting Activity Challenge Bot...')
-    console.log(`📅 Build: ${BUILD_TIME}`)
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
-
-    // Initialize database connection
-    console.log('📊 Connecting to database...')
-    await initDb()
-    console.log('')
-
-    // Setup database (create tables)
-    console.log('📊 Running migrations...')
-    await runMigrations()
-    console.log('')
-
-    // Setup bot commands menu
-    console.log('⚙️  Configuring bot commands...')
-    await setupBotCommands()
-    console.log('')
-
     // Start the bot
-    console.log('🤖 Launching bot...')
-    bot.launch()
+    await startBot()
 
-    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-    console.log('✅ Bot is now running and listening for messages')
-    console.log(`📅 Build: ${BUILD_TIME}`)
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
-
-    // Graceful shutdown handlers
-    const shutdown = async (signal: string) => {
-      console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
-      console.log(`${signal} received, shutting down gracefully...`)
-      bot.stop(signal)
+    // Setup graceful shutdown
+    const shutdown = async (signal: string): Promise<void> => {
+      console.log(`\n🛑 ${signal} received, shutting down gracefully...`)
       await closeDb()
-      console.log('👋 Shutdown complete')
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
+      console.log('👋 Shutdown complete\n')
       process.exit(0)
     }
 
@@ -89,5 +29,4 @@ async function main() {
   }
 }
 
-// Start the application
 main()

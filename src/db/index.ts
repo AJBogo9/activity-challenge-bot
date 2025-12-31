@@ -1,4 +1,5 @@
 export { sql, initDb, closeDb } from './connection'
+export { runMigrations } from './migrate'
 
 export * from './users'
 export * from './activities'
