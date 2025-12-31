@@ -19,7 +19,7 @@ export function registerGlobalHandlers() {
     await ctx.reply('Action cancelled.')
     await ctx.scene.enter('menu_router')
   })
-  
+ 
   // Global error handler
   bot.catch((err: any, ctx: any) => {
     console.error(`Encountered an error for ${ctx.updateType}`, err)

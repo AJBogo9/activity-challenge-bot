@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- Activities/Exercises table
 CREATE TABLE IF NOT EXISTS activities (
   id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,  -- Added ON DELETE CASCADE
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   activity_type VARCHAR(255) NOT NULL,
   duration INTEGER,  -- in minutes
   points DECIMAL(10,2) NOT NULL,  -- MET-hours (decimal values)
@@ -35,20 +35,12 @@ CREATE TABLE IF NOT EXISTS activities (
 CREATE TABLE IF NOT EXISTS feedback (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-  
-  -- Likert scale ratings (1-5)
-  ease_of_use INTEGER CHECK (ease_of_use >= 1 AND ease_of_use <= 5),
-  usefulness INTEGER CHECK (usefulness >= 1 AND usefulness <= 5),
-  overall_satisfaction INTEGER CHECK (overall_satisfaction >= 1 AND overall_satisfaction <= 5),
-  
-  -- Textual feedback (main value)
-  text_feedback TEXT NOT NULL,
-  
-  -- Metadata
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  
-  -- Optional: track if this feedback has been reviewed
-  reviewed BOOLEAN DEFAULT FALSE
+  ease_of_use INTEGER CHECK (ease_of_use >= 1 AND ease_of_use <= 5),-- Likert scale ratings (1-5)
+  usefulness INTEGER CHECK (usefulness >= 1 AND usefulness <= 5),-- Likert scale ratings (1-5)
+  overall_satisfaction INTEGER CHECK (overall_satisfaction >= 1 AND overall_satisfaction <= 5),-- Likert scale ratings (1-5)
+  text_feedback TEXT NOT NULL, -- Textual feedback (main value)
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Metadata
+  reviewed BOOLEAN DEFAULT FALSE -- Optional: track if this feedback has been reviewed
 );
 
 -- Indexes for better performance

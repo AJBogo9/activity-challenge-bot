@@ -1,4 +1,5 @@
 import { Markup } from 'telegraf'
+import { TwoMessageManager } from '../../../utils/two-message-manager'
 import { getActivities, isValidActivity } from '../helpers/activity-data'
 
 /**
@@ -7,9 +8,12 @@ import { getActivities, isValidActivity } from '../helpers/activity-data'
 export async function showActivitySelection(ctx: any): Promise<void> {
   const mainCategory = ctx.wizard.state.mainCategory
   const subcategory = ctx.wizard.state.subcategory
-
+  
   if (!mainCategory || !subcategory) {
-    await ctx.reply('❌ Error: Missing category information. Please start over.')
+    await TwoMessageManager.updateContent(
+      ctx, 
+      '❌ Error: Missing category information. Please start over.'
+    )
     return
   }
 
@@ -30,14 +34,10 @@ export async function showActivitySelection(ctx: any): Promise<void> {
   // Add cancel button
   buttons.push([Markup.button.callback('❌ Cancel', 'activity:cancel')])
 
-  // Edit the existing message instead of sending a new one
-  await ctx.editMessageText(
-    `🏃 *Log Activity - Step 3/7*\n\n*Subcategory:* ${subcategory}\n\nChoose specific activity:`,
-    {
-      parse_mode: 'Markdown',
-      ...Markup.inlineKeyboard(buttons)
-    }
-  )
+  const message = `🏃 *Log Activity - Step 3/7*\n\n*Subcategory:* ${subcategory}\n\nChoose specific activity:`
+  const keyboard = Markup.inlineKeyboard(buttons)
+
+  await TwoMessageManager.updateContent(ctx, message, keyboard)
 }
 
 /**

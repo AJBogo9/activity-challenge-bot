@@ -1,6 +1,7 @@
-import { Scenes, Markup } from 'telegraf'
+import { Scenes } from 'telegraf'
 import { findUserByTelegramId } from '../../db/users'
 import { getActivitiesByUser } from '../../db/activities'
+import { TwoMessageManager } from '../../utils/two-message-manager'
 
 export const activityHistoryScene = new Scenes.BaseScene<any>('activity_history')
 
@@ -9,27 +10,22 @@ activityHistoryScene.enter(async (ctx: any) => {
     const user = await findUserByTelegramId(ctx.from.id.toString())
 
     if (!user) {
-      await ctx.reply('User not found. Please register first.')
+      await TwoMessageManager.updateContent(
+        ctx,
+        'User not found. Please register first.'
+      )
       await ctx.scene.enter('registered_menu')
       return
     }
 
     const activities = await getActivitiesByUser(user.id)
-    const keyboard = Markup.inlineKeyboard([
-      [Markup.button.callback('⬅️ Back to Profile', 'activity_history:back')]
-    ])
 
     if (activities.length === 0) {
       const message = '📜 *Activity History*\n\nYou haven\'t logged any activities yet.'
-
+      await TwoMessageManager.updateContent(ctx, message)
+      
       if (ctx.callbackQuery) {
-        await ctx.editMessageText(message, {
-          parse_mode: 'Markdown',
-          ...keyboard
-        })
         await ctx.answerCbQuery()
-      } else {
-        await ctx.replyWithMarkdown(message, keyboard)
       }
       return
     }
@@ -80,50 +76,42 @@ activityHistoryScene.enter(async (ctx: any) => {
         chunks.push(currentChunk + `_Total activities: ${activities.length}_`)
       }
 
-      // If entering from callback, delete the original message first
+      // Answer callback query if present
       if (ctx.callbackQuery) {
-        try {
-          await ctx.deleteMessage()
-        } catch (error) {
-          // Message might already be deleted, ignore error
-        }
         await ctx.answerCbQuery()
       }
 
-      // Send all chunks
-      for (let i = 0; i < chunks.length; i++) {
-        if (i === chunks.length - 1) {
-          // Add keyboard only to the last chunk
-          await ctx.replyWithMarkdown(chunks[i], keyboard)
-        } else {
-          await ctx.replyWithMarkdown(chunks[i])
-        }
+      // Send all chunks using updateContent (first chunk)
+      await TwoMessageManager.updateContent(ctx, chunks[0])
+      
+      // Send remaining chunks as separate messages
+      for (let i = 1; i < chunks.length; i++) {
+        await ctx.replyWithMarkdown(chunks[i])
       }
     } else {
-      // Check if we're editing an existing message or sending a new one
+      // Single message fits - use updateContent
+      await TwoMessageManager.updateContent(ctx, message)
+      
       if (ctx.callbackQuery) {
-        await ctx.editMessageText(message, {
-          parse_mode: 'Markdown',
-          ...keyboard
-        })
         await ctx.answerCbQuery()
-      } else {
-        await ctx.replyWithMarkdown(message, keyboard)
       }
     }
   } catch (error) {
     console.error('Error fetching activity history:', error)
-    await ctx.reply('An error occurred while fetching your activity history.')
+    await TwoMessageManager.updateContent(
+      ctx,
+      '❌ An error occurred while fetching your activity history.'
+    )
     await ctx.scene.enter('profile')
   }
 })
 
-activityHistoryScene.action('activity_history:back', async (ctx: any) => {
-  await ctx.answerCbQuery()
-  await ctx.scene.enter('profile')
-})
-
-// Handle any text input - remind to use buttons
+// Handle reply keyboard navigation
 activityHistoryScene.on('text', async (ctx: any) => {
-  await ctx.reply('Please use the buttons above to navigate.')
+  const handled = await TwoMessageManager.handleNavigation(ctx, ctx.message.text)
+  
+  if (!handled) {
+    // If not a navigation button, just delete the message
+    await TwoMessageManager.deleteUserMessage(ctx)
+  }
 })

@@ -1,4 +1,5 @@
 import { Scenes, Markup } from 'telegraf'
+import { TwoMessageManager } from '../../utils/two-message-manager'
 
 export const statsMenuScene = new Scenes.BaseScene<any>('stats_menu')
 
@@ -13,29 +14,12 @@ Choose what statistics you'd like to view:`
       Markup.button.callback('🏆 Top Users', 'stats:top')
     ],
     [
-      Markup.button.callback('🏛️ Guild vs Guild', 'stats:guilds'),
-      Markup.button.callback('⚔️ Guild Leaderboard', 'stats:compare')
-    ],
-    [Markup.button.callback('🔙 Back to Main Menu', 'stats:back')]
+      Markup.button.callback('🏆 Guild Rankings', 'stats:guild_rankings'),
+      Markup.button.callback('👥 My Guild', 'stats:my_guild')
+    ]
   ])
 
-  // Check if we're editing an existing message or sending a new one
-  if (ctx.callbackQuery) {
-    try {
-      await ctx.editMessageText(message, {
-        parse_mode: 'Markdown',
-        ...keyboard
-      })
-    } catch (error: any) {
-      // Ignore "message is not modified" errors
-      if (!error.description?.includes('message is not modified')) {
-        throw error
-      }
-    }
-    await ctx.answerCbQuery()
-  } else {
-    await ctx.replyWithMarkdown(message, keyboard)
-  }
+  await TwoMessageManager.updateContent(ctx, message, keyboard)
 })
 
 // Handle My Summary button
@@ -50,25 +34,14 @@ statsMenuScene.action('stats:top', async (ctx: any) => {
   await ctx.scene.enter('top_users')
 })
 
-// Handle Guild Leaderboard button
-statsMenuScene.action('stats:guilds', async (ctx: any) => {
+// Handle Guild Rankings button (Guild vs Guild)
+statsMenuScene.action('stats:guild_rankings', async (ctx: any) => {
   await ctx.answerCbQuery()
-  await ctx.scene.enter('guild_leaderboard')  // Changed from 'guild_standings'
+  await ctx.scene.enter('guild_rankings')
 })
 
-// Handle Guild Comparison button
-statsMenuScene.action('stats:compare', async (ctx: any) => {
+// Handle My Guild button (Guild inner leaderboard)
+statsMenuScene.action('stats:my_guild', async (ctx: any) => {
   await ctx.answerCbQuery()
-  await ctx.scene.enter('guild_comparison')
-})
-
-// Handle Back button - return to main menu
-statsMenuScene.action('stats:back', async (ctx: any) => {
-  await ctx.answerCbQuery()
-  await ctx.scene.enter('registered_menu')
-})
-
-// Handle any text input - remind to use buttons
-statsMenuScene.on('text', async (ctx: any) => {
-  await ctx.reply('Please use the buttons above to navigate the statistics menu.')
+  await ctx.scene.enter('my_guild_leaderboard')
 })

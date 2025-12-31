@@ -6,9 +6,12 @@ import { setupBotCommands } from './src/bot/setup'
 import { closeDb } from './src/db'
 import * as flows from './src/flows'
 import { registerGlobalHandlers } from './src/bot/handlers/handlers'
-import { initializeContributors } from './src/flows/info/credits'
+import { TwoMessageManager } from './src/utils/two-message-manager'
 
 type MyContext = Scenes.SceneContext
+
+// Build timestamp
+const BUILD_TIME = new Date().toISOString()
 
 // Setup scenes stage
 const stage = new Scenes.Stage<MyContext>(Object.values(flows) as any[])
@@ -29,9 +32,17 @@ bot.use(async (ctx, next) => {
 })
 
 bot.use(stage.middleware())
+bot.use(async (ctx, next) => {
+  if (ctx.message && 'text' in ctx.message) {
+    const handled = await TwoMessageManager.handleNavigation(ctx, ctx.message.text)
+    if (handled) {
+      return
+    }
+  }
+  return next()
+})
 
 // Register global handlers AFTER stage middleware
-// This way ctx.wizard will exist when callbacks are processed
 registerGlobalHandlers()
 
 // Register commands
@@ -42,16 +53,12 @@ async function main() {
   try {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
     console.log('🚀 Starting Activity Challenge Bot...')
+    console.log(`📅 Build: ${BUILD_TIME}`)
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
 
     // Setup database (create tables)
     console.log('📊 Setting up database...')
     await runMigrations()
-    console.log('')
-
-    // Initialize contributors list
-    console.log('👥 Fetching contributors...')
-    await initializeContributors()
     console.log('')
 
     // Setup bot commands menu
@@ -65,6 +72,7 @@ async function main() {
 
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
     console.log('✅ Bot is now running and listening for messages')
+    console.log(`📅 Build: ${BUILD_TIME}`)
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
 
     // Graceful shutdown handlers
@@ -80,7 +88,6 @@ async function main() {
 
     process.once('SIGINT', () => shutdown('SIGINT'))
     process.once('SIGTERM', () => shutdown('SIGTERM'))
-
   } catch (error) {
     console.error('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
     console.error('❌ Failed to start bot:', error)

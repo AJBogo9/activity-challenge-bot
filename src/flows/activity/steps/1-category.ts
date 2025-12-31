@@ -1,4 +1,5 @@
 import { Markup } from 'telegraf'
+import { TwoMessageManager } from '../../../utils/two-message-manager'
 import { getMainCategories, isValidCategory } from '../helpers/activity-data'
 
 /**
@@ -22,13 +23,11 @@ export async function showCategorySelection(ctx: any): Promise<void> {
   // Add cancel button
   buttons.push([Markup.button.callback('❌ Cancel', 'category:cancel')])
 
-  const message = await ctx.replyWithMarkdown(
-    '🏃 *Log Activity - Step 1/7*\n\nChoose a main category:',
-    Markup.inlineKeyboard(buttons)
-  )
-  
-  // Store message ID for editing later
-  ctx.wizard.state.messageId = message.message_id
+  const message = '🏃 *Log Activity - Step 1/7*\n\nChoose a main category:'
+  const keyboard = Markup.inlineKeyboard(buttons)
+
+  // Use TwoMessageManager to update the content message
+  await TwoMessageManager.updateContent(ctx, message, keyboard)
 }
 
 /**

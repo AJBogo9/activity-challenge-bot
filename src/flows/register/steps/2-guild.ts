@@ -1,5 +1,6 @@
 import { Markup } from 'telegraf'
 import { formatConfirmationMessage } from '../helpers/format'
+import { TwoMessageManager } from '../../../utils/two-message-manager'
 
 export async function handleGuildSelection(ctx: any): Promise<boolean> {
   // Wait for callback query
@@ -11,18 +12,10 @@ export async function handleGuildSelection(ctx: any): Promise<boolean> {
 
   // Handle cancel
   if (data === 'cancel_registration') {
-    try {
-      await ctx.answerCbQuery()
-      await ctx.editMessageText('❌ Registration cancelled.')
-    } catch (error) {
-      // Message might be too old to edit
-    }
-    
-    await ctx.reply(
-      'You can start registration again from the main menu.',
-      Markup.keyboard([['⬅️ Back to Main Menu']])
-        .resize()
-        .persistent()
+    await ctx.answerCbQuery()
+    await TwoMessageManager.updateContent(
+      ctx,
+      '❌ Registration cancelled.\n\nYou can start registration again from the main menu.'
     )
     await ctx.scene.enter('unregistered_menu')
     return false
@@ -52,29 +45,26 @@ export async function handleGuildSelection(ctx: any): Promise<boolean> {
       guild,
     }
 
-    try {
-      await ctx.editMessageReplyMarkup({ inline_keyboard: [] })
-    } catch (error) {
-      // Message might be too old to edit
-    }
-
     const confirmationMessage = formatConfirmationMessage(ctx.wizard.state.pendingUser)
-
-    await ctx.reply(
+    
+    await TwoMessageManager.updateContent(
+      ctx,
       confirmationMessage,
-      { 
-        parse_mode: 'MarkdownV2',
-        ...Markup.inlineKeyboard([
-          [Markup.button.callback('✅ Confirm Registration', 'confirm_profile')],
-          [Markup.button.callback('❌ Cancel', 'cancel_profile')]
-        ])
-      }
+      Markup.inlineKeyboard([
+        [
+          Markup.button.callback('❌ Cancel', 'cancel_profile'),
+          Markup.button.callback('✅ Confirm', 'confirm_profile')
+        ]
+      ])
     )
 
     return true
   } catch (error) {
     console.error('Error in guild selection:', error)
-    await ctx.reply('There was an error. Please try again.')
+    await TwoMessageManager.updateContent(
+      ctx,
+      '❌ There was an error. Please try again.'
+    )
     await ctx.scene.enter('unregistered_menu')
     return false
   }

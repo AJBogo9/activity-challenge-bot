@@ -1,4 +1,5 @@
 import { Markup } from 'telegraf'
+import { TwoMessageManager } from '../../../utils/two-message-manager'
 import { addPointsToUser, createActivity, findUserByTelegramId } from '../../../db'
 
 /**
@@ -17,7 +18,10 @@ export async function showConfirmation(ctx: any): Promise<void> {
   } = ctx.wizard.state
 
   if (!mainCategory || !activity || !intensity || !activityDate || !duration || !metValue) {
-    await ctx.reply('❌ Error: Missing activity information. Please start over.')
+    await TwoMessageManager.updateContent(
+      ctx, 
+      '❌ Error: Missing activity information. Please start over.'
+    )
     return
   }
 
@@ -26,8 +30,7 @@ export async function showConfirmation(ctx: any): Promise<void> {
     ? activityDate.toLocaleDateString() 
     : activityDate
 
-  const summary = `
-🔍 *Review Your Activity - Step 7/7*
+  const summary = `🔍 *Review Your Activity - Step 7/7*
 
 📋 *Summary:*
 - *Category:* ${mainCategory}${subcategory ? ` > ${subcategory}` : ''}
@@ -39,39 +42,16 @@ export async function showConfirmation(ctx: any): Promise<void> {
 
 🎯 *Points to be earned:* ${calculatedPoints}
 
-_Please review the information above. Is everything correct?_
-`
+_Please review the information above. Is everything correct?_`
 
-  // Try to edit the existing message
-  try {
-    await ctx.editMessageText(
-      summary,
-      {
-        parse_mode: 'Markdown',
-        ...Markup.inlineKeyboard([
-          [
-            Markup.button.callback('✅ Confirm & Save', 'confirm:save'),
-          ],
-          [
-            Markup.button.callback('❌ Cancel', 'confirm:cancel')
-          ]
-        ])
-      }
-    )
-  } catch (error) {
-    // If editing fails, send a new message
-    await ctx.replyWithMarkdown(
-      summary,
-      Markup.inlineKeyboard([
-        [
-          Markup.button.callback('✅ Confirm & Save', 'confirm:save'),
-        ],
-        [
-          Markup.button.callback('❌ Cancel', 'confirm:cancel')
-        ]
-      ])
-    )
-  }
+  const keyboard = Markup.inlineKeyboard([
+    [
+      Markup.button.callback('❌ Cancel', 'confirm:cancel'),
+      Markup.button.callback('✅ Confirm & Save', 'confirm:save')
+    ]
+  ])
+
+  await TwoMessageManager.updateContent(ctx, summary, keyboard)
 }
 
 /**
@@ -110,9 +90,9 @@ export async function handleConfirmation(ctx: any): Promise<void> {
       const user = await findUserByTelegramId(ctx.from.id.toString())
 
       if (!user) {
-        await ctx.editMessageText(
-          '❌ User not found. Please register first with /start',
-          { parse_mode: 'Markdown' }
+        await TwoMessageManager.updateContent(
+          ctx,
+          '❌ User not found. Please register first with /start'
         )
         return ctx.scene.enter('registered_menu')
       }
@@ -145,8 +125,7 @@ export async function handleConfirmation(ctx: any): Promise<void> {
         : activityDate
 
       // Success message
-      const successMessage = `
-✅ *Activity Logged Successfully!*
+      const successMessage = `✅ *Activity Logged Successfully!*
 
 📋 *Summary:*
 - *Category:* ${mainCategory}${subcategory ? ` > ${subcategory}` : ''}
@@ -159,19 +138,18 @@ export async function handleConfirmation(ctx: any): Promise<void> {
 🎯 *Points Earned:* ${calculatedPoints}
 📊 *Total Points:* ${newTotalPoints}
 
-Great work! Keep it up! 💪
-`
+Great work! Keep it up! 💪`
 
-      await ctx.editMessageText(successMessage, { parse_mode: 'Markdown' })
+      await TwoMessageManager.updateContent(ctx, successMessage)
     } catch (error) {
       console.error('Error saving activity:', error)
-      await ctx.editMessageText(
-        '❌ An error occurred while saving your activity. Please try again later.',
-        { parse_mode: 'Markdown' }
+      await TwoMessageManager.updateContent(
+        ctx,
+        '❌ An error occurred while saving your activity. Please try again later.'
       )
     }
 
-    // Return to main menu
+    // Return to main menu - this will reinitialize TwoMessageManager
     return ctx.scene.enter('registered_menu')
   }
 }
