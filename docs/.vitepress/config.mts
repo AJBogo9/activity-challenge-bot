@@ -8,6 +8,7 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Contributing', link: '/CONTRIBUTING' },
+      { text: 'Kubernetes Dev', link: '/kubernetes-dev' },
       { text: 'Point System', link: '/point-system' }
     ],
     sidebar: [
@@ -15,6 +16,7 @@ export default defineConfig({
         text: 'Documentation',
         items: [
           { text: 'Contributing', link: '/CONTRIBUTING' },
+          { text: 'Kubernetes Dev', link: '/kubernetes-dev' },
           { text: 'Point System', link: '/point-system' }
         ]
       }
