@@ -1,15 +1,23 @@
 # Environment variables
 .env
+.env.local
+.env.*.local
 
 # Dependencies
 node_modules/
 
 # Python
 venv/
+__pycache__/
+*.py[cod]
+*$py.class
 
 # IDEs and Editors
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
 # Docker & Container files
 *.deb
@@ -17,6 +25,7 @@ venv/
 # Build outputs
 dist/
 build/
+*.js.map
 
 # OS files
 .DS_Store
@@ -28,8 +37,16 @@ notes/
 *.temp
 TODO.md
 
-# Database files
-*.db
+# Database files (PostgreSQL dumps/backups)
+*.sql.gz
+*.dump
+*.backup
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Test coverage
 coverage/
@@ -41,3 +58,23 @@ docs/.vitepress/cache
 # Kubernetes config files
 kubeconfig
 **/kubeconfig
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform.lock.hcl
+
+# Talos generated configs
+**/clusterconfig/*.yaml
+!**/clusterconfig/.gitkeep
+!talconfig.yaml
+
+# Packer
+packer_cache/
+*.box
+
+# Secrets (unencrypted)
+*.key
+*.pem
