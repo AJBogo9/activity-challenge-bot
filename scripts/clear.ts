@@ -4,11 +4,15 @@ async function clearDatabase() {
   try {
     console.log("Connected to PostgreSQL")
 
-    // Clear all data from tables (in correct order due to foreign keys)
-    await sql`TRUNCATE TABLE activities CASCADE`
-    await sql`TRUNCATE TABLE users CASCADE`
+    console.log("Clearing all tables...")
+    // Using DELETE instead of TRUNCATE for more reliable behavior across different environments
+    // The order matters because of foreign key constraints
+    await sql.unsafe('DELETE FROM activities')
+    await sql.unsafe('DELETE FROM feedback')
+    await sql.unsafe('DELETE FROM users')
+    await sql.unsafe('DELETE FROM guilds')
 
-    console.log("Database cleared successfully!")
+    console.log("Database cleared successfully (all tables)!")
     await closeDb()
     process.exit(0)
   } catch (error) {
