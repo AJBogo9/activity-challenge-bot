@@ -18,6 +18,7 @@ resource "kubernetes_secret" "bot_secrets" {
     COMPETITION_START_DATE   = var.competition_start_date
     COMPETITION_END_DATE     = var.competition_end_date
     MB_ENCRYPTION_SECRET_KEY = var.mb_encryption_secret_key
+    WEBAPP_URL               = var.webapp_url
   }
 }
 
@@ -50,6 +51,24 @@ resource "kubernetes_service" "postgres" {
     port {
       port        = 5432
       target_port = 5432
+    }
+    type = "ClusterIP"
+  }
+}
+
+resource "kubernetes_service" "bot" {
+  metadata {
+    name      = "activity-challenge-bot"
+    namespace = kubernetes_namespace.bot_system.metadata[0].name
+  }
+  spec {
+    selector = {
+      app = "activity-challenge-bot"
+    }
+    port {
+      name        = "http"
+      port        = 3001
+      target_port = 3001
     }
     type = "ClusterIP"
   }
@@ -175,9 +194,27 @@ resource "kubernetes_deployment" "bot" {
           image = var.bot_image
           image_pull_policy = "Always" 
 
+          port {
+            container_port = 3001
+            name           = "http"
+          }
+
           env {
             name  = "NODE_ENV"
             value = "development"
+          }
+          env {
+            name  = "API_PORT"
+            value = "3001"
+          }
+          env {
+            name = "WEBAPP_URL"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret.bot_secrets.metadata[0].name
+                key  = "WEBAPP_URL"
+              }
+            }
           }
           env {
             name = "BOT_TOKEN"

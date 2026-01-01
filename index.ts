@@ -7,6 +7,7 @@ import { closeDb } from './src/db'
 import * as flows from './src/flows'
 import { registerGlobalHandlers } from './src/bot/handlers/handlers'
 import { TwoMessageManager } from './src/utils/two-message-manager'
+import { startApiServer } from './src/api/server'
 
 type MyContext = Scenes.SceneContext
 
@@ -69,6 +70,11 @@ async function main() {
     // Start the bot
     console.log('🤖 Launching bot...')
     bot.launch()
+
+    // Start API Server
+    const API_PORT = parseInt(process.env.API_PORT || '3000')
+    console.log(`🌐 Starting API server on port ${API_PORT}...`)
+    startApiServer(API_PORT)
 
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
     console.log('✅ Bot is now running and listening for messages')
