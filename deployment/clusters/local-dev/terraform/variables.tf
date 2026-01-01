@@ -40,6 +40,12 @@ variable "mb_encryption_secret_key" {
   default     = "dummy_secret_key_for_metabase_encryption"
 }
 
+variable "webapp_url" {
+  description = "Mini App URL"
+  type        = string
+  default     = "http://localhost:3001"
+}
+
 variable "bot_image" {
   description = "Docker image for the bot"
   type        = string

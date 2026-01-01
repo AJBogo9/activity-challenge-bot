@@ -16,9 +16,19 @@ spec:
       containers:
         - name: bot
           image: ghcr.io/ajbogo9/activity-challenge-bot:latest
+          ports:
+            - containerPort: 3001
+              name: http
           env:
             - name: NODE_ENV
               value: production
+            - name: API_PORT
+              value: "3001"
+            - name: WEBAPP_URL
+              valueFrom:
+                secretKeyRef:
+                  name: bot-secrets
+                  key: WEBAPP_URL
             - name: BOT_TOKEN
               valueFrom:
                 secretKeyRef:

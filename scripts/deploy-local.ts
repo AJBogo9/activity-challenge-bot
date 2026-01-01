@@ -75,6 +75,7 @@ const envMap: Record<string, string> = {
   COMPETITION_START_DATE: "competition_start_date",
   COMPETITION_END_DATE: "competition_end_date",
   MB_ENCRYPTION_SECRET_KEY: "mb_encryption_secret_key",
+  WEBAPP_URL: "webapp_url",
 };
 
 for (const [envKey, tfVar] of Object.entries(envMap)) {
