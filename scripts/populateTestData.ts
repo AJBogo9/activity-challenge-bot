@@ -1,10 +1,11 @@
-import { sql, closeDb } from '../src/db'
+import { sql, initDb, closeDb } from '../src/db'
 import { createUser } from '../src/db/users'
 import { addPointsToUser } from '../src/db/points'
 import { getGuildNames } from '../src/db/guilds'
 
 async function populateData() {
   try {
+    await initDb()
     console.log("Connected to PostgreSQL for test data population.")
 
     const guilds = await getGuildNames()

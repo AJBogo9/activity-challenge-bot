@@ -1,4 +1,4 @@
-import { sql, closeDb } from '../src/db'
+import { sql, initDb, closeDb } from '../src/db'
 
 const INITIAL_GUILDS = [
     { name: 'TiK', members: 300 },
@@ -24,6 +24,7 @@ const INITIAL_GUILDS = [
 
 async function initGuilds() {
     try {
+        await initDb()
         console.log('Initializing guilds...')
 
         for (const guild of INITIAL_GUILDS) {
