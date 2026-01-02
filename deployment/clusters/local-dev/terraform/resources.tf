@@ -17,7 +17,6 @@ resource "kubernetes_secret" "bot_secrets" {
     POSTGRES_DB              = var.postgres_db
     COMPETITION_START_DATE   = var.competition_start_date
     COMPETITION_END_DATE     = var.competition_end_date
-    MB_ENCRYPTION_SECRET_KEY = var.mb_encryption_secret_key
     WEBAPP_URL               = var.webapp_url
   }
 }
@@ -32,9 +31,6 @@ resource "kubernetes_config_map" "postgres_init_scripts" {
     "init-databases.sql" = <<EOF
 -- Initialize additional databases for the application
 -- This script runs only on first database initialization
-
--- Create metabase database
-CREATE DATABASE metabase;
 EOF
   }
 }

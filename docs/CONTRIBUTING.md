@@ -3,18 +3,21 @@
 Thanks for your interest in contributing to the Activity Challenge Bot! This guide will help you set up your development environment.
 
 ## Table of Contents
-- [Development Setup](#development-setup)
-  - [Prerequisites](#prerequisites)
-  - [Step 1: Clone the Repository](#step-1-clone-the-repository)
-  - [Step 2: Install Dependencies](#step-2-install-dependencies)
-  - [Step 3: Set Up Services with Podman](#step-3-set-up-services-with-podman)
-  - [Step 4: Configure Environment Variables](#step-4-configure-environment-variables)
-- [Development Workflow](#development-workflow)
-  - [Running the Bot](#running-the-bot)
-  - [Managing Data](#managing-data)
-  - [Database Access](#database-access)
-- [Testing](#testing)
-- [Contributing Standards](#contributing-standards)
+- [Contributing Guide 🎉](#contributing-guide-)
+  - [Table of Contents](#table-of-contents)
+  - [Development Setup](#development-setup)
+    - [Prerequisites](#prerequisites)
+    - [Step 1: Clone the Repository](#step-1-clone-the-repository)
+    - [Step 2: Install Dependencies](#step-2-install-dependencies)
+    - [Step 3: Set Up Services with Podman](#step-3-set-up-services-with-podman)
+    - [Step 4: Configure Environment Variables](#step-4-configure-environment-variables)
+  - [Development Workflow](#development-workflow)
+    - [Running the Bot](#running-the-bot)
+    - [Managing Data](#managing-data)
+    - [Database Access](#database-access)
+  - [Testing](#testing)
+  - [Contributing Standards](#contributing-standards)
+  - [Resources](#resources)
 
 ---
 
@@ -45,7 +48,7 @@ bun install
 
 ### Step 3: Set Up Services with Podman
 
-Start the required services (Postgres, Metabase) using Podman Compose:
+Start the required services (Postgres) using Podman Compose:
 
 ```bash
 bun run pod:up

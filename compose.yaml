@@ -11,30 +11,11 @@ services:
       - "127.0.0.1:5432:5432"  # Only expose to localhost
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
-
-  metabase:
-    image: metabase/metabase:latest
-    container_name: activity-bot-metabase
-    ports:
-      - "127.0.0.1:3000:3000"  # Only expose to localhost (use nginx/caddy for public access)
-    environment:
-      MB_DB_TYPE: postgres
-      MB_DB_DBNAME: metabase
-      MB_DB_PORT: 5432
-      MB_DB_USER: ${POSTGRES_USER}
-      MB_DB_PASS: ${POSTGRES_PASSWORD}
-      MB_DB_HOST: postgres
-      MB_ENCRYPTION_SECRET_KEY: ${MB_ENCRYPTION_SECRET_KEY}  # Add this to your .env
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: always
 
   app:
     build: .
@@ -56,7 +37,7 @@ services:
         condition: service_healthy
     volumes:
       - ./data:/app/data:z  # Only mount data directory, not entire source code
-    command: bun index.ts  # Remove --watch for production
+    command: bun index.ts
 
 volumes:
   postgres_data:
