@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - deployment.yaml
   - bot-secrets.sops.yaml
+  - service.yaml

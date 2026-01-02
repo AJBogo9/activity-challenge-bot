@@ -1,0 +1,13 @@
+# Ignore Terraform directories and state files recursively for all clusters
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/.terraform.lock.hcl
+
+# Ignore secret variable files
+**/*.tfvars
+**/*.tfvars.json
+**/secrets.tfvars
+
+# Ignore Talos specific generated configs if any
+**/talos/clusterconfig/

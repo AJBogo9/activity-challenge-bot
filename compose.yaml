@@ -40,10 +40,14 @@ services:
     build: .
     container_name: activity-challenge-bot
     restart: always
+    ports:
+      - "3001:3001"
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/activity_challenge
       NODE_ENV: production
       BOT_TOKEN: ${BOT_TOKEN}
+      API_PORT: 3001
+      WEBAPP_URL: ${WEBAPP_URL}
       # Add competition dates
       COMPETITION_START_DATE: ${COMPETITION_START_DATE}
       COMPETITION_END_DATE: ${COMPETITION_END_DATE}

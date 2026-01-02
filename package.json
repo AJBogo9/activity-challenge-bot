@@ -45,7 +45,22 @@
     "lint": "eslint --max-warnings=-1",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "webapp:install": "cd webapp && bun install",
+    "webapp:build": "cd webapp && bun run build",
+    "webapp:dev": "cd webapp && bun run dev",
+    "//18": "════════════════════════════════════════════════════════════",
+    "//19": "☸️  KUBERNETES DEV",
+    "//20": "════════════════════════════════════════════════════════════",
+    "cluster:setup": "bun scripts/setup-local-cluster.ts",
+    "cluster:deploy": "bun scripts/deploy-local.ts",
+    "cluster:destroy": "bun scripts/destroy-local.ts",
+    "cluster:logs": "kubectl logs -n bot-system -l app=activity-challenge-bot -f",
+    "cluster:shell": "kubectl exec -it -n bot-system deploy/activity-challenge-bot -- sh",
+    "cluster:init-guilds": "kubectl exec -n bot-system deploy/activity-challenge-bot -- bun scripts/init-guilds.ts",
+    "cluster:populate": "kubectl exec -n bot-system deploy/activity-challenge-bot -- bun scripts/populateTestData.ts",
+    "cluster:clear": "kubectl exec -n bot-system deploy/activity-challenge-bot -- bun scripts/clear.ts",
+    "cluster:db:psql": "kubectl exec -it -n bot-system deploy/postgres -- psql -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-summer_body_bot}"
   },
   "repository": {
     "type": "git",

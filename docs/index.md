@@ -30,5 +30,10 @@ Add the bot to Telegram and start logging activities for your guild. See the [Co
 
 ## Documentation
 
+
+
 - [Contributing Guide](./CONTRIBUTING.md) - How to setup the project locally
+
+- [Kubernetes Dev Guide](./kubernetes-dev.md) - Local Kubernetes development with Talos
+
 - [Point System](./point-system.md) - How points are calculated and awarded
