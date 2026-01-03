@@ -8,6 +8,22 @@ const envSchema = z.object({
 
 export const config = envSchema.parse(process.env);
 
+// Database configuration
+export const dbConfig = {
+  connectionString: config.DATABASE_URL,
+  max: 10,
+  idle_timeout: 20,
+  connect_timeout: 10,
+  maxRetries: 10,
+  retryDelay: 2000, // 2 seconds
+};
+
+// Bot configuration
+export const botConfig = {
+  token: config.BOT_TOKEN,
+  keepAlive: false,
+};
+
 // Re-export competition config
-export { CURRENT_COMPETITION, isCompetitionActive, getDaysRemaining } from './competition';
-export * from './contributors'
+export { CURRENT_COMPETITION, isCompetitionActive, getDaysRemaining, getDaysElapsed, getCompetitionProgress } from './competition';
+export * from './contributors';

@@ -1,21 +1,14 @@
 // @ts-expect-error - No type definitions available for telegram-inline-calendar
-import Calendar from 'telegram-inline-calendar'
-import { bot } from '../bot/instance'
-import { startDate, endDate } from '../constants'
+import Calendar from 'telegram-inline-calendar';
+import { bot } from '../bot/instance';
+import { CURRENT_COMPETITION } from '../config';
 
-// Parse dates with explicit handling
-const parseDate = (dateStr: string): Date | false => {
-  if (!dateStr) return false
-  
-  // Parse YYYY-MM-DD format explicitly at noon UTC to avoid timezone issues
-  const [year, month, day] = dateStr.split('-').map(Number)
-  if (!year || !month || !day) return false
-  
-  return new Date(Date.UTC(year, month - 1, day, 12, 0, 0))
-}
-
-const parsedStartDate = parseDate(startDate)
-const parsedEndDate = parseDate(endDate)
+/**
+ * Convert Date object to YYYY-MM-DD format at noon UTC to avoid timezone issues
+ */
+const formatDateForCalendar = (date: Date): Date => {
+  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0));
+};
 
 /**
  * Calendar for activity logging - respects competition dates
@@ -26,9 +19,9 @@ const activityCalendar = new Calendar(bot, {
   bot_api: 'telegraf',
   close_calendar: true,
   start_week_day: 1, // Monday
-  start_date: parsedStartDate,
-  stop_date: parsedEndDate
-})
+  start_date: formatDateForCalendar(CURRENT_COMPETITION.startDate),
+  stop_date: formatDateForCalendar(CURRENT_COMPETITION.endDate)
+});
 
 /**
  * Show the activity calendar picker
@@ -36,15 +29,14 @@ const activityCalendar = new Calendar(bot, {
  */
 export async function showActivityCalendar(ctx: any): Promise<any> {
   try {
-    const message = ctx.message || ctx.callbackQuery?.message
+    const message = ctx.message || ctx.callbackQuery?.message;
     if (!message) {
-      throw new Error('No message context available for calendar')
+      throw new Error('No message context available for calendar');
     }
-    
-    return await activityCalendar.startNavCalendar(message)
+    return await activityCalendar.startNavCalendar(message);
   } catch (error) {
-    console.error('Error showing calendar:', error)
-    throw error
+    console.error('Error showing calendar:', error);
+    throw error;
   }
 }
 
@@ -55,21 +47,20 @@ export async function showActivityCalendar(ctx: any): Promise<any> {
  */
 export function handleCalendarSelection(ctx: any): string | null {
   if (!ctx.callbackQuery?.message) {
-    return null
+    return null;
   }
 
-  const chatId = ctx.callbackQuery.message.chat.id
-  const messageId = ctx.callbackQuery.message.message_id
+  const chatId = ctx.callbackQuery.message.chat.id;
+  const messageId = ctx.callbackQuery.message.message_id;
 
   // Check if this callback is for our calendar
   if (messageId === activityCalendar.chats.get(chatId)) {
-    const result = activityCalendar.clickButtonCalendar(ctx.callbackQuery)
-    
+    const result = activityCalendar.clickButtonCalendar(ctx.callbackQuery);
     // -1 means calendar navigation (prev/next month), not a date selection
     if (result !== -1 && result) {
-      return result as string
+      return result as string;
     }
   }
 
-  return null
+  return null;
 }

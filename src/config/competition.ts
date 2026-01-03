@@ -2,7 +2,6 @@
  * Competition configuration
  * Update these dates for each competition period
  */
-
 export interface CompetitionConfig {
   startDate: Date;
   endDate: Date;
@@ -12,11 +11,39 @@ export interface CompetitionConfig {
 
 // Current active competition
 export const CURRENT_COMPETITION: CompetitionConfig = {
-  name: "Winter 2026 Activity Challenge",
-  startDate: new Date("2026-12-24"),
+  name: "Winter 2025-2026 Activity Challenge",
+  startDate: new Date("2025-12-24"),
   endDate: new Date("2026-03-31"),
   description: "Q1 2026 fitness challenge"
 };
+
+// Validate competition dates on startup
+const validateCompetitionDates = () => {
+  if (isNaN(CURRENT_COMPETITION.startDate.getTime())) {
+    throw new Error(
+      `Invalid competition start date: ${CURRENT_COMPETITION.startDate}. ` +
+      `Please check the date format in src/config/competition.ts`
+    );
+  }
+  
+  if (isNaN(CURRENT_COMPETITION.endDate.getTime())) {
+    throw new Error(
+      `Invalid competition end date: ${CURRENT_COMPETITION.endDate}. ` +
+      `Please check the date format in src/config/competition.ts`
+    );
+  }
+  
+  if (CURRENT_COMPETITION.startDate >= CURRENT_COMPETITION.endDate) {
+    throw new Error(
+      `Competition start date (${CURRENT_COMPETITION.startDate.toISOString()}) ` +
+      `must be before end date (${CURRENT_COMPETITION.endDate.toISOString()}). ` +
+      `Please fix the dates in src/config/competition.ts`
+    );
+  }
+};
+
+// Run validation immediately when this module is imported
+validateCompetitionDates();
 
 // Helper functions
 export const isCompetitionActive = (date: Date = new Date()): boolean => {
