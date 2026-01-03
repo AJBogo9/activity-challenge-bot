@@ -1,5 +1,4 @@
-import { TwoMessageManager } from '../../../utils/two-message-manager'
-import { handleCalendarSelection, showActivityCalendar } from '../../../utils/calendar'
+import { handleCalendarSelection, showActivityCalendar, TwoMessageManager } from '../../../utils'
 
 /**
  * Display date selection screen with calendar

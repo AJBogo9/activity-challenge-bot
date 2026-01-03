@@ -1,6 +1,6 @@
-import { ERROR_MESSAGE } from "../../utils/texts"
+import { ERROR_MESSAGE } from "../../utils"
 import { bot } from "../instance"
-import { handleInlineQuery } from './inlineQueryHandler'
+import { handleInlineQuery } from "./inlineQueryHandler"
 
 export function registerGlobalHandlers() {
   // Register inline query handler

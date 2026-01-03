@@ -1,6 +1,6 @@
 import { Scenes } from 'telegraf'
-import { findUserByTelegramId } from '../../db/users'
-import { TwoMessageManager } from '../../utils/two-message-manager'
+import { findUserByTelegramId } from '../../db'
+import { TwoMessageManager } from '../../utils'
 
 export const userProfileInfoScene = new Scenes.BaseScene<any>('user_profile_info')
 

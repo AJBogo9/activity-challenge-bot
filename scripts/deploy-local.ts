@@ -74,7 +74,6 @@ const envMap: Record<string, string> = {
   POSTGRES_DB: "postgres_db",
   COMPETITION_START_DATE: "competition_start_date",
   COMPETITION_END_DATE: "competition_end_date",
-  MB_ENCRYPTION_SECRET_KEY: "mb_encryption_secret_key",
   WEBAPP_URL: "webapp_url",
 };
 

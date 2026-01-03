@@ -1,8 +1,6 @@
 import { Scenes } from 'telegraf'
-import { formatList } from '../../utils/format-list'
-import { ERROR_MESSAGE } from '../../utils/texts'
 import { getTopUsers } from '../../db'
-import { TwoMessageManager } from '../../utils/two-message-manager'
+import { formatList, TwoMessageManager, ERROR_MESSAGE } from '../../utils'
 
 function getRankPrefix(index: number): string {
   const medals = ['🥇', '🥈', '🥉']

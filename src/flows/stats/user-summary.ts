@@ -1,9 +1,6 @@
 import { Scenes } from 'telegraf'
-import { findUserByTelegramId } from '../../db/users'
-import { ERROR_MESSAGE } from '../../utils/texts'
-import { escapeMarkdown, getRankPrefix } from '../../utils/format-list'
-import { getNearbyGuildUsers, getNearbyUsers, getUserSummary } from '../../db'
-import { TwoMessageManager } from '../../utils/two-message-manager'
+import { getNearbyGuildUsers, getNearbyUsers, getUserSummary, findUserByTelegramId } from '../../db'
+import { TwoMessageManager, escapeMarkdown, getRankPrefix, ERROR_MESSAGE } from '../../utils'
 
 export const userSummaryScene = new Scenes.BaseScene<any>('user_summary')
 

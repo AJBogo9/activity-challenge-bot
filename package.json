@@ -28,15 +28,13 @@
     "pod:init-guilds": "podman exec -it activity-challenge-bot bun scripts/init-guilds.ts",
     "pod:test": "podman exec -it activity-challenge-bot bun test",
     "//9": "════════════════════════════════════════════════════════════",
-    "//10": "🗄️  DATABASE & METABASE",
+    "//10": "🗄️  DATABASE",
     "//11": "════════════════════════════════════════════════════════════",
     "pod:db:psql": "podman exec -it activity-bot-postgres psql -U ${POSTGRES_USER:-postgres} -d activity_challenge",
-    "pod:metabase:logs": "podman logs -f activity-bot-metabase",
-    "pod:metabase:restart": "podman restart activity-bot-metabase",
     "//12": "════════════════════════════════════════════════════════════",
     "//13": "🧪 TESTING",
     "//14": "════════════════════════════════════════════════════════════",
-    "test": "bun test",
+    "test": "NODE_ENV=test BOT_TOKEN=test-bot-token-12345 DATABASE_URL=postgresql://testuser:testpass@localhost:5432/testdb bun test",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
     "//15": "════════════════════════════════════════════════════════════",
@@ -89,7 +87,8 @@
     "fuse.js": "^7.1.0",
     "postgres": "^3.4.7",
     "telegraf": "^4.16.2",
-    "telegram-inline-calendar": "^1.10.0"
+    "telegram-inline-calendar": "^1.10.0",
+    "zod": "^4.3.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",

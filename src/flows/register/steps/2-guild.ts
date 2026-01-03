@@ -1,6 +1,6 @@
 import { Markup } from 'telegraf'
 import { formatConfirmationMessage } from '../helpers/format'
-import { TwoMessageManager } from '../../../utils/two-message-manager'
+import { TwoMessageManager } from '../../../utils'
 
 export async function handleGuildSelection(ctx: any): Promise<boolean> {
   // Wait for callback query

@@ -1,6 +1,5 @@
 import { Scenes } from 'telegraf'
-import { TERMS_AND_CONDITIONS } from '../../utils/texts'
-import { TwoMessageManager } from '../../utils/two-message-manager'
+import { TERMS_AND_CONDITIONS, TwoMessageManager } from '../../utils'
 
 export const termsScene = new Scenes.BaseScene<any>('terms_scene')
 

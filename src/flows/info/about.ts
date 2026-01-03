@@ -1,6 +1,5 @@
 import { Scenes } from 'telegraf'
-import { ABOUT_BOT_MESSAGE } from '../../utils/texts'
-import { TwoMessageManager } from '../../utils/two-message-manager'
+import { ABOUT_BOT_MESSAGE, TwoMessageManager } from '../../utils'
 
 export const aboutBotScene = new Scenes.BaseScene<any>('about_bot_scene')
 

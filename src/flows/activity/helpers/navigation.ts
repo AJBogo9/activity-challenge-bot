@@ -1,4 +1,4 @@
-import { TwoMessageManager } from '../../../utils/two-message-manager'
+import { TwoMessageManager } from '../../../utils'
 
 /**
  * Cancel the wizard and return to main menu

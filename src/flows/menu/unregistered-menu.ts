@@ -1,5 +1,5 @@
 import { Scenes } from 'telegraf'
-import { TwoMessageManager } from '../../utils/two-message-manager'
+import { TwoMessageManager } from '../../utils'
 
 export const mainMenuScene = new Scenes.BaseScene<any>('unregistered_menu')
 

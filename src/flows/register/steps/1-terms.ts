@@ -1,8 +1,7 @@
 import { Markup } from 'telegraf'
 import { findUserByTelegramId, getGuildNames } from '../../../db'
-import { TERMS_AND_CONDITIONS } from '../../../utils/texts'
 import { createGuildButtons } from '../helpers/keyboard-builder'
-import { TwoMessageManager } from '../../../utils/two-message-manager'
+import { TERMS_AND_CONDITIONS, TwoMessageManager } from '../../../utils'
 
 export async function showTermsStep(ctx: any) {
   const user = await findUserByTelegramId(ctx.from.id.toString())

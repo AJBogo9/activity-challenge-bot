@@ -29,11 +29,14 @@ COPY --from=builder /app/webapp/node_modules ./webapp/node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/scripts ./scripts
-COPY --from=builder /app/data/processed/4_level_hierarchy.json ./data/processed/4_level_hierarchy.json
-COPY --from=builder /app/data/contributors.ts ./data/contributors.ts
+COPY --from=builder /app/tests ./tests
+COPY --from=builder /app/data/processed/activity-hierarchy.json ./data/processed/activity-hierarchy.json
+COPY --from=builder /app/src/config/contributors.ts ./src/config/contributors.ts
 COPY --from=builder /app/index.ts ./
 COPY --from=builder /app/package.json ./
-
+# Copy ESLint config for linting in tests
+COPY --from=builder /app/eslint.config.mjs ./
+COPY --from=builder /app/tsconfig.json ./
 # Specify the API port
 EXPOSE 3001
 

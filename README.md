@@ -1,6 +1,6 @@
 ![SummerBodyBot Banner](./assets/banner.svg)
 
-SummerBodyBot is a Telegram bot designed to track and record activity scores among Aalto guilds and within teams. Participants can register, join or create teams, log activities to earn points, and view various rankings and statistics via the bot and a Metabase dashboard.
+SummerBodyBot is a Telegram bot designed to track and record activity scores among Aalto guilds and within teams. Participants can register, join or create teams, log activities to earn points, and view various rankings and statistics via the bot.
 
 ## Features
 
@@ -8,7 +8,6 @@ SummerBodyBot is a Telegram bot designed to track and record activity scores amo
 - 👥 **Team management**: Create or join teams to compete with friends.
 - 📊 **Real-time leaderboards**: Track your progress and rankings instantly.
 - 🏃 **Activity logging**: Log exercise and wellness activities with ease.
-- 📈 **Metabase integration**: Visual analytics and dashboards for deep insights.
 - 🛠️ **Administrative tools**: Scripts for managing guilds and test data.
 
 ## Tech Stack
@@ -17,7 +16,6 @@ SummerBodyBot is a Telegram bot designed to track and record activity scores amo
 - **Telegraf** - Modern Telegram bot framework
 - **Postgres** - Relational database for persistent storage
 - **Podman** - Containerization for easy deployment
-- **Metabase** - Business intelligence and analytics
 - **VitePress** - Documentation site generator
 
 ## Quick Start

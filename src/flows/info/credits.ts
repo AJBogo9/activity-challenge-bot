@@ -1,6 +1,6 @@
 import { Scenes } from 'telegraf'
-import { TwoMessageManager } from '../../utils/two-message-manager'
-import { CONTRIBUTORS } from '../../../data/contributors'
+import { TwoMessageManager } from '../../utils'
+import { CONTRIBUTORS } from '../../config'
 
 export const creditsScene = new Scenes.BaseScene<any>('credits')
 

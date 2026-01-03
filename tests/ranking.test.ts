@@ -14,7 +14,6 @@ describe("Ranking Utilities", () => {
     });
 
     test("should handle string numbers via parseInt in the flow", () => {
-        // This mimics the flow where parseInt is used
         expect(getRankPrefix(parseInt("1"))).toBe('🥇');
         expect(getRankPrefix(parseInt("5"))).toBe('5\\.');
     });

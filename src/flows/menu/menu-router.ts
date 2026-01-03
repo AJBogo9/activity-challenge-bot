@@ -1,5 +1,5 @@
 import { Scenes } from 'telegraf'
-import { findUserByTelegramId } from '../../db/users'
+import { findUserByTelegramId } from '../../db'
 
 // This scene checks if user is registered and routes to appropriate menu
 export const menuRouterScene = new Scenes.BaseScene<any>('menu_router')

@@ -61,11 +61,6 @@ spec:
                 secretKeyRef:
                   name: bot-secrets
                   key: COMPETITION_END_DATE
-            - name: MB_ENCRYPTION_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: bot-secrets
-                  key: MB_ENCRYPTION_SECRET_KEY
           resources:
             requests:
               cpu: "100m"

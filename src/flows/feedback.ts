@@ -1,7 +1,6 @@
 import { Scenes, Markup } from 'telegraf'
-import { saveFeedback } from '../db/feedback'
-import { findUserByTelegramId } from '../db/users'
-import { TwoMessageManager } from '../utils/two-message-manager'
+import { findUserByTelegramId, saveFeedback } from '../db'
+import { TwoMessageManager } from '../utils'
 
 // Wizard scene for feedback collection
 export const feedbackWizard = new Scenes.WizardScene<any>(

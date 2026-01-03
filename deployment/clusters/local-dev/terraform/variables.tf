@@ -34,12 +34,6 @@ variable "competition_end_date" {
   default     = "2025-12-31T23:59:59Z"
 }
 
-variable "mb_encryption_secret_key" {
-  description = "Metabase Encryption Secret Key"
-  type        = string
-  default     = "dummy_secret_key_for_metabase_encryption"
-}
-
 variable "webapp_url" {
   description = "Mini App URL"
   type        = string

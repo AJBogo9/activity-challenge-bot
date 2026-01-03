@@ -1,5 +1,5 @@
 import { Markup } from 'telegraf'
-import { TwoMessageManager } from '../../../utils/two-message-manager'
+import { TwoMessageManager } from '../../../utils'
 import { getActivities, isValidActivity } from '../helpers/activity-data'
 
 /**
