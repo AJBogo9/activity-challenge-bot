@@ -33,7 +33,9 @@ COPY --from=builder /app/data/processed/activity-hierarchy.json ./data/processed
 COPY --from=builder /app/src/config/contributors.ts ./src/config/contributors.ts
 COPY --from=builder /app/index.ts ./
 COPY --from=builder /app/package.json ./
-
+# Copy ESLint config for linting in tests
+COPY --from=builder /app/eslint.config.mjs ./
+COPY --from=builder /app/tsconfig.json ./
 # Specify the API port
 EXPOSE 3001
 
