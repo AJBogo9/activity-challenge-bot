@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { getRankPrefix, escapeMarkdown } from "../src/utils";
+import { getRankPrefix, escapeMarkdown } from "../src/utils/format-list";
 
 describe("Ranking Utilities", () => {
     test("should return medals for top 3 rankings", () => {
@@ -14,7 +14,6 @@ describe("Ranking Utilities", () => {
     });
 
     test("should handle string numbers via parseInt in the flow", () => {
-        // This mimics the flow where parseInt is used
         expect(getRankPrefix(parseInt("1"))).toBe('🥇');
         expect(getRankPrefix(parseInt("5"))).toBe('5\\.');
     });
