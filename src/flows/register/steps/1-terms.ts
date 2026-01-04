@@ -7,7 +7,7 @@ export async function showTermsStep(ctx: any) {
   const user = await findUserByTelegramId(ctx.from.id.toString())
   
   if (user) {
-    await ctx.reply("You've already registered! You can start logging activities.")
+    await ctx.reply("You've already registered\\! You can start logging activities\\.")
     await ctx.scene.enter('registered_menu')
     return
   }
@@ -35,7 +35,7 @@ export async function handleTermsResponse(ctx: any): Promise<boolean> {
     await ctx.answerCbQuery()
     await TwoMessageManager.updateContent(
       ctx,
-      '❌ You declined the terms and conditions.\n\nYou can try again from the main menu.'
+      '❌ You declined the terms and conditions\\.\n\nYou can try again from the main menu\\.'
     )
     await ctx.scene.enter('unregistered_menu')
     return false
@@ -52,16 +52,15 @@ export async function handleTermsResponse(ctx: any): Promise<boolean> {
       
       await TwoMessageManager.updateContent(
         ctx,
-        '✅ Terms accepted!\n\n*Please select your guild:*',
+        '✅ Terms accepted\\!\n\n*Please select your guild:*',
         Markup.inlineKeyboard(guildRows)
       )
-      
       return true
     } catch (error) {
       console.error('Error loading guilds:', error)
       await TwoMessageManager.updateContent(
         ctx,
-        '❌ There was an error loading guilds. Please try again.'
+        '❌ There was an error loading guilds\\. Please try again\\.'
       )
       await ctx.scene.enter('unregistered_menu')
       return false
