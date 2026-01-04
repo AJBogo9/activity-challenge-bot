@@ -1,6 +1,6 @@
 import { Scenes, Markup } from 'telegraf'
 import { findUserByTelegramId, getActivitiesByUser, deleteActivity, addPointsToUser } from '../../db'
-import { TwoMessageManager } from '../../utils'
+import { formatDate, TwoMessageManager } from '../../utils'
 import { Activity } from '../../types'
 
 const ACTIVITIES_PER_PAGE = 5
@@ -44,7 +44,7 @@ function buildActivityMessage(
     if (activity.description) {
       message += `   📝 ${activity.description}\n`
     }
-    message += `   📅 ${activity.activity_date}\n`
+    message += `   📅 ${formatDate(activity.activity_date)}\n`
 
     // Add delete button for this activity
     buttons.push([
@@ -153,7 +153,7 @@ activityHistoryScene.action(/^delete:(\d+)$/, async (ctx: any) => {
     message += `⏱️ ${activity.duration} min | `
   }
   message += `🎯 ${activity.points} pts\n`
-  message += `📅 ${activity.activity_date}\n\n`
+  message += `📅 ${formatDate(activity.activity_date)}\n\n`
   message += `This will deduct *${activity.points} points* from your total.\n\n`
   message += '_Are you sure you want to delete this activity?_'
 
