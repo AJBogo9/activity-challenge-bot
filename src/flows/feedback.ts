@@ -12,10 +12,10 @@ export const feedbackWizard = new Scenes.WizardScene<any>(
     
     await TwoMessageManager.updateContent(
       ctx,
-      '📝 *Feedback - Step 1/4*\n\n' +
+      '📝 *Feedback \\- Step 1/4*\n\n' +
       'How easy was it to use this bot?\n\n' +
-      '1 = Very Difficult\n' +
-      '5 = Very Easy',
+      '1 \\= Very Difficult\n' +
+      '5 \\= Very Easy',
       Markup.inlineKeyboard([
         [
           Markup.button.callback('1', 'rate_1'),
@@ -37,7 +37,7 @@ export const feedbackWizard = new Scenes.WizardScene<any>(
       const data = ctx.callbackQuery.data
       
       if (data === 'cancel_feedback') {
-        await TwoMessageManager.updateContent(ctx, '❌ Feedback cancelled.')
+        await TwoMessageManager.updateContent(ctx, '❌ Feedback cancelled\\.')
         await ctx.answerCbQuery()
         return ctx.scene.enter('registered_menu')
       }
@@ -47,10 +47,10 @@ export const feedbackWizard = new Scenes.WizardScene<any>(
       
       await TwoMessageManager.updateContent(
         ctx,
-        '📝 *Feedback - Step 2/4*\n\n' +
+        '📝 *Feedback \\- Step 2/4*\n\n' +
         'How useful do you find this bot?\n\n' +
-        '1 = Not Useful at All\n' +
-        '5 = Extremely Useful',
+        '1 \\= Not Useful at All\n' +
+        '5 \\= Extremely Useful',
         Markup.inlineKeyboard([
           [
             Markup.button.callback('1', 'rate_1'),
@@ -74,7 +74,7 @@ export const feedbackWizard = new Scenes.WizardScene<any>(
       const data = ctx.callbackQuery.data
       
       if (data === 'cancel_feedback') {
-        await TwoMessageManager.updateContent(ctx, '❌ Feedback cancelled.')
+        await TwoMessageManager.updateContent(ctx, '❌ Feedback cancelled\\.')
         await ctx.answerCbQuery()
         return ctx.scene.enter('registered_menu')
       }
@@ -84,10 +84,10 @@ export const feedbackWizard = new Scenes.WizardScene<any>(
       
       await TwoMessageManager.updateContent(
         ctx,
-        '📝 *Feedback - Step 3/4*\n\n' +
+        '📝 *Feedback \\- Step 3/4*\n\n' +
         'Overall, how satisfied are you with this bot?\n\n' +
-        '1 = Very Dissatisfied\n' +
-        '5 = Very Satisfied',
+        '1 \\= Very Dissatisfied\n' +
+        '5 \\= Very Satisfied',
         Markup.inlineKeyboard([
           [
             Markup.button.callback('1', 'rate_1'),
@@ -111,7 +111,7 @@ export const feedbackWizard = new Scenes.WizardScene<any>(
       const data = ctx.callbackQuery.data
       
       if (data === 'cancel_feedback') {
-        await TwoMessageManager.updateContent(ctx, '❌ Feedback cancelled.')
+        await TwoMessageManager.updateContent(ctx, '❌ Feedback cancelled\\.')
         await ctx.answerCbQuery()
         return ctx.scene.enter('registered_menu')
       }
@@ -121,11 +121,11 @@ export const feedbackWizard = new Scenes.WizardScene<any>(
       
       await TwoMessageManager.updateContent(
         ctx,
-        '📝 *Feedback - Step 4/4*\n\n' +
-        'Great! Now please share your detailed feedback.\n\n' +
+        '📝 *Feedback \\- Step 4/4*\n\n' +
+        'Great\\! Now please share your detailed feedback\\.\n\n' +
         'What would you like to tell us? What can we improve? ' +
         'What features would you like to see?\n\n' +
-        '💡 *This is the most valuable part of your feedback!*\n\n' +
+        '💡 *This is the most valuable part of your feedback\\!*\n\n' +
         'Type your message below:',
         Markup.inlineKeyboard([
           [Markup.button.callback('❌ Cancel', 'cancel_feedback')]
@@ -140,7 +140,7 @@ export const feedbackWizard = new Scenes.WizardScene<any>(
   // Step 5: Save Feedback
   async (ctx: any) => {
     if (ctx.callbackQuery?.data === 'cancel_feedback') {
-      await TwoMessageManager.updateContent(ctx, '❌ Feedback cancelled.')
+      await TwoMessageManager.updateContent(ctx, '❌ Feedback cancelled\\.')
       await ctx.answerCbQuery()
       return ctx.scene.enter('registered_menu')
     }
@@ -154,8 +154,8 @@ export const feedbackWizard = new Scenes.WizardScene<any>(
       if (textFeedback.length < 10) {
         await TwoMessageManager.updateContent(
           ctx,
-          '⚠️ Please provide at least 10 characters of feedback. ' +
-          'Your detailed thoughts are valuable to us!\n\n' +
+          '⚠️ Please provide at least 10 characters of feedback\\. ' +
+          'Your detailed thoughts are valuable to us\\!\n\n' +
           'Type your message below:',
           Markup.inlineKeyboard([
             [Markup.button.callback('❌ Cancel', 'cancel_feedback')]
@@ -171,7 +171,7 @@ export const feedbackWizard = new Scenes.WizardScene<any>(
         if (!user) {
           await TwoMessageManager.updateContent(
             ctx,
-            '❌ Please register first before submitting feedback.'
+            '❌ Please register first before submitting feedback\\.'
           )
           return ctx.scene.enter('registered_menu')
         }
@@ -187,9 +187,9 @@ export const feedbackWizard = new Scenes.WizardScene<any>(
         
         await TwoMessageManager.updateContent(
           ctx,
-          '✅ *Thank you for your feedback!*\n\n' +
-          'Your input is incredibly valuable and helps us improve the bot. ' +
-          'We truly appreciate you taking the time to share your thoughts! 🙏'
+          '✅ *Thank you for your feedback\\!*\n\n' +
+          'Your input is incredibly valuable and helps us improve the bot\\. ' +
+          'We truly appreciate you taking the time to share your thoughts\\! 🙏'
         )
         
         // Wait a moment before returning to menu
@@ -199,7 +199,7 @@ export const feedbackWizard = new Scenes.WizardScene<any>(
         console.error('Error saving feedback:', error)
         await TwoMessageManager.updateContent(
           ctx,
-          '❌ Sorry, there was an error saving your feedback. Please try again later.'
+          '❌ Sorry, there was an error saving your feedback\\. Please try again later\\.'
         )
         
         // Wait a moment before returning to menu
@@ -214,7 +214,7 @@ feedbackWizard.use(TwoMessageManager.createEscapeMiddleware())
 
 // Handle cancel callback in all steps
 feedbackWizard.action('cancel_feedback', async (ctx: any) => {
-  await TwoMessageManager.updateContent(ctx, '❌ Feedback cancelled.')
+  await TwoMessageManager.updateContent(ctx, '❌ Feedback cancelled\\.')
   await ctx.answerCbQuery()
   
   // Wait a moment before returning to menu

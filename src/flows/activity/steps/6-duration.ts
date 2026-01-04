@@ -1,9 +1,6 @@
 import { Markup } from 'telegraf'
-import { TwoMessageManager } from '../../../utils'
+import { TwoMessageManager, escapeMarkdownV2 } from '../../../utils'
 
-/**
- * Display duration selection screen with quick options
- */
 export async function showDurationSelection(ctx: any): Promise<void> {
   const activity = ctx.wizard.state.activity
   const intensity = ctx.wizard.state.intensity
@@ -13,22 +10,21 @@ export async function showDurationSelection(ctx: any): Promise<void> {
   if (!activity || !intensity || !activityDate || !metValue) {
     await TwoMessageManager.updateContent(
       ctx,
-      '❌ Error: Missing activity information. Please start over.'
+      '❌ Error: Missing activity information\\. Please start over\\.'
     )
     return
   }
 
-  // Format date for display
   const dateStr = activityDate instanceof Date 
     ? activityDate.toLocaleDateString() 
     : activityDate
 
-  const message = `🏃 *Log Activity - Step 6/7*
+  const message = `🏃 *Log Activity \\- Step 6/7*
 
-*Activity:* ${activity}
-*Intensity:* ${intensity}
-*Date:* ${dateStr}
-*MET Value:* ${metValue}
+*Activity:* ${escapeMarkdownV2(activity)}
+*Intensity:* ${escapeMarkdownV2(intensity)}
+*Date:* ${escapeMarkdownV2(dateStr)}
+*MET Value:* ${escapeMarkdownV2(String(metValue))}
 
 ⏱️ How many minutes did you exercise?
 
@@ -54,22 +50,16 @@ _Tap a quick option below or type a custom number:_`
   await TwoMessageManager.updateContent(ctx, message, keyboard)
 }
 
-/**
- * Handle duration input from inline buttons or text
- */
 export async function handleDurationInput(ctx: any): Promise<void> {
   let minutes: number | undefined
 
-  // Handle inline button callback
   if (ctx.callbackQuery?.data) {
     const data = ctx.callbackQuery.data
 
-    // Skip cancel - handled in wizard
     if (data === 'duration:cancel') {
       return
     }
 
-    // Extract duration from button callback
     if (data.startsWith('duration:')) {
       await ctx.answerCbQuery()
       const durationStr = data.split(':')[1]
@@ -78,23 +68,18 @@ export async function handleDurationInput(ctx: any): Promise<void> {
       await ctx.answerCbQuery()
       return
     }
-  } 
-  // Handle text input
-  else if (ctx.message?.text) {
-    // Delete the user's text message to keep chat clean
+  } else if (ctx.message?.text) {
     await TwoMessageManager.deleteUserMessage(ctx)
-    
     const input = ctx.message.text.trim()
     minutes = parseInt(input, 10)
   } else {
     return
   }
 
-  // Validate duration
   if (!minutes || isNaN(minutes) || minutes <= 0 || minutes > 1440) {
     await TwoMessageManager.updateContent(
       ctx,
-      '❌ Please enter a valid number of minutes (1-1440) or use the buttons below.',
+      '❌ Please enter a valid number of minutes \\(1\\-1440\\) or use the buttons below\\.',
       Markup.inlineKeyboard([
         [
           Markup.button.callback('15 min', 'duration:15'),
@@ -115,10 +100,8 @@ export async function handleDurationInput(ctx: any): Promise<void> {
     return
   }
 
-  // Store duration in wizard state
   ctx.wizard.state.duration = minutes
-
-  // Calculate points for preview (MET * hours)
+  
   const metValue = ctx.wizard.state.metValue
   const points = Number(((metValue * minutes) / 60).toFixed(2))
   ctx.wizard.state.calculatedPoints = points

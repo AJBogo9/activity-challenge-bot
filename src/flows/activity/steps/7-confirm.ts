@@ -1,5 +1,5 @@
 import { Markup } from 'telegraf'
-import { TwoMessageManager } from '../../../utils'
+import { TwoMessageManager, escapeMarkdownV2 } from '../../../utils'
 import { addPointsToUser, createActivity, findUserByTelegramId } from '../../../db'
 
 /**
@@ -20,29 +20,28 @@ export async function showConfirmation(ctx: any): Promise<void> {
   if (!mainCategory || !activity || !intensity || !activityDate || !duration || !metValue) {
     await TwoMessageManager.updateContent(
       ctx, 
-      '❌ Error: Missing activity information. Please start over.'
+      '❌ Error: Missing activity information\\. Please start over\\.'
     )
     return
   }
 
-  // Format date for display
   const dateStr = activityDate instanceof Date 
     ? activityDate.toLocaleDateString() 
     : activityDate
 
-  const summary = `🔍 *Review Your Activity - Step 7/7*
+  const summary = `🔍 *Review Your Activity \\- Step 7/7*
 
 📋 *Summary:*
-- *Category:* ${mainCategory}${subcategory ? ` > ${subcategory}` : ''}
-- *Activity:* ${activity}
-- *Intensity:* ${intensity}
-- *Date:* ${dateStr}
-- *Duration:* ${duration} minutes
-- *MET Value:* ${metValue}
+\\- *Category:* ${escapeMarkdownV2(mainCategory)}${subcategory ? ` \\> ${escapeMarkdownV2(subcategory)}` : ''}
+\\- *Activity:* ${escapeMarkdownV2(activity)}
+\\- *Intensity:* ${escapeMarkdownV2(intensity)}
+\\- *Date:* ${escapeMarkdownV2(dateStr)}
+\\- *Duration:* ${duration} minutes
+\\- *MET Value:* ${escapeMarkdownV2(String(metValue))}
 
-🎯 *Points to be earned:* ${calculatedPoints}
+🎯 *Points to be earned:* ${escapeMarkdownV2(String(calculatedPoints))}
 
-_Please review the information above. Is everything correct?_`
+_Please review the information above\\. Is everything correct?_`
 
   const keyboard = Markup.inlineKeyboard([
     [
@@ -58,19 +57,16 @@ _Please review the information above. Is everything correct?_`
  * Handle confirmation actions (save, cancel)
  */
 export async function handleConfirmation(ctx: any): Promise<void> {
-  // Only process callback queries
   if (!ctx.callbackQuery?.data) {
     return
   }
 
   const data = ctx.callbackQuery.data
 
-  // Skip cancel - handled in wizard
   if (data === 'confirm:cancel') {
     return
   }
 
-  // Handle save confirmation
   if (data === 'confirm:save') {
     await ctx.answerCbQuery('Saving activity...')
 
@@ -86,27 +82,23 @@ export async function handleConfirmation(ctx: any): Promise<void> {
     } = ctx.wizard.state
 
     try {
-      // Find user
       const user = await findUserByTelegramId(ctx.from.id.toString())
 
       if (!user) {
         await TwoMessageManager.updateContent(
           ctx,
-          '❌ User not found. Please register first with /start'
+          '❌ User not found\\. Please register first with /start'
         )
         return ctx.scene.enter('registered_menu')
       }
 
-      // Calculate new total points
       const oldPoints = Number(user.points || 0)
       const newTotalPoints = Number((oldPoints + calculatedPoints).toFixed(2))
 
-      // Format activity type with hierarchy
       const activityType = subcategory 
         ? `${mainCategory} - ${subcategory} - ${activity}`
         : `${mainCategory} - ${activity}`
 
-      // Create activity record
       await createActivity({
         userId: user.id,
         activityType,
@@ -116,40 +108,36 @@ export async function handleConfirmation(ctx: any): Promise<void> {
         activityDate
       })
 
-      // Update user points
       await addPointsToUser(user.id, calculatedPoints)
 
-      // Format date for display
       const dateStr = activityDate instanceof Date 
         ? activityDate.toLocaleDateString() 
         : activityDate
 
-      // Success message
-      const successMessage = `✅ *Activity Logged Successfully!*
+      const successMessage = `✅ *Activity Logged Successfully\\!*
 
 📋 *Summary:*
-- *Category:* ${mainCategory}${subcategory ? ` > ${subcategory}` : ''}
-- *Activity:* ${activity}
-- *Intensity:* ${intensity}
-- *Date:* ${dateStr}
-- *Duration:* ${duration} minutes
-- *MET Value:* ${metValue}
+\\- *Category:* ${escapeMarkdownV2(mainCategory)}${subcategory ? ` \\> ${escapeMarkdownV2(subcategory)}` : ''}
+\\- *Activity:* ${escapeMarkdownV2(activity)}
+\\- *Intensity:* ${escapeMarkdownV2(intensity)}
+\\- *Date:* ${escapeMarkdownV2(dateStr)}
+\\- *Duration:* ${duration} minutes
+\\- *MET Value:* ${escapeMarkdownV2(String(metValue))}
 
-🎯 *Points Earned:* ${calculatedPoints}
-📊 *Total Points:* ${newTotalPoints}
+🎯 *Points Earned:* ${escapeMarkdownV2(String(calculatedPoints))}
+📊 *Total Points:* ${escapeMarkdownV2(String(newTotalPoints))}
 
-Great work! Keep it up! 💪`
+Great work\\! Keep it up\\! 💪`
 
       await TwoMessageManager.updateContent(ctx, successMessage)
     } catch (error) {
       console.error('Error saving activity:', error)
       await TwoMessageManager.updateContent(
         ctx,
-        '❌ An error occurred while saving your activity. Please try again later.'
+        '❌ An error occurred while saving your activity\\. Please try again later\\.'
       )
     }
 
-    // Return to main menu - this will reinitialize TwoMessageManager
     return ctx.scene.enter('registered_menu')
   }
 }

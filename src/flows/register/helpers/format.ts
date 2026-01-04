@@ -1,6 +1,5 @@
-export const escapeMarkdownV2 = (text: string) => {
-  return text.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, '\\$&')
-}
+import { escapeMarkdownV2 } from "../../../utils"
+
 
 export function formatConfirmationMessage(userData: any) {
   const escapedFirstName = escapeMarkdownV2(userData.firstName || 'N/A')

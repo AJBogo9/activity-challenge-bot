@@ -8,6 +8,13 @@ const ACTIVITIES_PER_PAGE = 5
 export const activityHistoryScene = new Scenes.BaseScene<any>('activity_history')
 
 /**
+ * Escape special characters for MarkdownV2
+ */
+function escapeMarkdownV2(text: string): string {
+  return text.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, '\\$&')
+}
+
+/**
  * Helper to build activity history message with pagination
  */
 function buildActivityMessage(
@@ -22,7 +29,8 @@ function buildActivityMessage(
   let message = '📜 *Activity History*\n\n'
 
   if (pageActivities.length === 0) {
-    message += "You haven't logged any activities yet."
+    message += "You haven't logged any activities yet\\."
+    console.log('🔍 DEBUG - Empty activities message:', message)
     return {
       text: message,
       keyboard: null
@@ -34,17 +42,34 @@ function buildActivityMessage(
   
   pageActivities.forEach((activity, index) => {
     const globalIndex = startIdx + index + 1
-    message += `*${globalIndex}.* ${activity.activity_type}\n`
+    
+    // Log raw activity data
+    console.log('🔍 DEBUG - Raw activity data:', {
+      activity_type: activity.activity_type,
+      duration: activity.duration,
+      points: activity.points,
+      description: activity.description,
+      activity_date: activity.activity_date,
+      formatted_date: formatDate(activity.activity_date)
+    })
+    
+    message += `*${globalIndex}\\.* ${escapeMarkdownV2(activity.activity_type)}\n`
     
     if (activity.duration) {
       message += `   ⏱️ Duration: ${activity.duration} min\n`
     }
-    message += `   🎯 Points: ${activity.points}\n`
+    message += `   🎯 Points: ${escapeMarkdownV2(activity.points.toString())}\n`
     
     if (activity.description) {
-      message += `   📝 ${activity.description}\n`
+      message += `   📝 ${escapeMarkdownV2(activity.description)}\n`
     }
-    message += `   📅 ${formatDate(activity.activity_date)}\n`
+    
+    const formattedDate = formatDate(activity.activity_date)
+    console.log('🔍 DEBUG - Date before escape:', formattedDate)
+    const escapedDate = escapeMarkdownV2(formattedDate)
+    console.log('🔍 DEBUG - Date after escape:', escapedDate)
+    
+    message += `   📅 ${escapedDate}\n`
 
     // Add delete button for this activity
     buttons.push([
@@ -55,6 +80,10 @@ function buildActivityMessage(
   })
 
   message += `_Page ${page + 1} of ${totalPages} • Total activities: ${activities.length}_`
+
+  console.log('🔍 DEBUG - Final message to send:')
+  console.log(message)
+  console.log('🔍 DEBUG - Message length:', message.length)
 
   // Add pagination buttons if needed
   const paginationButtons: any[] = []
@@ -83,7 +112,7 @@ async function displayActivityHistory(ctx: any, page: number = 0) {
     if (!user) {
       await TwoMessageManager.updateContent(
         ctx,
-        'User not found. Please register first.'
+        'User not found\\. Please register first\\.'
       )
       await ctx.scene.enter('registered_menu')
       return
@@ -98,7 +127,8 @@ async function displayActivityHistory(ctx: any, page: number = 0) {
     }
 
     if (activities.length === 0) {
-      const message = '📜 *Activity History*\n\nYou haven\'t logged any activities yet.'
+      const message = '📜 *Activity History*\n\nYou haven\'t logged any activities yet\\.'
+      console.log('🔍 DEBUG - No activities message:', message)
       await TwoMessageManager.updateContent(ctx, message)
       return
     }
@@ -111,7 +141,7 @@ async function displayActivityHistory(ctx: any, page: number = 0) {
     console.error('Error fetching activity history:', error)
     await TwoMessageManager.updateContent(
       ctx,
-      '❌ An error occurred while fetching your activity history.'
+      '❌ An error occurred while fetching your activity history\\.'
     )
   }
 }
@@ -147,15 +177,17 @@ activityHistoryScene.action(/^delete:(\d+)$/, async (ctx: any) => {
 
   // Build confirmation message
   let message = '⚠️ *Delete Activity?*\n\n'
-  message += `*${activity.activity_type}*\n`
+  message += `*${escapeMarkdownV2(activity.activity_type)}*\n`
   
   if (activity.duration) {
-    message += `⏱️ ${activity.duration} min | `
+    message += `⏱️ ${activity.duration} min \\| `
   }
-  message += `🎯 ${activity.points} pts\n`
-  message += `📅 ${formatDate(activity.activity_date)}\n\n`
-  message += `This will deduct *${activity.points} points* from your total.\n\n`
+  message += `🎯 ${escapeMarkdownV2(activity.points.toString())} pts\n`
+  message += `📅 ${escapeMarkdownV2(formatDate(activity.activity_date))}\n\n`
+  message += `This will deduct *${escapeMarkdownV2(activity.points.toString())} points* from your total\\.\n\n`
   message += '_Are you sure you want to delete this activity?_'
+
+  console.log('🔍 DEBUG - Delete confirmation message:', message)
 
   const keyboard = Markup.inlineKeyboard([
     [

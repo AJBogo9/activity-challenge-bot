@@ -7,7 +7,7 @@ export const creditsScene = new Scenes.BaseScene<any>('credits')
 creditsScene.enter(async (ctx: any) => {
   // Format contributors message
   const contributorsList = CONTRIBUTORS
-    .map(c => `• ${c.name} - ${c.role}`)
+    .map(c => `• ${c.name} \\- ${c.role}`)
     .join('\n')
   
   const message = `👥 *Credits*\n\n` +

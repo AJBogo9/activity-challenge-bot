@@ -13,6 +13,14 @@ export function formatDate(date: Date | string): string {
   return `${day}.${month}.${year}`
 }
 
+/**
+ * Escape special characters for MarkdownV2
+ * Use this for any dynamic content (usernames, activity names, etc.)
+ */
+export function escapeMarkdownV2(text: string): string {
+  return text.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, '\\$&')
+}
+
 export { TwoMessageManager } from './two-message-manager'
 export * from './calendar'
 export * from './format-list'

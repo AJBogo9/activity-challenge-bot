@@ -1,6 +1,6 @@
 import { Scenes } from 'telegraf'
 import { findUserByTelegramId } from '../../db'
-import { TwoMessageManager } from '../../utils'
+import { escapeMarkdownV2, TwoMessageManager } from '../../utils'
 
 export const userProfileInfoScene = new Scenes.BaseScene<any>('user_profile_info')
 
@@ -11,18 +11,23 @@ userProfileInfoScene.enter(async (ctx: any) => {
     if (!user) {
       await TwoMessageManager.updateContent(
         ctx,
-        'User not found. Please register first.'
+        'User not found\\. Please register first\\.'
       )
       await ctx.scene.enter('registered_menu')
       return
     }
 
-    const summary = `📊 *User Summary*
-
-👤 *Name:* ${user.first_name}${user.last_name ? ' ' + user.last_name : ''}
-🆔 *Username:* ${user.username ? '@' + user.username : 'N/A'}
-🏛️ *Guild:* ${user.guild || 'None'}
-🎯 *Total Points:* ${user.points || 0}`
+    const firstName = escapeMarkdownV2(user.first_name || '')
+    const lastName = user.last_name ? ' ' + escapeMarkdownV2(user.last_name) : ''
+    const username = user.username ? '@' + escapeMarkdownV2(user.username) : 'N/A'
+    const guild = user.guild ? escapeMarkdownV2(user.guild) : 'None'
+    const points = escapeMarkdownV2(String(user.points || 0))
+    
+    const summary = `📊 *User Summary*\n\n` +
+      `👤 *Name:* ${firstName}${lastName}\n` +
+      `🆔 *Username:* ${username}\n` +
+      `🏛️ *Guild:* ${guild}\n` +
+      `🎯 *Total Points:* ${points}`
 
     await TwoMessageManager.updateContent(ctx, summary)
     
@@ -33,7 +38,7 @@ userProfileInfoScene.enter(async (ctx: any) => {
     console.error('Error fetching user summary:', error)
     await TwoMessageManager.updateContent(
       ctx,
-      '❌ An error occurred while fetching your profile.'
+      '❌ An error occurred while fetching your profile\\.'
     )
     await ctx.scene.enter('profile')
   }

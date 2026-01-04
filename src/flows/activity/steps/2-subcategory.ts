@@ -1,21 +1,17 @@
 import { Markup } from 'telegraf'
-import { TwoMessageManager } from '../../../utils'
+import { TwoMessageManager, escapeMarkdownV2 } from '../../../utils'
 import { getSubcategories, isValidSubcategory } from '../helpers/activity-data'
 
-/**
- * Display subcategory selection screen with inline keyboard
- */
 export async function showSubcategorySelection(ctx: any): Promise<void> {
   const mainCategory = ctx.wizard.state.mainCategory
   
   if (!mainCategory) {
-    await TwoMessageManager.updateContent(ctx, '❌ Error: No main category selected.')
+    await TwoMessageManager.updateContent(ctx, '❌ Error: No main category selected\\.')
     return
   }
 
   const subcategories = getSubcategories(mainCategory)
   
-  // Create inline keyboard buttons (2 per row)
   const buttons = []
   for (let i = 0; i < subcategories.length; i += 2) {
     const row = [
@@ -27,33 +23,25 @@ export async function showSubcategorySelection(ctx: any): Promise<void> {
     buttons.push(row)
   }
   
-  // Add cancel button
   buttons.push([Markup.button.callback('❌ Cancel', 'subcategory:cancel')])
-
-  const message = `🏃 *Log Activity - Step 2/7*\n\n*Category:* ${mainCategory}\n\nChoose a subcategory:`
+  
+  const message = `🏃 *Log Activity \\- Step 2/7*\n\n*Category:* ${escapeMarkdownV2(mainCategory)}\n\nChoose a subcategory:`
   const keyboard = Markup.inlineKeyboard(buttons)
-
+  
   await TwoMessageManager.updateContent(ctx, message, keyboard)
 }
 
-/**
- * Handle subcategory selection from inline button callback
- * @returns true if subcategory was selected successfully, false otherwise
- */
 export async function handleSubcategorySelection(ctx: any): Promise<boolean> {
-  // Only process callback queries
   if (!ctx.callbackQuery?.data) {
     return false
   }
 
   const data = ctx.callbackQuery.data
 
-  // Handle cancel
   if (data === 'subcategory:cancel') {
-    return false // Let wizard handle the cancel
+    return false
   }
 
-  // Extract subcategory from callback data
   if (!data.startsWith('subcategory:')) {
     await ctx.answerCbQuery()
     return false
@@ -62,19 +50,16 @@ export async function handleSubcategorySelection(ctx: any): Promise<boolean> {
   const selectedSubcategory = data.replace('subcategory:', '')
   const mainCategory = ctx.wizard.state.mainCategory
 
-  // Validate we have a main category
   if (!mainCategory) {
     await ctx.answerCbQuery('❌ No main category found')
     return false
   }
 
-  // Validate subcategory
   if (!isValidSubcategory(mainCategory, selectedSubcategory)) {
     await ctx.answerCbQuery('❌ Invalid subcategory')
     return false
   }
 
-  // Store in wizard state
   ctx.wizard.state.subcategory = selectedSubcategory
   await ctx.answerCbQuery()
   return true

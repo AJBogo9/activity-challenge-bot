@@ -29,7 +29,7 @@ export class TwoMessageManager {
 
     // Create reply keyboard message (stays at bottom)
     const keyboardMsg = await ctx.reply(keyboardText, {
-      parse_mode: 'Markdown',
+      parse_mode: 'MarkdownV2',
       ...Markup.keyboard(buttons || defaultButtons)
         .resize()
         .persistent()
@@ -63,7 +63,7 @@ export class TwoMessageManager {
         undefined,
         text,
         {
-          parse_mode: 'Markdown',
+          parse_mode: 'MarkdownV2',
           ...inlineKeyboard
         }
       )
@@ -73,7 +73,7 @@ export class TwoMessageManager {
       ctx.session.lastContent = text
     } catch (error) {
       // If edit fails (message too old or deleted), create new content message
-      const contentMsg = await ctx.replyWithMarkdown(text, inlineKeyboard)
+      const contentMsg = await ctx.replyWithMarkdownV2(text, inlineKeyboard)
       ctx.session.contentMessageId = contentMsg.message_id
       
       // Track the scene and content
@@ -97,14 +97,14 @@ export class TwoMessageManager {
         undefined,
         text,
         {
-          parse_mode: 'Markdown',
+          parse_mode: 'MarkdownV2',
           ...Markup.keyboard(buttons).resize().persistent()
         }
       )
     } catch (error) {
       // If edit fails, create new keyboard message
       const keyboardMsg = await ctx.reply(text, {
-        parse_mode: 'Markdown',
+        parse_mode: 'MarkdownV2',
         ...Markup.keyboard(buttons).resize().persistent()
       })
       ctx.session.keyboardMessageId = keyboardMsg.message_id

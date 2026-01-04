@@ -6,7 +6,8 @@
 
 export const ERROR_MESSAGE = 
   "Something went wrong while processing your request\\. Please try again\\. " +
-  "We've logged the error for further review, but if the issue persists or you need "
+  "We've logged the error for further review, but if the issue persists or you need " +
+  "immediate assistance, please contact support\\.";
 
 export const POINTS_INFO_MESSAGE = `*How Points Work*
 
@@ -15,14 +16,14 @@ Your points are calculated using MET\\-hours, a standard measure that accounts f
 *The Formula:* Points \\= \\(MET × Duration in minutes\\) ÷ 60
 
 *What are METs?* MET \\(Metabolic Equivalent of Task\\) measures how intense an activity is:
-\\- 1 MET \\= sitting quietly
-\\- 3 METs \\= walking casually
-\\- 8 METs \\= running
-\\- 12\\+ METs \\= intense sports
+• 1 MET \\= sitting quietly
+• 3 METs \\= walking casually
+• 8 METs \\= running
+• 12\\+ METs \\= intense sports
 
 Higher intensity activities have higher MET values and earn more points per minute\\.
 
-Source: https://pacompendium\\.com/adult\\-compendium/`
+Source: https://pacompendium\\.com/adult\\-compendium/`;
 
 export const TERMS_AND_CONDITIONS = `*Terms and Conditions*
 
@@ -39,14 +40,13 @@ We collect your Telegram ID, username, and activity logs\\. Your data won't be s
 • Violations may result in disqualification
 
 *Important*
-The bot may change or stop at any time\\. We're not liable for issues from using it\\. Terms may update without notice\\.`
+The bot may change or stop at any time\\. We're not liable for issues from using it\\. Terms may update without notice\\.`;
 
 export const ABOUT_BOT_MESSAGE = `*About This Bot*
 
 This bot is *completely open source* and *free to use\\!*
 
 *Open Source & Community\\-Driven*
-
 The entire codebase is publicly available on GitHub\\. Anyone can view the code, learn from it, or use it for their own projects\\.
 
-*Repository:* [github\\.com/AJBogo9/activity\\-challenge\\-bot](https://github.com/AJBogo9/activity-challenge-bot)`
+*Repository:* [github\\.com/AJBogo9/activity\\-challenge\\-bot](https://github.com/AJBogo9/activity-challenge-bot)`;
