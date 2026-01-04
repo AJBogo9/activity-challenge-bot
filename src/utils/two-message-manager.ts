@@ -197,4 +197,64 @@ export class TwoMessageManager {
       // Silently ignore if deletion fails
     }
   }
+
+  /**
+   * Middleware for wizards/scenes to allow escape via /start or reply keyboard
+   * Add this to any wizard/scene where users should be able to navigate away
+   * 
+   * @example
+   * myWizard.use(TwoMessageManager.createEscapeMiddleware())
+   */
+  static createEscapeMiddleware() {
+    return async (ctx: any, next: any) => {
+      // Only intercept if we have a text message
+      if (!ctx.message || !('text' in ctx.message)) {
+        return next()
+      }
+
+      const messageText = ctx.message.text
+
+      // Check for /start command
+      if (messageText === '/start') {
+        // Clear any wizard state if in a wizard
+        if (ctx.wizard) {
+          ctx.wizard.state = {}
+        }
+        
+        // Navigate to menu router
+        await this.deleteUserMessage(ctx)
+        await ctx.scene.enter('menu_router')
+        return
+      }
+      
+      // Check for reply keyboard navigation
+      // Map of reply keyboard buttons to their target scenes
+      const navigationMap: Record<string, string> = {
+        '📝 Register': 'register_wizard',
+        'ℹ️ Info': 'info_menu',
+        '👤 Profile': 'profile',
+        '💪 Log Activity': 'activity_wizard',
+        '📊 Statistics': 'stats_menu',
+        '💬 Feedback': 'feedback_wizard'
+      }
+
+      const targetScene = navigationMap[messageText]
+      
+      // Only intercept if it's a navigation button AND we're not already entering that scene
+      if (targetScene && ctx.scene.current?.id !== targetScene) {
+        // Clear wizard state if in a wizard
+        if (ctx.wizard) {
+          ctx.wizard.state = {}
+        }
+        
+        // Navigate away
+        await this.deleteUserMessage(ctx)
+        await ctx.scene.enter(targetScene)
+        return
+      }
+      
+      // If not a navigation command, continue to next middleware/handler
+      return next()
+    }
+  }
 }

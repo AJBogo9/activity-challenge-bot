@@ -210,6 +210,8 @@ export const feedbackWizard = new Scenes.WizardScene<any>(
   }
 )
 
+feedbackWizard.use(TwoMessageManager.createEscapeMiddleware())
+
 // Handle cancel callback in all steps
 feedbackWizard.action('cancel_feedback', async (ctx: any) => {
   await TwoMessageManager.updateContent(ctx, '❌ Feedback cancelled.')
