@@ -27,3 +27,4 @@ export const botConfig = {
 // Re-export competition config
 export { CURRENT_COMPETITION, isCompetitionActive, getDaysRemaining, getDaysElapsed, getCompetitionProgress } from './competition';
 export * from './contributors';
+export * from './guilds'

@@ -1,7 +1,5 @@
-import { sql, initDb, closeDb } from '../src/db'
-import { createUser } from '../src/db/users'
-import { addPointsToUser } from '../src/db/points'
-import { getGuildNames } from '../src/db/guilds'
+import { sql, initDb, closeDb, createUser, addPointsToUser } from '../src/db'
+import { getGuildNames } from '../src/config'
 
 async function populateData() {
   try {

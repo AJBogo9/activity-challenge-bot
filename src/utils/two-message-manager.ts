@@ -73,7 +73,12 @@ export class TwoMessageManager {
       ctx.session.lastContent = text
     } catch (error) {
       // If edit fails (message too old or deleted), create new content message
-      const contentMsg = await ctx.replyWithMarkdownV2(text, inlineKeyboard)
+      const options = {
+        parse_mode: 'MarkdownV2' as const,
+        ...(inlineKeyboard || {})
+      }
+      
+      const contentMsg = await ctx.reply(text, options)
       ctx.session.contentMessageId = contentMsg.message_id
       
       // Track the scene and content
