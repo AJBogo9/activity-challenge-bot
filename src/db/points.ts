@@ -245,9 +245,9 @@ export async function getGuildLeaderboard(forceRefresh = false): Promise<GuildSt
 export async function getGuildRankingHistory(days: number = 30) {
   const activeGuilds = getActiveGuilds();
   
-  // Build a map of guild name to total members
-  const guildMembersMap = new Map<string, number>();
-  activeGuilds.forEach(g => guildMembersMap.set(g.name, g.totalMembers));
+  // Extract arrays outside the SQL query
+  const guildNames = activeGuilds.map(g => g.name);
+  const guildMembers = activeGuilds.map(g => g.totalMembers);
   
   return await sql`
     WITH RECURSIVE dates AS (
@@ -258,8 +258,8 @@ export async function getGuildRankingHistory(days: number = 30) {
       WHERE date < CURRENT_DATE
     ),
     guild_names AS (
-      SELECT unnest(ARRAY[${activeGuilds.map(g => g.name)}]::TEXT[]) as guild_name,
-             unnest(ARRAY[${activeGuilds.map(g => g.totalMembers)}]::INTEGER[]) as total_members
+      SELECT unnest(${sql.array(guildNames)}::TEXT[]) as guild_name,
+             unnest(${sql.array(guildMembers)}::INTEGER[]) as total_members
     ),
     daily_guild_points AS (
       SELECT 
