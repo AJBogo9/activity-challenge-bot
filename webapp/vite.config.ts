@@ -6,7 +6,12 @@ export default defineConfig({
   plugins: [react()],
   base: './',
   server: {
+    host: true,
     port: 5173,
+    allowedHosts: [
+      '.lhr.life', // Allow all localhost.run subdomains
+      '.localhost.run'
+    ],
     proxy: {
       '/api': {
         target: 'http://localhost:3001',

@@ -10,7 +10,6 @@ async function clearDatabase() {
     await sql.unsafe('DELETE FROM activities')
     await sql.unsafe('DELETE FROM feedback')
     await sql.unsafe('DELETE FROM users')
-    await sql.unsafe('DELETE FROM guilds')
 
     console.log("Database cleared successfully (all tables)!")
     await closeDb()

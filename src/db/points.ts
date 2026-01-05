@@ -1,5 +1,8 @@
 import { sql } from './index'
 import { User } from '../types'
+import { getActiveGuilds } from '../config/guilds'
+
+// ==================== USER POINTS ====================
 
 /**
  * Add points to a user
@@ -11,6 +14,10 @@ export async function addPointsToUser(userId: number, pointsToAdd: number): Prom
     WHERE id = ${userId}
   `
 }
+
+// ==================== RANKING HISTORY ====================
+
+// ==================== USER STATISTICS ====================
 
 /**
  * Get user's point summary including rankings
@@ -49,29 +56,10 @@ export async function getUserSummary(telegramId: string) {
   return user
 }
 
-/**
- * Get guild leaderboard
- * Ordered by average points per member
- */
-export async function getGuildLeaderboard() {
-  return await sql`
-    SELECT 
-      g.name as guild,
-      COUNT(u.id)::FLOAT as active_members,
-      g.total_members::FLOAT as total_members,
-      ROUND(COUNT(u.id)::DECIMAL / g.total_members * 100, 1)::FLOAT as participation_percentage,
-      SUM(COALESCE(u.points, 0))::FLOAT as total_points,
-      ROUND(SUM(COALESCE(u.points, 0)) / CAST(g.total_members AS DECIMAL), 1)::FLOAT as average_points
-    FROM guilds g
-    LEFT JOIN users u ON g.name = u.guild
-    WHERE g.is_active = TRUE
-    GROUP BY g.name, g.total_members
-    ORDER BY average_points DESC
-  `
-}
+// ==================== LEADERBOARD RANKINGS ====================
 
 /**
- * Get overall top users
+ * Overall top users
  */
 export async function getTopUsers(limit: number = 20): Promise<User[]> {
   return await sql<User[]>`
@@ -80,6 +68,8 @@ export async function getTopUsers(limit: number = 20): Promise<User[]> {
     LIMIT ${limit}
   `
 }
+
+// ==================== USER RANKINGS ====================
 
 /**
  * Get users nearby in global leaderboard
@@ -95,6 +85,31 @@ export async function getNearbyUsers(telegramId: string) {
         guild,
         RANK() OVER (ORDER BY points DESC) as rank
       FROM users
+    ),
+    target_rank AS (
+      SELECT rank FROM ranked_users WHERE telegram_id = ${telegramId}
+    )
+    SELECT * FROM ranked_users
+    WHERE ABS(rank - (SELECT rank FROM target_rank)) <= 2
+    ORDER BY rank
+  `
+}
+
+/**
+ * Get users nearby in guild leaderboard
+ */
+export async function getNearbyGuildUsers(telegramId: string, guild: string) {
+  return await sql<any[]>`
+    WITH ranked_users AS (
+      SELECT 
+        telegram_id,
+        username,
+        first_name,
+        points,
+        guild,
+        RANK() OVER (PARTITION BY guild ORDER BY points DESC) as rank
+      FROM users
+      WHERE guild = ${guild}
     ),
     target_rank AS (
       SELECT rank FROM ranked_users WHERE telegram_id = ${telegramId}
@@ -145,10 +160,95 @@ export async function getUserRankingHistory(telegramId: string, days: number = 3
   `
 }
 
+// ==================== GUILD LEADERBOARD WITH CACHING ====================
+
+interface GuildStatsCache {
+  guild: string;
+  totalPoints: number;
+  activeMembers: number;
+  registeredMembers: number;
+  totalMembers: number;
+  participationPercentage: number;
+  averagePoints: number;
+  lastUpdated: Date;
+}
+
+// In-memory cache
+let guildStatsCache: GuildStatsCache[] = [];
+let lastCacheUpdate: Date | null = null;
+
+// Cache TTL: 5 minutes
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+/**
+ * Get guild leaderboard (with caching)
+ * @param forceRefresh - Force cache refresh even if cache is fresh
+ */
+export async function getGuildLeaderboard(forceRefresh = false): Promise<GuildStatsCache[]> {
+  const now = new Date();
+  const cacheAge = lastCacheUpdate ? now.getTime() - lastCacheUpdate.getTime() : Infinity;
+  
+  // Return cached data if fresh enough and not forcing refresh
+  if (!forceRefresh && cacheAge < CACHE_TTL_MS && guildStatsCache.length > 0) {
+    return guildStatsCache;
+  }
+  
+  // Recalculate from database
+  const activeGuilds = getActiveGuilds();
+  const stats: GuildStatsCache[] = [];
+  
+  for (const guildConfig of activeGuilds) {
+    const [result] = await sql`
+      SELECT 
+        COUNT(id) FILTER (WHERE points > 0) as active_members,
+        COUNT(id) as registered_members,
+        COALESCE(SUM(points), 0) as total_points
+      FROM users
+      WHERE guild = ${guildConfig.name}
+    `;
+    
+    const totalPoints = parseFloat(result.total_points) || 0;
+    const activeMembers = parseInt(result.active_members) || 0;
+    const registeredMembers = parseInt(result.registered_members) || 0;
+    const totalMembers = guildConfig.totalMembers;
+    
+    const averagePoints = parseFloat((totalPoints / totalMembers).toFixed(1));
+    const participationPercentage = parseFloat(
+      ((activeMembers / totalMembers) * 100).toFixed(1)
+    );
+    
+    stats.push({
+      guild: guildConfig.name,
+      totalPoints,
+      activeMembers,
+      registeredMembers,
+      totalMembers,
+      participationPercentage,
+      averagePoints,
+      lastUpdated: now
+    });
+  }
+  
+  // Sort by average points (highest first)
+  stats.sort((a, b) => b.averagePoints - a.averagePoints);
+  
+  // Update cache
+  guildStatsCache = stats;
+  lastCacheUpdate = now;
+  
+  return stats;
+}
+
 /**
  * Get ranking history for all guilds for the last N days
  */
 export async function getGuildRankingHistory(days: number = 30) {
+  const activeGuilds = getActiveGuilds();
+  
+  // Extract arrays outside the SQL query
+  const guildNames = activeGuilds.map(g => g.name);
+  const guildMembers = activeGuilds.map(g => g.totalMembers);
+  
   return await sql`
     WITH RECURSIVE dates AS (
       SELECT (CURRENT_DATE - (${days} || ' days')::INTERVAL)::DATE as date
@@ -157,17 +257,20 @@ export async function getGuildRankingHistory(days: number = 30) {
       FROM dates
       WHERE date < CURRENT_DATE
     ),
+    guild_names AS (
+      SELECT unnest(${sql.array(guildNames)}::TEXT[]) as guild_name,
+             unnest(${sql.array(guildMembers)}::INTEGER[]) as total_members
+    ),
     daily_guild_points AS (
       SELECT 
-        g.name as guild,
+        gn.guild_name as guild,
         d.date,
-        COALESCE(SUM(a.points), 0) / CAST(g.total_members AS DECIMAL) as average_points
-      FROM guilds g
+        COALESCE(SUM(a.points), 0) / CAST(gn.total_members AS DECIMAL) as average_points
+      FROM guild_names gn
       CROSS JOIN dates d
-      LEFT JOIN users u ON g.name = u.guild
+      LEFT JOIN users u ON gn.guild_name = u.guild
       LEFT JOIN activities a ON u.id = a.user_id AND a.activity_date <= d.date
-      WHERE g.is_active = TRUE
-      GROUP BY g.name, d.date, g.total_members
+      GROUP BY gn.guild_name, d.date, gn.total_members
     ),
     daily_guild_ranks AS (
       SELECT 
@@ -188,26 +291,22 @@ export async function getGuildRankingHistory(days: number = 30) {
 }
 
 /**
- * Get users nearby in guild leaderboard
+ * Invalidate the guild leaderboard cache
+ * Call this after activities are logged to ensure fresh data on next request
  */
-export async function getNearbyGuildUsers(telegramId: string, guild: string) {
-  return await sql<any[]>`
-    WITH ranked_users AS (
-      SELECT 
-        telegram_id,
-        username,
-        first_name,
-        points,
-        guild,
-        RANK() OVER (PARTITION BY guild ORDER BY points DESC) as rank
-      FROM users
-      WHERE guild = ${guild}
-    ),
-    target_rank AS (
-      SELECT rank FROM ranked_users WHERE telegram_id = ${telegramId}
-    )
-    SELECT * FROM ranked_users
-    WHERE ABS(rank - (SELECT rank FROM target_rank)) <= 2
-    ORDER BY rank
-  `
+export function invalidateGuildCache(): void {
+  lastCacheUpdate = null;
+}
+
+/**
+ * Get cache info (useful for debugging)
+ */
+export function getGuildCacheInfo() {
+  return {
+    isCached: guildStatsCache.length > 0 && lastCacheUpdate !== null,
+    lastUpdate: lastCacheUpdate,
+    cacheAge: lastCacheUpdate ? Date.now() - lastCacheUpdate.getTime() : null,
+    ttl: CACHE_TTL_MS,
+    isStale: lastCacheUpdate ? Date.now() - lastCacheUpdate.getTime() > CACHE_TTL_MS : true
+  };
 }

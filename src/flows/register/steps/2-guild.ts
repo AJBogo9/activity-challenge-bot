@@ -1,6 +1,8 @@
 import { Markup } from 'telegraf'
 import { formatConfirmationMessage } from '../helpers/format'
 import { TwoMessageManager } from '../../../utils'
+import { isValidGuild } from '../../../config/guilds'
+import { escapeMarkdownV2 } from '../../../utils'
 
 export async function handleGuildSelection(ctx: any): Promise<boolean> {
   // Wait for callback query
@@ -15,7 +17,7 @@ export async function handleGuildSelection(ctx: any): Promise<boolean> {
     await ctx.answerCbQuery()
     await TwoMessageManager.updateContent(
       ctx,
-      '❌ Registration cancelled.\n\nYou can start registration again from the main menu.'
+      escapeMarkdownV2('❌ Registration cancelled.\n\nYou can start registration again from the main menu.')
     )
     await ctx.scene.enter('unregistered_menu')
     return false
@@ -28,9 +30,20 @@ export async function handleGuildSelection(ctx: any): Promise<boolean> {
   }
 
   try {
-    await ctx.answerCbQuery()
-    
     const guild = guildMatch[1]
+
+    // Validate guild exists in config and is active
+    if (!isValidGuild(guild)) {
+      await ctx.answerCbQuery('❌ Invalid guild selection')
+      await TwoMessageManager.updateContent(
+        ctx,
+        escapeMarkdownV2('❌ The selected guild is not valid or is no longer active.\n\nPlease select a different guild.')
+      )
+      return false
+    }
+
+    await ctx.answerCbQuery()
+
     const firstName = ctx.from.first_name || ''
     const lastName = ctx.from.last_name || ''
     const username = ctx.from.username || `user_${ctx.from.id}`
@@ -46,7 +59,7 @@ export async function handleGuildSelection(ctx: any): Promise<boolean> {
     }
 
     const confirmationMessage = formatConfirmationMessage(ctx.wizard.state.pendingUser)
-    
+
     await TwoMessageManager.updateContent(
       ctx,
       confirmationMessage,
@@ -63,7 +76,7 @@ export async function handleGuildSelection(ctx: any): Promise<boolean> {
     console.error('Error in guild selection:', error)
     await TwoMessageManager.updateContent(
       ctx,
-      '❌ There was an error. Please try again.'
+      escapeMarkdownV2('❌ There was an error. Please try again.')
     )
     await ctx.scene.enter('unregistered_menu')
     return false
