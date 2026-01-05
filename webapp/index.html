@@ -4,17 +4,158 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#2481cc" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Activity Challenge Stats</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+      :root {
+        --tg-theme-bg-color: #ffffff;
+        --tg-theme-text-color: #000000;
+        --tg-theme-hint-color: #999999;
+        --tg-theme-link-color: #2481cc;
+        --tg-theme-button-color: #2481cc;
+        --tg-theme-button-text-color: #ffffff;
+        --tg-theme-secondary-bg-color: #f0f2f5;
+        --chart-color-1: #3390ec;
+        --chart-color-2: #00C49F;
+        --chart-color-3: #FFBB28;
+        --chart-color-4: #FF8042;
+        --chart-color-5: #8884d8;
+      }
+      
       body {
-        background-color: var(--tg-theme-bg-color, #ffffff);
-        color: var(--tg-theme-text-color, #000000);
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--tg-theme-secondary-bg-color);
+        color: var(--tg-theme-text-color);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      #app {
+        max-width: 600px;
+        margin: 0 auto;
+        padding-bottom: 80px; /* Space for bottom nav */
+      }
+
+      /* Utility classes for layout */
+      .p-4 { padding: 1rem; }
+      .p-6 { padding: 1.5rem; }
+      .mb-4 { margin-bottom: 1rem; }
+      .mb-6 { margin-bottom: 1.5rem; }
+      .mt-4 { margin-top: 1rem; }
+      .gap-2 { gap: 0.5rem; }
+      .gap-4 { gap: 1rem; }
+      .flex { display: flex; }
+      .flex-col { flex-direction: column; }
+      .items-center { align-items: center; }
+      .justify-between { justify-content: space-between; }
+      .justify-center { justify-content: center; }
+      .text-center { text-align: center; }
+      .font-bold { font-weight: 700; }
+      .text-xs { font-size: 0.75rem; }
+      .text-sm { font-size: 0.875rem; }
+      .text-lg { font-size: 1.125rem; }
+      .text-xl { font-size: 1.25rem; }
+      .uppercase { text-transform: uppercase; }
+      .tracking-widest { letter-spacing: 0.1em; }
+      .w-full { width: 100%; }
+      .rounded { border-radius: 0.5rem; }
+      
+      .card {
+        background-color: var(--tg-theme-bg-color);
+        border-radius: 1rem;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      }
+
+      .text-hint { color: var(--tg-theme-hint-color); }
+      .text-link { color: var(--tg-theme-link-color); }
+      
+      /* Navigation */
+      nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--tg-theme-bg-color);
+        border-top: 1px solid var(--tg-theme-secondary-bg-color);
+        padding: 0.5rem;
+        z-index: 100;
+        display: flex;
+        justify-content: space-around;
+      }
+      
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.5rem;
+        color: var(--tg-theme-hint-color);
+        text-decoration: none;
+        font-size: 0.7rem;
+        border-radius: 0.5rem;
+        transition: color 0.2s;
+      }
+      
+      .nav-item.active {
+        color: var(--tg-theme-button-color);
+      }
+      
+      .nav-icon {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 2px;
+      }
+
+      /* Loader */
+      .loader {
+        border: 3px solid var(--tg-theme-secondary-bg-color);
+        border-radius: 50%;
+        border-top: 3px solid var(--tg-theme-link-color);
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+        margin: 2rem auto;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      /* Floating Action Button */
+      .fab-refresh {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        width: 40px;
+        height: 40px;
+        background-color: var(--tg-theme-bg-color);
+        color: var(--tg-theme-link-color);
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 200;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      
+      .fab-refresh:active {
+        transform: scale(0.95);
+      }
+      
+      .spinning {
+        animation: spin 1s linear infinite;
       }
     </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div id="refresh-btn" class="fab-refresh"></div>
+    <div id="app"></div>
+    <nav id="nav"></nav>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

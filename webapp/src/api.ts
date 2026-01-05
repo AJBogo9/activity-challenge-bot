@@ -1,31 +1,39 @@
-import axios from 'axios';
+// Minimal API wrapper using fetch
+const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
-});
-
-// Add Telegram initData to headers
-api.interceptors.request.use((config) => {
+function getHeaders(): HeadersInit {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+  
   const webapp = (window as any).Telegram?.WebApp;
   if (webapp?.initData) {
-    config.headers['X-Telegram-Init-Data'] = webapp.initData;
+    headers['X-Telegram-Init-Data'] = webapp.initData;
   }
-  return config;
-});
+  
+  return headers;
+}
 
-export const getStats = async () => {
-  const response = await api.get('/stats');
-  return response.data;
-};
+export async function fetchStats() {
+  const res = await fetch(`${BASE_URL}/stats/personal`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch stats');
+  return res.json();
+}
 
-export const getPersonalStats = async () => {
-  const response = await api.get('/stats/personal');
-  return response.data;
-};
+export async function fetchPersonalStats() {
+  const res = await fetch(`${BASE_URL}/stats/personal`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch personal stats');
+  return res.json();
+}
 
-export const getGuildStats = async () => {
-  const response = await api.get('/stats/guilds');
-  return response.data;
-};
+export async function fetchGuildStats() {
+  const res = await fetch(`${BASE_URL}/stats/guilds`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch guild stats');
+  return res.json();
+}
 
-export default api;
+export async function fetchPlayerStats(page: number = 0, limit: number = 50) {
+  const res = await fetch(`${BASE_URL}/stats/players?page=${page}&limit=${limit}`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch player stats');
+  return res.json();
+}

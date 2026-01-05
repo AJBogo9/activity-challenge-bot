@@ -9,6 +9,8 @@
     "//2": "════════════════════════════════════════════════════════════",
     "start": "bun index.ts",
     "dev": "bun --watch index.ts",
+    "simulate": "bun scripts/simulate-traffic.ts",
+    "sync:ngrok": "bun scripts/sync-ngrok.ts",
     "populate": "bun scripts/populateTestData.ts",
     "clear": "bun scripts/clear.ts",
     "//3": "════════════════════════════════════════════════════════════",

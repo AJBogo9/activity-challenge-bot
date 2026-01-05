@@ -73,11 +73,12 @@ export async function getGuildLeaderboard() {
 /**
  * Get overall top users
  */
-export async function getTopUsers(limit: number = 20): Promise<User[]> {
+export async function getTopUsers(limit: number = 20, offset: number = 0): Promise<User[]> {
   return await sql<User[]>`
     SELECT * FROM users
     ORDER BY points DESC
     LIMIT ${limit}
+    OFFSET ${offset}
   `
 }
 
@@ -106,9 +107,70 @@ export async function getNearbyUsers(telegramId: string) {
 }
 
 /**
+ * Takes a snapshot of current user and guild rankings
+ */
+export async function takeDailySnapshot() {
+  const date = new Date().toISOString().split('T')[0]
+
+  console.log(`📸 Taking daily snapshot for ${date}...`)
+
+  await sql.begin(async (sql) => {
+    // 1. User Snapshots
+    await sql`
+      INSERT INTO user_daily_snapshots (date, telegram_id, points, rank)
+      SELECT 
+        ${date}::DATE,
+        telegram_id,
+        points,
+        RANK() OVER (ORDER BY points DESC) as rank
+      FROM users
+      ON CONFLICT (date, telegram_id) DO UPDATE 
+      SET points = EXCLUDED.points, rank = EXCLUDED.rank
+    `
+
+    // 2. Guild Snapshots
+    await sql`
+      INSERT INTO guild_daily_snapshots (date, guild_name, points, rank)
+      SELECT 
+        ${date}::DATE,
+        g.name,
+        COALESCE(SUM(u.points), 0) / CAST(g.total_members AS DECIMAL) as points,
+        RANK() OVER (ORDER BY COALESCE(SUM(u.points), 0) / CAST(g.total_members AS DECIMAL) DESC) as rank
+      FROM guilds g
+      LEFT JOIN users u ON g.name = u.guild
+      WHERE g.is_active = TRUE
+      GROUP BY g.name, g.total_members
+      ON CONFLICT (date, guild_name) DO UPDATE 
+      SET points = EXCLUDED.points, rank = EXCLUDED.rank
+    `
+  })
+
+  console.log('✅ Snapshots saved.')
+}
+
+/**
  * Get ranking history for the last N days
+ * Uses snapshots for speed
  */
 export async function getUserRankingHistory(telegramId: string, days: number = 30) {
+  // Try snapshots first
+  const snapshots = await sql`
+    SELECT 
+      date::TEXT as date,
+      rank::INTEGER as rank,
+      points::FLOAT as points
+    FROM user_daily_snapshots
+    WHERE telegram_id = ${telegramId}
+      AND date > CURRENT_DATE - (${days} || ' days')::INTERVAL
+    ORDER BY date ASC
+  `
+
+  // If we have enough snapshots, return them
+  if (snapshots.length >= days - 1) {
+    return snapshots
+  }
+
+  // Fallback to recursive CTE for missing history (e.g. initial setup)
   return await sql`
     WITH RECURSIVE dates AS (
       SELECT CURRENT_DATE - (${days} || ' days')::INTERVAL as date
@@ -149,6 +211,21 @@ export async function getUserRankingHistory(telegramId: string, days: number = 3
  * Get ranking history for all guilds for the last N days
  */
 export async function getGuildRankingHistory(days: number = 30) {
+  const snapshots = await sql`
+    SELECT 
+      guild_name as guild,
+      date::TEXT as date,
+      rank::INTEGER as rank,
+      points::FLOAT as average_points
+    FROM guild_daily_snapshots
+    WHERE date > CURRENT_DATE - (${days} || ' days')::INTERVAL
+    ORDER BY date ASC, rank ASC
+  `
+
+  if (snapshots.length > 0) {
+    return snapshots
+  }
+
   return await sql`
     WITH RECURSIVE dates AS (
       SELECT (CURRENT_DATE - (${days} || ' days')::INTERVAL)::DATE as date

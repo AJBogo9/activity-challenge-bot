@@ -1,9 +1,6 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
   base: './',
   server: {
     port: 5173,
@@ -16,6 +13,8 @@ export default defineConfig({
   },
   build: {
     outDir: '../dist/webapp',
-    emptyOutDir: true
+    emptyOutDir: true,
+    target: 'esnext',
+    minify: 'esbuild' // Fast and efficient
   }
-})
+});

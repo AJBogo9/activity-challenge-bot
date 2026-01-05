@@ -109,5 +109,36 @@ await new Promise(resolve => setTimeout(resolve, 5000));
 console.log("Untainting control plane...");
 run(["kubectl", "taint", "nodes", "--all", "node-role.kubernetes.io/control-plane-"], true);
 
+console.log("Setting up MetalLB LoadBalancer...");
+try {
+    run(["kubectl", "apply", "-f", "https://raw.githubusercontent.com/metallb/metallb/v0.13.12/config/manifests/metallb-native.yaml"]);
+    console.log("Waiting for MetalLB...");
+    // Wait for deployment instead of pod selector to be more robust
+    run(["kubectl", "wait", "--namespace", "metallb-system", "--for=condition=ready", "pod", "--selector=app=metallb", "--timeout=90s"]);
+    
+    const lbConfig = `
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: local-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - 10.5.0.200-10.5.0.250
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: local-advertisement
+  namespace: metallb-system
+`;
+    const tmpLBPath = join(tmpdir(), "metallb-config.yaml");
+    await write(tmpLBPath, lbConfig);
+    run(["kubectl", "apply", "-f", tmpLBPath]);
+    console.log("✅ MetalLB configured.");
+} catch (e) {
+    console.error("❌ MetalLB setup failed:", (e as Error).message);
+}
+
 console.log("Cluster setup complete!");
 console.log(`Registry available at localhost:${REGISTRY_PORT} (host) and ${REGISTRY_NAME}:${REGISTRY_PORT} (cluster)`);
