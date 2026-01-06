@@ -17,15 +17,6 @@ export default defineConfig({
     
     sidebar: [
       {
-        text: 'Getting Started',
-        collapsed: false,
-        items: [
-          { text: 'Introduction', link: '/' },
-          { text: 'Features', link: '/features' },
-          { text: 'Contributing', link: '/CONTRIBUTING' }
-        ]
-      },
-      {
         text: 'Guides',
         collapsed: false,
         items: [
