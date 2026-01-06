@@ -213,79 +213,84 @@ src/
 
 ### Activity Logging Flow
 
-```
-1. User clicks "💪 Log Activity"
-   ↓
-2. Bot enters activity_wizard scene
-   ↓
-3. Wizard Step 0: Show categories
-   ↓
-4. User selects category
-   ↓
-5. Wizard Step 1: Show subcategories
-   ↓
-6. User selects subcategory
-   ↓
-7. Wizard Step 2: Show activities
-   ↓
-8. User selects activity
-   ↓
-9. Wizard Step 3: Show intensity levels
-   ↓
-10. User selects intensity
-    ↓
-11. Wizard Step 4: Show date picker
-    ↓
-12. User selects date
-    ↓
-13. Wizard Step 5: Ask for duration
-    ↓
-14. User enters minutes
-    ↓
-15. Calculate points: (MET × minutes) / 60
-    ↓
-16. Wizard Step 6: Show confirmation
-    ↓
-17. User confirms
-    ↓
-18. Save to database:
-    - Insert into activities table
-    - Update users.points
-    - Invalidate guild leaderboard cache
-    ↓
-19. Show success message
-    ↓
-20. Return to main menu
+```mermaid
+flowchart TD
+    A[User clicks 💪 Log Activity] --> B[Enter activity_wizard scene]
+    B --> C[Step 0: Show categories]
+    C --> D[User selects category]
+    D --> E[Step 1: Show subcategories]
+    E --> F[User selects subcategory]
+    F --> G[Step 2: Show activities]
+    G --> H[User selects activity]
+    H --> I[Step 3: Show intensity levels]
+    I --> J[User selects intensity]
+    J --> K[Step 4: Show date picker]
+    K --> L[User selects date]
+    L --> M[Step 5: Ask for duration]
+    M --> N[User enters minutes]
+    N --> O[Calculate points:<br/>MET × minutes / 60]
+    O --> P[Step 6: Show confirmation]
+    P --> Q[User confirms]
+    Q --> R[Save to database:<br/>- Insert into activities<br/>- Update users.points<br/>- Invalidate cache]
+    R --> S[Show success message]
+    S --> T[Return to main menu]
+
+    %% Legend
+    subgraph Legend
+        L1[User Action]
+        L2[Wizard Step]
+        L3[Database/Calculation]
+    end
+
+    classDef userAction fill:#10b981,stroke:#059669,color:#fff
+    classDef wizardStep fill:#6366f1,stroke:#4f46e5,color:#fff
+    classDef dbAction fill:#f59e0b,stroke:#d97706,color:#fff
+    
+    class D,F,H,J,L,N,Q userAction
+    class C,E,G,I,K,M,P wizardStep
+    class O,R dbAction
+    class L1 userAction
+    class L2 wizardStep
+    class L3 dbAction
 ```
 
 ### Registration Flow
 
-```
-1. User clicks "📝 Register"
-   ↓
-2. Bot enters register_wizard scene
-   ↓
-3. Wizard Step 0: Show terms & conditions
-   ↓
-4. User accepts terms
-   ↓
-5. Wizard Step 1: Show guild selection
-   ↓
-6. User selects guild
-   ↓
-7. Wizard Step 2: Show confirmation
-   ↓
-8. User confirms
-   ↓
-9. Save to database:
-    - Insert into users table
-    - Set points = 0
-    ↓
-10. Update reply keyboard (add registered buttons)
-    ↓
-11. Show success message
-    ↓
-12. Navigate to registered menu
+```mermaid
+flowchart TD
+    A[User clicks 📝 Register] --> B[Enter register_wizard scene]
+    B --> C[Step 0: Show terms & conditions]
+    C --> D[User accepts terms]
+    D --> E[Step 1: Show guild selection]
+    E --> F[User selects guild]
+    F --> G[Step 2: Show confirmation]
+    G --> H[User confirms]
+    H --> I[Save to database:<br/>- Insert into users<br/>- Set points = 0]
+    I --> J[Update reply keyboard<br/>add registered buttons]
+    J --> K[Show success message]
+    K --> L[Navigate to registered menu]
+
+    %% Legend
+    subgraph Legend
+        L1[User Action]
+        L2[Wizard Step]
+        L3[Database Operation]
+        L4[System Action]
+    end
+
+    classDef userAction fill:#10b981,stroke:#059669,color:#fff
+    classDef wizardStep fill:#6366f1,stroke:#4f46e5,color:#fff
+    classDef dbAction fill:#f59e0b,stroke:#d97706,color:#fff
+    classDef systemAction fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    
+    class D,F,H userAction
+    class C,E,G wizardStep
+    class I dbAction
+    class J systemAction
+    class L1 userAction
+    class L2 wizardStep
+    class L3 dbAction
+    class L4 systemAction
 ```
 
 ## Database Design
@@ -294,12 +299,40 @@ src/
 
 Three main tables with simple relationships:
 
-```sql
-users (id, telegram_id, username, first_name, guild, points, created_at)
-  ↓ (one-to-many)
-activities (id, user_id, activity_type, duration, points, activity_date, created_at)
-
-feedback (id, user_id, ease_of_use, usefulness, overall_satisfaction, text_feedback, created_at)
+```mermaid
+erDiagram
+    users ||--o{ activities : logs
+    users ||--o{ feedback : provides
+    
+    users {
+        int id PK
+        bigint telegram_id UK "Unique Telegram user ID"
+        string username "Telegram username"
+        string first_name "User's first name"
+        string guild "Guild affiliation"
+        int points "Total accumulated points"
+        timestamp created_at "Registration timestamp"
+    }
+    
+    activities {
+        int id PK
+        int user_id FK "References users(id)"
+        string activity_type "Type of activity logged"
+        int duration "Duration in minutes"
+        int points "Points earned"
+        date activity_date "Date activity occurred"
+        timestamp created_at "Log timestamp"
+    }
+    
+    feedback {
+        int id PK
+        int user_id FK "References users(id)"
+        int ease_of_use "Rating 1-5"
+        int usefulness "Rating 1-5"
+        int overall_satisfaction "Rating 1-5"
+        text text_feedback "Optional text comments"
+        timestamp created_at "Feedback timestamp"
+    }
 ```
 
 ### Key Design Decisions

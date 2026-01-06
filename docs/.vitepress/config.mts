@@ -61,14 +61,6 @@ export default withMermaid(
             { text: 'Point System', link: '/reference/point-system' },
             { text: 'Activity Hierarchy', link: '/reference/activity-hierarchy' }
           ]
-        },
-        {
-          text: 'Deployment',
-          collapsed: true,
-          items: [
-            { text: 'Kubernetes Dev', link: '/kubernetes-dev' },
-            { text: 'Competition Setup', link: '/competition-setup' }
-          ]
         }
       ],
       socialLinks: [
