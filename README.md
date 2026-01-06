@@ -25,7 +25,7 @@ A Telegram bot for tracking physical activities and fostering healthy competitio
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/activity-challenge-bot.git
+git clone https://github.com/AJBogo9/activity-challenge-bot.git
 cd activity-challenge-bot
 
 # Install dependencies
@@ -239,5 +239,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Support
 
 - **Documentation**: [Full docs](docs/)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/activity-challenge-bot/issues)
+- **Issues**: [GitHub Issues](https://github.com/AJBogo9/activity-challenge-bot/issues)
 - **Questions**: Open a discussion on GitHub
