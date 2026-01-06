@@ -4,38 +4,41 @@ A comprehensive guide to the Activity Challenge Bot's architecture, design patte
 
 ## System Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                       Telegram API                          │
-└───────────────────────────┬─────────────────────────────────┘
-                            │
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│                     Bot Application                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │   grammY     │  │   Scenes &   │  │     API      │     │
-│  │  Framework   │→ │   Wizards    │  │    Server    │     │
-│  └──────────────┘  └──────────────┘  └──────────────┘     │
-│         │                  │                  │             │
-│         ↓                  ↓                  ↓             │
-│  ┌─────────────────────────────────────────────────┐       │
-│  │         Two-Message Manager Pattern             │       │
-│  └─────────────────────────────────────────────────┘       │
-└───────────────────────────┬─────────────────────────────────┘
-                            │
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│                    PostgreSQL Database                      │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐                 │
-│  │  users   │  │activities│  │ feedback │                 │
-│  └──────────┘  └──────────┘  └──────────┘                 │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+  TG[Telegram API]
+  
+  subgraph Bot["Bot Application"]
+    GR[grammY Framework]
+    SC[Scenes & Wizards]
+    API[API Server]
+    TMM[Two-Message Manager Pattern]
+    
+    GR --> SC
+    GR --> API
+    SC --> TMM
+    API --> TMM
+  end
+  
+  subgraph DB["PostgreSQL Database"]
+    USERS[(users)]
+    ACTIVITIES[(activities)]
+    FEEDBACK[(feedback)]
+  end
+  
+  WEB[Web Application<br/>React + Vite + TailwindCSS<br/>Stats & Visualizations]
+  
+  TG --> Bot
+  Bot --> DB
+  API -.-> WEB
 
-┌─────────────────────────────────────────────────────────────┐
-│                       Web Application                       │
-│              React + Vite + TailwindCSS                     │
-│                  (Stats & Visualizations)                   │
-└─────────────────────────────────────────────────────────────┘
+  classDef database fill:#4a90e2,stroke:#2e5c8a,color:#fff
+  classDef webapp fill:#10b981,stroke:#059669,color:#fff
+  classDef telegram fill:#0088cc,stroke:#006699,color:#fff
+  
+  class USERS,ACTIVITIES,FEEDBACK database
+  class WEB webapp
+  class TG telegram
 ```
 
 ## Technology Stack
