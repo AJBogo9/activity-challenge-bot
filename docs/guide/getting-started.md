@@ -215,35 +215,3 @@ Now that you have the bot running locally:
 3. **Learn patterns** - Check out [Code Patterns](/development/patterns.md)
 4. **Configure the bot** - See [Competition Setup](/admin/competition-setup.md) and [Guild Management](/admin/guild-management.md)
 5. **Start contributing** - See [Contributing Guide](/CONTRIBUTING)
-
-## Getting Help
-
-- **Issues**: Check [GitHub Issues](https://github.com/EppuRuotsalainen/activity-challenge-bot/issues)
-- **Documentation**: Browse the sidebar for detailed guides
-- **Questions**: Open a discussion on GitHub
-
-## Troubleshooting
-
-### Bot token is invalid
-
-Make sure you copied the entire token from BotFather, including any hyphens or colons.
-
-### Database connection failed
-
-Check that PostgreSQL is running and the credentials in `.env` match your database setup. See [Environment Setup](/guide/environment-setup.md) for configuration details.
-
-### Port already in use
-
-If port 3001 is already in use, change `API_PORT` in your `.env` file.
-
-### Migration errors
-
-Try dropping and recreating the database:
-
-```bash
-dropdb activity_challenge_bot
-createdb activity_challenge_bot
-bun run migrate
-```
-
-For more troubleshooting help, see [Local Development](/guide/local-development.md).

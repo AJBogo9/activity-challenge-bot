@@ -93,27 +93,6 @@ DATABASE_URL=postgresql://postgres:postgres@postgres:5432/activity_challenge_bot
 ### Production (Kubernetes)
 Environment variables managed via Kubernetes secrets (see deployment docs).
 
-## Quick Troubleshooting
-
-**"BOT_TOKEN is required"**
-- Check `.env` exists in project root
-- Verify `BOT_TOKEN` is set: `cat .env | grep BOT_TOKEN`
-- Restart terminal/container
-
-**"Database connection failed"**
-```bash
-# Check PostgreSQL is running
-docker ps | grep postgres  # Container
-pg_isready -h localhost -p 5432  # Local
-
-# Test connection
-psql $DATABASE_URL -c "SELECT 1"
-```
-
-**"Port already in use"**
-- Change `API_PORT` in `.env`
-- Or kill process: `lsof -i :3001` then `kill -9 <PID>`
-
 ## Template
 
 Copy from `.env.example`:
@@ -121,15 +100,6 @@ Copy from `.env.example`:
 cp .env.example .env
 # Edit with your actual values
 ```
-
-## Security Notes
-
-**Development**: Use weak passwords, same bot token
-**Production**: 
-- Strong random passwords
-- Separate bot token
-- Kubernetes secrets for sensitive data
-- See [Database Operations](/admin/database-operations.md) for security best practices
 
 ## Next Steps
 

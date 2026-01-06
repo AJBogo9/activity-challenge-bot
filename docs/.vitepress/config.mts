@@ -6,6 +6,7 @@ export default withMermaid(
     title: "Activity Challenge Bot",
     description: "A Telegram bot for tracking physical activity competitions among Aalto guilds",
     base: '/activity-challenge-bot/',
+    lastUpdated: true,
     themeConfig: {
       nav: [
         { text: 'Home', link: '/' },
@@ -40,7 +41,6 @@ export default withMermaid(
           collapsed: false,
           items: [
             { text: 'Project Structure', link: '/development/project-structure' },
-            { text: 'Code Patterns', link: '/development/patterns' },
             { text: 'Testing', link: '/development/testing' }
           ]
         },
@@ -51,7 +51,6 @@ export default withMermaid(
             { text: 'Competition Setup', link: '/admin/competition-setup' },
             { text: 'Guild Management', link: '/admin/guild-management' },
             { text: 'Database Operations', link: '/admin/database-operations' },
-            { text: 'Monitoring', link: '/admin/monitoring' }
           ]
         },
         {
@@ -63,6 +62,12 @@ export default withMermaid(
           ]
         }
       ],
+      lastUpdated: {
+        text: 'Last updated',
+        formatOptions: {
+          dateStyle: 'medium',
+        }
+      },
       socialLinks: [
         { icon: 'github', link: 'https://github.com/AJBogo9/activity-challenge-bot' }
       ],

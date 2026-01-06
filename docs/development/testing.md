@@ -173,32 +173,7 @@ afterEach(clearTestData)
 bun run test:coverage
 ```
 
-**Goals:**
-- Functions: 80%+
-- Branches: 70%+
-- Lines: 80%+
-
 **Priority areas:** Point calculations, database operations, user flows
-
-## Manual Testing Checklist
-
-### Registration
-- [ ] Terms acceptance required
-- [ ] Guild selection works
-- [ ] Confirmation shows correct data
-- [ ] Can cancel at each step
-
-### Activity Logging
-- [ ] All 4 hierarchy levels work
-- [ ] Date picker validates competition period
-- [ ] Duration validates numbers
-- [ ] Points calculated correctly
-- [ ] Can cancel at each step
-
-### Profile
-- [ ] Stats display correctly
-- [ ] Activity history works
-- [ ] Delete account requires confirmation
 
 ## Debugging Tests
 
@@ -213,58 +188,6 @@ bun test --test-name-pattern "should calculate rankings"
 test('should do something', () => {
   console.log('Debug:', someVariable)
   expect(true).toBe(true)
-})
-```
-
-## Best Practices
-
-✅ Write tests for critical business logic
-✅ Test edge cases (zero, negative, large values)
-✅ Keep tests independent
-✅ Clean up test data
-✅ Mock external dependencies
-
-❌ Don't test third-party libraries
-❌ Don't write order-dependent tests
-❌ Don't use production database
-❌ Don't commit failing tests
-
-## Common Test Patterns
-
-### Testing Async Functions
-```typescript
-test('should handle async', async () => {
-  const result = await asyncFunction()
-  expect(result).toBeDefined()
-})
-```
-
-### Testing Errors
-```typescript
-test('should throw error', () => {
-  expect(() => validateInput(invalid)).toThrow('Invalid input')
-})
-
-test('should handle async errors', async () => {
-  await expect(asyncFunction()).rejects.toThrow('Error')
-})
-```
-
-### Testing Edge Cases
-```typescript
-describe('Point Calculation Edge Cases', () => {
-  test('handles zero values', () => {
-    expect(calculatePoints(0, 30)).toBe(0)
-    expect(calculatePoints(8, 0)).toBe(0)
-  })
-  
-  test('handles large values', () => {
-    expect(calculatePoints(20, 180)).toBe(60)
-  })
-  
-  test('handles decimal precision', () => {
-    expect(calculatePoints(7.5, 45)).toBeCloseTo(5.63, 2)
-  })
 })
 ```
 

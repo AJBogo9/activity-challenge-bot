@@ -155,93 +155,6 @@ See [Guild Management](/admin/guild-management.md) for configuration.
 
 **Why?** Supports retroactive logging ("forgot to log yesterday's run").
 
-## Common Queries
-
-### User Rankings
-
-```sql
--- Global leaderboard
-SELECT telegram_id, username, first_name, points, guild,
-       RANK() OVER (ORDER BY points DESC) as rank
-FROM users
-ORDER BY points DESC LIMIT 20;
-
--- Guild leaderboard
-SELECT telegram_id, username, points,
-       RANK() OVER (PARTITION BY guild ORDER BY points DESC) as guild_rank
-FROM users
-WHERE guild = 'TiK'
-ORDER BY points DESC;
-```
-
-### Activity History
-
-```sql
--- User's recent activities
-SELECT activity_type, duration, points, activity_date
-FROM activities
-WHERE user_id = $1
-ORDER BY activity_date DESC, created_at DESC
-LIMIT 50;
-```
-
-### Guild Statistics
-
-```sql
-SELECT guild,
-       COUNT(id) as total_members,
-       COUNT(id) FILTER (WHERE points > 0) as active_members,
-       COALESCE(SUM(points), 0) as total_points,
-       COALESCE(AVG(points), 0) as avg_points
-FROM users
-WHERE guild IS NOT NULL
-GROUP BY guild
-ORDER BY avg_points DESC;
-```
-
-See [Database Operations](/admin/database-operations.md) for more operational queries.
-
-## Data Operations
-
-### Creating a User
-
-```typescript
-export async function createUser(data: CreateUserData) {
-  const [user] = await sql`
-    INSERT INTO users (telegram_id, username, first_name, last_name, guild, points)
-    VALUES (${data.telegramId}, ${data.username}, ${data.firstName}, 
-            ${data.lastName}, ${data.guild}, 0)
-    RETURNING *
-  `
-  return user
-}
-```
-
-### Logging an Activity
-
-```typescript
-export async function logActivity(data: ActivityData) {
-  // Insert activity
-  const [activity] = await sql`
-    INSERT INTO activities (user_id, activity_type, duration, points, activity_date)
-    VALUES (${data.userId}, ${data.activityType}, ${data.duration},
-            ${data.points}, ${data.activityDate})
-    RETURNING *
-  `
-  
-  // Update user's total points
-  await sql`
-    UPDATE users 
-    SET points = points + ${data.points}
-    WHERE id = ${data.userId}
-  `
-  
-  return activity
-}
-```
-
-See [Project Structure](/development/project-structure.md) for full database module organization.
-
 ## Performance
 
 ### Index Strategy
@@ -306,25 +219,6 @@ LEFT JOIN activities a ON u.id = a.user_id
 GROUP BY u.id, u.points
 HAVING ABS(u.points - COALESCE(SUM(a.points), 0)) > 0.01;
 ```
-
-### Find Activities Outside Competition
-
-```sql
-SELECT u.username, a.activity_type, a.activity_date, a.points
-FROM activities a JOIN users u ON u.id = a.user_id
-WHERE a.activity_date < '2025-12-24' OR a.activity_date > '2026-03-31'
-ORDER BY a.activity_date DESC;
-```
-
-See [Competition Setup](/admin/competition-setup.md) for competition period configuration.
-
-## Security
-
-- Use parameterized queries (always): `sql\`SELECT * FROM users WHERE id = ${id}\``
-- Limited user privileges in production (not postgres superuser)
-- Minimal data stored (no email, phone, location, health metrics)
-
-See [Database Operations](/admin/database-operations.md) for security best practices including limited user permissions.
 
 ## Further Reading
 
