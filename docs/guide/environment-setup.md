@@ -6,7 +6,7 @@ Configuration reference for the Activity Challenge Bot.
 
 Create a `.env` file in the project root:
 
-```env
+```dotenv
 # Telegram Bot (required)
 BOT_TOKEN=your_bot_token_here
 
@@ -45,46 +45,46 @@ API_PORT=3001
 
 ### Competition Period
 
-Edit `src/config/competition.ts`:
+Competition dates and settings are managed in code for version control and type safety.
 
+See [Competition Setup](/admin/competition-setup.md) for detailed configuration instructions.
+
+**Quick example:**
 ```typescript
-export const CURRENT_COMPETITION: CompetitionConfig = {
+// src/config/competition.ts
+export const CURRENT_COMPETITION = {
   name: "Winter 2025-2026 Activity Challenge",
-  startDate: new Date("2025-12-24"),  // ISO 8601 format
-  endDate: new Date("2026-03-31"),
-  description: "Q1 2026 fitness challenge"
+  startDate: new Date("2025-12-24"),
+  endDate: new Date("2026-03-31")
 }
 ```
 
-⚠️ Always use `YYYY-MM-DD` format for dates.
-
-See [Competition Setup](/admin/competition-setup) for details.
-
 ### Guilds
 
-Edit `src/config/guilds.ts`:
+Guild configuration is managed in code.
 
+See [Guild Management](/admin/guild-management.md) for detailed configuration instructions.
+
+**Quick example:**
 ```typescript
-export const GUILDS: GuildConfig[] = [
+// src/config/guilds.ts
+export const GUILDS = [
   { name: "TiK", totalMembers: 700, isActive: true },
-  { name: "SIK", totalMembers: 450, isActive: true },
-  // Add more guilds here
+  // Add more guilds...
 ]
 ```
-
-See [Guild Management](/admin/guild-management) for details.
 
 ## Environment-Specific Setup
 
 ### Local Development
-```env
+```dotenv
 NODE_ENV=development
 POSTGRES_HOST=localhost
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/activity_challenge_bot
 ```
 
 ### Container Development
-```env
+```dotenv
 NODE_ENV=development
 POSTGRES_HOST=postgres  # ← Service name from compose.yaml
 DATABASE_URL=postgresql://postgres:postgres@postgres:5432/activity_challenge_bot
@@ -129,10 +129,11 @@ cp .env.example .env
 - Strong random passwords
 - Separate bot token
 - Kubernetes secrets for sensitive data
-- See [PostgreSQL Security](https://www.postgresql.org/docs/current/auth-methods.html)
+- See [Database Operations](/admin/database-operations.md) for security best practices
 
 ## Next Steps
 
-- [Getting Started](/guide/getting-started)
-- [Local Development](/guide/local-development)
-- [Competition Setup](/admin/competition-setup)
+- [Getting Started](/guide/getting-started.md) - Set up the project
+- [Local Development](/guide/local-development.md) - Development workflow
+- [Competition Setup](/admin/competition-setup.md) - Configure competition
+- [Guild Management](/admin/guild-management.md) - Configure guilds

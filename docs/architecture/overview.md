@@ -60,6 +60,8 @@ graph TB
 - **postgres.js**: Lightweight PostgreSQL client for Bun/Node
 - **SQL**: Direct SQL queries (no ORM) for performance and simplicity
 
+See [Database Architecture](./database.md) for schema details.
+
 ### Frontend (Web App)
 - **React 18**: UI framework
 - **Vite**: Build tool and dev server
@@ -76,9 +78,7 @@ graph TB
 
 ### 1. Two-Message Manager Pattern
 
-The bot maintains exactly two persistent messages per user:
-1. **Content Message**: Displays current information (edited in place)
-2. **Keyboard Message**: Shows reply keyboard at bottom (rarely changes)
+The bot maintains exactly two persistent messages per user: a content message (edited in place) and a keyboard message (stays at bottom).
 
 **Benefits:**
 - Clean, organized chat interface
@@ -86,35 +86,18 @@ The bot maintains exactly two persistent messages per user:
 - Consistent user experience
 - Easy navigation without scrolling
 
-**Implementation:** See [Two-Message Manager](./two-message-manager.md) for details.
+See [Two-Message Manager](./two-message-manager.md) for complete implementation details.
 
 ### 2. Wizard Pattern (Multi-Step Flows)
 
-Complex user interactions are implemented as wizards:
+Complex user interactions use wizards:
 - Registration (3 steps)
 - Activity logging (7 steps)
 - Feedback collection (1 step with multi-part form)
 
-Each wizard step:
-1. Displays information/question
-2. Waits for user input
-3. Validates input
-4. Stores in wizard state
-5. Proceeds to next step
+Each wizard step displays information, waits for input, validates, stores state, and proceeds to next step.
 
-**State Management:**
-```typescript
-interface WizardState {
-  mainCategory?: string
-  subcategory?: string
-  activity?: string
-  intensity?: string
-  metValue?: number
-  activityDate?: Date
-  duration?: number
-  calculatedPoints?: number
-}
-```
+See [Flows and Wizards](./flows-and-wizards.md) for detailed flow diagrams and implementation.
 
 ### 3. Scene-Based Navigation
 
@@ -129,8 +112,6 @@ The bot uses scenes for different "screens":
 - `info_menu`: Information and help
 - `feedback_wizard`: Feedback collection
 
-Scenes can be entered/exited, maintaining clean state transitions.
-
 ### 4. Inline Keyboard Navigation
 
 All user interactions use inline keyboards (buttons within messages):
@@ -139,223 +120,49 @@ All user interactions use inline keyboards (buttons within messages):
 - Callback data for action handling
 - Back/Cancel buttons on every step
 
-**Example:**
-```typescript
-Markup.inlineKeyboard([
-  [Markup.button.callback('Option 1', 'action:option1')],
-  [Markup.button.callback('Option 2', 'action:option2')],
-  [Markup.button.callback('❌ Cancel', 'action:cancel')]
-])
-```
-
 ### 5. Hierarchical Data Navigation
 
-The 4-level activity hierarchy uses progressive disclosure:
-- Start broad (category)
-- Narrow down (subcategory)
-- Get specific (activity)
-- Choose intensity
+The 4-level activity hierarchy uses progressive disclosure (Category → Subcategory → Activity → Intensity). Each level is paginated if needed, showing 8-12 items per page.
 
-Each level is paginated if needed, showing 8-12 items per page.
+See [Activity Hierarchy](/reference/activity-hierarchy.md) for complete structure.
 
 ## Project Structure
 
 ```
 src/
 ├── api/                    # REST API server (for web app)
-│   └── server.ts
 ├── bot/                    # Telegram bot core
-│   ├── commands.ts         # Command handlers (/start)
-│   ├── handlers/           # Event handlers
-│   ├── instance.ts         # Bot instance creation
-│   ├── middleware.ts       # Session management
-│   ├── setup.ts           # Bot configuration
-│   └── start.ts           # Bot initialization
 ├── config/                 # Configuration files
-│   ├── competition.ts      # Competition dates & settings
-│   ├── contributors.ts     # Credits
-│   ├── guilds.ts          # Guild definitions
-│   └── index.ts
-├── db/                    # Database layer
-│   ├── activities.ts      # Activity CRUD operations
-│   ├── connection.ts      # DB connection pool
-│   ├── feedback.ts        # Feedback operations
-│   ├── guilds.ts         # Guild operations
-│   ├── migrate.ts        # Schema migrations
-│   ├── points.ts         # Point calculations & rankings
-│   ├── schema.sql        # Database schema
-│   └── users.ts          # User CRUD operations
-├── flows/                 # Scene implementations
-│   ├── activity/         # Activity logging wizard
-│   │   ├── helpers/      # Activity data & navigation
-│   │   ├── steps/        # 7 wizard steps
-│   │   └── wizard.ts     # Wizard composition
-│   ├── feedback.ts       # Feedback collection
-│   ├── info/             # Info screens
-│   ├── menu/             # Menu routers
-│   ├── profile/          # User profile views
-│   ├── register/         # Registration wizard
-│   │   ├── helpers/
-│   │   ├── steps/        # 3 wizard steps
-│   │   └── wizard.ts
-│   └── stats/            # Statistics & leaderboards
-├── types/                # TypeScript type definitions
-│   └── index.ts
-└── utils/                # Utility functions
-    ├── calendar.ts       # Date picker
-    ├── format-list.ts    # List formatting
-    ├── texts.ts         # Text utilities
-    ├── two-message-manager.ts  # Core pattern
-    └── webapp-auth.ts   # Web app authentication
+├── db/                     # Database layer
+├── flows/                  # Scene implementations
+├── types/                  # TypeScript type definitions
+└── utils/                  # Utility functions
 ```
+
+See [Project Structure](/development/project-structure.md) for detailed breakdown.
 
 ## Data Flow
 
-### Activity Logging Flow
+The bot uses multi-step wizards for complex operations like activity logging and registration.
 
-```mermaid
-flowchart TD
-    A[User clicks 💪 Log Activity] --> B[Enter activity_wizard scene]
-    B --> C[Step 0: Show categories]
-    C --> D[User selects category]
-    D --> E[Step 1: Show subcategories]
-    E --> F[User selects subcategory]
-    F --> G[Step 2: Show activities]
-    G --> H[User selects activity]
-    H --> I[Step 3: Show intensity levels]
-    I --> J[User selects intensity]
-    J --> K[Step 4: Show date picker]
-    K --> L[User selects date]
-    L --> M[Step 5: Ask for duration]
-    M --> N[User enters minutes]
-    N --> O[Calculate points:<br/>MET × minutes / 60]
-    O --> P[Step 6: Show confirmation]
-    P --> Q[User confirms]
-    Q --> R[Save to database:<br/>- Insert into activities<br/>- Update users.points<br/>- Invalidate cache]
-    R --> S[Show success message]
-    S --> T[Return to main menu]
-
-    %% Legend
-    subgraph Legend
-        L1[User Action]
-        L2[Wizard Step]
-        L3[Database/Calculation]
-    end
-
-    classDef userAction fill:#10b981,stroke:#059669,color:#fff
-    classDef wizardStep fill:#6366f1,stroke:#4f46e5,color:#fff
-    classDef dbAction fill:#f59e0b,stroke:#d97706,color:#fff
-    
-    class D,F,H,J,L,N,Q userAction
-    class C,E,G,I,K,M,P wizardStep
-    class O,R dbAction
-    class L1 userAction
-    class L2 wizardStep
-    class L3 dbAction
-```
-
-### Registration Flow
-
-```mermaid
-flowchart TD
-    A[User clicks 📝 Register] --> B[Enter register_wizard scene]
-    B --> C[Step 0: Show terms & conditions]
-    C --> D[User accepts terms]
-    D --> E[Step 1: Show guild selection]
-    E --> F[User selects guild]
-    F --> G[Step 2: Show confirmation]
-    G --> H[User confirms]
-    H --> I[Save to database:<br/>- Insert into users<br/>- Set points = 0]
-    I --> J[Update reply keyboard<br/>add registered buttons]
-    J --> K[Show success message]
-    K --> L[Navigate to registered menu]
-
-    %% Legend
-    subgraph Legend
-        L1[User Action]
-        L2[Wizard Step]
-        L3[Database Operation]
-        L4[System Action]
-    end
-
-    classDef userAction fill:#10b981,stroke:#059669,color:#fff
-    classDef wizardStep fill:#6366f1,stroke:#4f46e5,color:#fff
-    classDef dbAction fill:#f59e0b,stroke:#d97706,color:#fff
-    classDef systemAction fill:#8b5cf6,stroke:#7c3aed,color:#fff
-    
-    class D,F,H userAction
-    class C,E,G wizardStep
-    class I dbAction
-    class J systemAction
-    class L1 userAction
-    class L2 wizardStep
-    class L3 dbAction
-    class L4 systemAction
-```
+See [Flows and Wizards](./flows-and-wizards.md) for detailed flow diagrams showing:
+- Activity Logging Flow (7 steps)
+- Registration Flow (3 steps)
 
 ## Database Design
 
-### Schema Overview
-
 Three main tables with simple relationships:
+- **users**: Participant information and total points
+- **activities**: Logged activities with individual points
+- **feedback**: User feedback submissions
 
-```mermaid
-erDiagram
-    users ||--o{ activities : logs
-    users ||--o{ feedback : provides
-    
-    users {
-        int id PK
-        bigint telegram_id UK "Unique Telegram user ID"
-        string username "Telegram username"
-        string first_name "User's first name"
-        string guild "Guild affiliation"
-        int points "Total accumulated points"
-        timestamp created_at "Registration timestamp"
-    }
-    
-    activities {
-        int id PK
-        int user_id FK "References users(id)"
-        string activity_type "Type of activity logged"
-        int duration "Duration in minutes"
-        int points "Points earned"
-        date activity_date "Date activity occurred"
-        timestamp created_at "Log timestamp"
-    }
-    
-    feedback {
-        int id PK
-        int user_id FK "References users(id)"
-        int ease_of_use "Rating 1-5"
-        int usefulness "Rating 1-5"
-        int overall_satisfaction "Rating 1-5"
-        text text_feedback "Optional text comments"
-        timestamp created_at "Feedback timestamp"
-    }
-```
-
-### Key Design Decisions
-
-1. **Denormalized Points**: Points stored in both `users.points` (aggregate) and `activities.points` (individual)
-   - Enables fast ranking queries
-   - Maintains detailed history
-   - Easy to verify consistency
-
-2. **String-Based Activity Types**: Full hierarchy path stored as string
-   - Flexible (no schema changes needed)
-   - Human-readable
-   - Simple queries
-
-3. **No Foreign Key for Guilds**: Guild names validated at application layer
-   - Allows adding guilds without migrations
-   - Simpler deployment
-
+**Key Design Decisions:**
+1. **Denormalized Points**: Stored in both `users.points` (fast rankings) and `activities.points` (detailed history)
+2. **String-Based Activity Types**: Full hierarchy path as string for flexibility
+3. **No Foreign Key for Guilds**: Validated at application layer for easy guild management
 4. **Separate Date Fields**: `activity_date` (when activity happened) vs `created_at` (when logged)
-   - Supports retroactive logging
-   - Useful for analytics
 
-See [Database Schema](./database.md) for complete details.
+See [Database Schema](./database.md) for complete ERD and schema details.
 
 ## Session Management
 
@@ -365,106 +172,64 @@ Bot sessions store:
 - Two persistent message IDs
 - Last displayed scene and content (for deduplication)
 
-```typescript
-interface Session {
-  contentMessageId?: number
-  keyboardMessageId?: number
-  lastSceneId?: string
-  lastContent?: string
-  // Wizard state stored in ctx.wizard.state
-}
-```
-
 Sessions are stored in-memory (not persisted between bot restarts).
 
 ## Error Handling
 
 ### Telegram API Errors
-
 ```typescript
 try {
   await ctx.telegram.editMessageText(...)
 } catch (error) {
-  // If edit fails (message too old), create new message
+  // If edit fails, create new message
   const newMsg = await ctx.reply(...)
   ctx.session.contentMessageId = newMsg.message_id
 }
 ```
 
 ### Database Errors
-
-```typescript
-try {
-  await sql`INSERT INTO activities ...`
-} catch (error) {
-  await ctx.reply('❌ Failed to save activity. Please try again.')
-  console.error('Database error:', error)
-}
-```
+All database operations wrapped in try-catch with user-friendly error messages.
 
 ### User Input Validation
-
-All user inputs validated before database operations:
-- Date within competition period
-- Duration > 0 and < reasonable maximum
-- Guild exists in configuration
+All inputs validated before database operations:
+- Date within competition period (see [Competition Setup](/admin/competition-setup.md))
+- Duration > 0 and reasonable
+- Guild exists in configuration (see [Guild Management](/admin/guild-management.md))
 - Activity hierarchy path valid
 
 ## Performance Optimizations
 
 ### Guild Leaderboard Caching
-
-```typescript
-// 5-minute in-memory cache
-let guildStatsCache: GuildStatsCache[] = []
-let lastCacheUpdate: Date | null = null
-const CACHE_TTL_MS = 5 * 60 * 1000
-
-// Invalidate on activity submission
-export function invalidateGuildCache(): void {
-  lastCacheUpdate = null
-}
-```
+5-minute in-memory cache, invalidated on activity submission.
 
 ### Database Indexing
+Strategic indexes for common queries: user lookup, rankings, user history, recent activities.
 
-Strategic indexes for common queries:
-- `users(telegram_id)` - User lookup
-- `users(points DESC)` - Rankings
-- `activities(user_id, activity_date)` - User history
-- `activities(created_at DESC)` - Recent activities
+See [Database Schema](./database.md) for index details.
 
 ### Window Functions for Rankings
-
 ```sql
 -- Efficient ranking without subqueries
-SELECT 
-  *,
-  RANK() OVER (ORDER BY points DESC) as rank
+SELECT *, RANK() OVER (ORDER BY points DESC) as rank
 FROM users
 ```
 
 ## Security Considerations
 
 ### Input Sanitization
-
 - All callback data validated before processing
 - SQL injection prevented (parameterized queries)
 - User messages deleted after processing (clean chat)
 
 ### Data Privacy
-
 - Only Telegram ID, name, and guild stored
-- No location tracking
-- No sensitive health data
+- No location tracking or sensitive health data
 - Users can request data deletion
 
-### Authentication
+See [Database Operations](/admin/database-operations.md) for security best practices.
 
-Web app uses Telegram Web App authentication:
-- Validates init data signature
-- Verifies user identity through Telegram
-- No separate login system needed
+### Authentication
+Web app uses Telegram Web App authentication - validates init data signature through Telegram.
 
 ## Deployment Architecture
 
@@ -473,6 +238,8 @@ Web app uses Telegram Web App authentication:
 - PostgreSQL container
 - Bot container with hot reload
 
+See [Local Development](/guide/local-development.md) for setup.
+
 ### Production
 - Kubernetes cluster (Talos Linux)
 - PostgreSQL StatefulSet with persistent storage
@@ -480,7 +247,18 @@ Web app uses Telegram Web App authentication:
 - Web app served via static hosting
 - Flux CD for GitOps
 
-See deployment documentation (maintained by your friend) for details.
+See [Kubernetes Dev Guide](/guide/kubernetes-dev.md) for cluster setup.
+
+## Configuration Management
+
+### Environment Variables
+See [Environment Setup](/guide/environment-setup.md) for complete configuration reference.
+
+### Application Configuration
+- **Competition dates**: See [Competition Setup](/admin/competition-setup.md)
+- **Guild settings**: See [Guild Management](/admin/guild-management.md)
+
+Configuration in code allows version control and type safety.
 
 ## Monitoring & Logging
 
@@ -489,54 +267,34 @@ Currently implemented:
 - Database connection health checks
 - Cache statistics endpoint
 
-Future considerations:
-- Prometheus metrics
-- Grafana dashboards
-- Error tracking (Sentry)
-- Usage analytics
+See [Monitoring](/admin/monitoring.md) for operations guide.
 
 ## Testing Strategy
 
-The project includes tests for:
-- Point calculations
-- Ranking algorithms
-- Leaderboard logic
+Tests for point calculations, ranking algorithms, and leaderboard logic using Bun's test runner.
 
-```bash
-bun test              # Run all tests
-bun test:watch        # Watch mode
-bun test:coverage     # Coverage report
-```
+See [Testing Guide](/development/testing.md) for patterns and examples.
 
-Tests use Bun's built-in test runner (similar to Jest).
+## Further Reading
 
-## Configuration Management
+### Architecture Deep Dives
+- [Database Schema](./database.md) - Complete schema and design decisions
+- [Flows and Wizards](./flows-and-wizards.md) - Conversation flow implementation
+- [Two-Message Manager](./two-message-manager.md) - Core UX pattern
 
-### Environment Variables
+### Administration
+- [Competition Setup](/admin/competition-setup.md) - Configure competition periods
+- [Guild Management](/admin/guild-management.md) - Manage guilds
+- [Database Operations](/admin/database-operations.md) - Backup and maintenance
+- [Monitoring](/admin/monitoring.md) - Health checks and troubleshooting
 
-```bash
-BOT_TOKEN=          # Telegram bot token
-DATABASE_URL=       # PostgreSQL connection string
-NODE_ENV=           # production/development
-PORT=               # API server port (default 3000)
-```
+### Development
+- [Getting Started](/guide/getting-started.md) - Setup and first run
+- [Local Development](/guide/local-development.md) - Development workflow
+- [Project Structure](/development/project-structure.md) - Code organization
+- [Code Patterns](/development/patterns.md) - Best practices
+- [Testing](/development/testing.md) - Testing guide
 
-### Application Configuration
-
-Competition dates and guild settings in code:
-- `src/config/competition.ts` - Competition period
-- `src/config/guilds.ts` - Guild definitions
-
-This allows version control and type safety for critical configuration.
-
-## Future Architecture Considerations
-
-Potential improvements:
-1. **Redis for Sessions**: Persist sessions across bot restarts
-2. **Message Queue**: Handle high-volume activity logging
-3. **Microservices**: Separate API server for web app
-4. **GraphQL API**: More flexible data querying for web app
-5. **Webhook Mode**: More reliable than long polling
-6. **Rate Limiting**: Prevent abuse (currently unlimited)
-
-These would be needed if scaling beyond a single university community.
+### Reference
+- [Point System](/reference/point-system.md) - How points are calculated
+- [Activity Hierarchy](/reference/activity-hierarchy.md) - Complete activity database

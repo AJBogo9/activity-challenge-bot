@@ -11,7 +11,7 @@ The bot uses two main conversation patterns:
 1. **Wizards**: Multi-step forms (activity logging, registration)
 2. **Simple Scenes**: Single-step views (profile, stats, info)
 
-All flows integrate with the [Two-Message Manager](/architecture/two-message-manager) pattern for clean UX.
+All flows integrate with the [Two-Message Manager](/architecture/two-message-manager.md) pattern for clean UX.
 
 ## Wizard Pattern
 
@@ -52,6 +52,8 @@ flows/activity/
     └── navigation.ts      # Back/cancel handlers
 ```
 
+See [Activity Hierarchy](/reference/activity-hierarchy.md) for details on the 1000+ activities and their MET values.
+
 **Key Implementation Details:**
 
 Each step file exports two functions:
@@ -79,13 +81,52 @@ export async function handleCategorySelection(ctx: any) {
 ```
 
 **Flow Diagram:**
-```
-Category → Subcategory → Activity → Intensity → Date → Duration → Confirm → Save
-   ↓            ↓           ↓           ↓        ↓        ↓         ↓
-[Back]       [Back]      [Back]     [Back]   [Cancel] [Cancel]  [Cancel]
+
+```mermaid
+flowchart TD
+    A[User clicks 💪 Log Activity] --> B[Enter activity_wizard scene]
+    B --> C[Step 0: Show categories]
+    C --> D[User selects category]
+    D --> E[Step 1: Show subcategories]
+    E --> F[User selects subcategory]
+    F --> G[Step 2: Show activities]
+    G --> H[User selects activity]
+    H --> I[Step 3: Show intensity levels]
+    I --> J[User selects intensity]
+    J --> K[Step 4: Show date picker]
+    K --> L[User selects date]
+    L --> M[Step 5: Ask for duration]
+    M --> N[User enters minutes]
+    N --> O[Calculate points:<br/>MET × minutes / 60]
+    O --> P[Step 6: Show confirmation]
+    P --> Q[User confirms]
+    Q --> R[Save to database:<br/>- Insert into activities<br/>- Update users.points<br/>- Invalidate cache]
+    R --> S[Show success message]
+    S --> T[Return to main menu]
+
+    %% Legend
+    subgraph Legend
+        L1[User Action]
+        L2[Wizard Step]
+        L3[Database/Calculation]
+    end
+
+    classDef userAction fill:#10b981,stroke:#059669,color:#fff
+    classDef wizardStep fill:#6366f1,stroke:#4f46e5,color:#fff
+    classDef dbAction fill:#f59e0b,stroke:#d97706,color:#fff
+    
+    class D,F,H,J,L,N,Q userAction
+    class C,E,G,I,K,M,P wizardStep
+    class O,R dbAction
+    class L1 userAction
+    class L2 wizardStep
+    class L3 dbAction
 ```
 
 **Point Calculation:**
+
+See [Point System](/reference/point-system.md) for detailed explanation of the MET-based formula.
+
 ```typescript
 // Step 6: Calculate points after duration input
 ctx.wizard.state.calculatedPoints = (metValue * duration) / 60
@@ -114,9 +155,43 @@ invalidateGuildCache()
 
 Simpler flow for new user onboarding.
 
-**Flow:**
-```
-Terms & Conditions → Guild Selection → Confirmation → Save
+**Flow Diagram:**
+
+```mermaid
+flowchart TD
+    A[User clicks 📝 Register] --> B[Enter register_wizard scene]
+    B --> C[Step 0: Show terms & conditions]
+    C --> D[User accepts terms]
+    D --> E[Step 1: Show guild selection]
+    E --> F[User selects guild]
+    F --> G[Step 2: Show confirmation]
+    G --> H[User confirms]
+    H --> I[Save to database:<br/>- Insert into users<br/>- Set points = 0]
+    I --> J[Update reply keyboard<br/>add registered buttons]
+    J --> K[Show success message]
+    K --> L[Navigate to registered menu]
+
+    %% Legend
+    subgraph Legend
+        L1[User Action]
+        L2[Wizard Step]
+        L3[Database Operation]
+        L4[System Action]
+    end
+
+    classDef userAction fill:#10b981,stroke:#059669,color:#fff
+    classDef wizardStep fill:#6366f1,stroke:#4f46e5,color:#fff
+    classDef dbAction fill:#f59e0b,stroke:#d97706,color:#fff
+    classDef systemAction fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    
+    class D,F,H userAction
+    class C,E,G wizardStep
+    class I dbAction
+    class J systemAction
+    class L1 userAction
+    class L2 wizardStep
+    class L3 dbAction
+    class L4 systemAction
 ```
 
 **State:**
@@ -132,7 +207,7 @@ interface PendingUser {
 
 **Key Features:**
 - Terms must be accepted
-- Guild validated against config
+- Guild validated against config (see [Guild Management](/admin/guild-management.md))
 - Keyboard updated after registration (adds registered features)
 
 ## Simple Scenes
@@ -161,6 +236,8 @@ profileScene.action('profile:history', async (ctx) => {
 })
 ```
 
+See [Two-Message Manager](/architecture/two-message-manager.md) for details on the `updateContent` method.
+
 ## Navigation Patterns
 
 ### Escape Middleware
@@ -174,6 +251,8 @@ activityWizard.use(TwoMessageManager.createEscapeMiddleware())
 Intercepts:
 - `/start` command → Returns to main menu
 - Reply keyboard buttons → Navigates to different scenes
+
+See [Two-Message Manager](/architecture/two-message-manager.md) for implementation details.
 
 ### Back Buttons
 
@@ -204,17 +283,9 @@ activityWizard.leave(async (ctx) => {
 })
 ```
 
-**Session State**: Persists across scenes
-```typescript
-interface Session {
-  contentMessageId?: number
-  keyboardMessageId?: number
-  lastSceneId?: string
-  lastContent?: string
-}
-```
+**Session State**: Persists across scenes (see [Two-Message Manager](/architecture/two-message-manager.md))
 
-**Database**: Permanent data only
+**Database**: Permanent data only (see [Database Schema](/architecture/database.md))
 
 ## Scene Registration
 
@@ -248,6 +319,8 @@ bot.use(stage.middleware())
 ❌ Don't forget to clean up wizard state
 ❌ Don't create wizards without escape routes
 
+See [Code Patterns](/development/patterns.md) for more best practices.
+
 ## Testing Flows
 
 Manual testing checklist:
@@ -257,8 +330,12 @@ Manual testing checklist:
 - [ ] Send invalid input
 - [ ] Rapid button clicking
 
+See [Testing Guide](/development/testing.md) for automated testing strategies.
+
 ## Further Reading
 
-- [Two-Message Manager Pattern](/architecture/two-message-manager)
-- [grammY Scenes Documentation](https://grammy.dev/plugins/conversations.html)
-- [Activity Hierarchy](/reference/activity-hierarchy)
+- [Two-Message Manager Pattern](/architecture/two-message-manager.md) - Core UX pattern
+- [Code Patterns](/development/patterns.md) - Implementation best practices
+- [Activity Hierarchy](/reference/activity-hierarchy.md) - Activity database structure
+- [Point System](/reference/point-system.md) - How points are calculated
+- [grammY Scenes Documentation](https://grammy.dev/plugins/conversations.html) - Framework reference

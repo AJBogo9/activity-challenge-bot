@@ -6,14 +6,40 @@ PostgreSQL schema for the Activity Challenge Bot.
 
 Three main tables with simple relationships:
 
-```
-users (profiles and points)
-  ↓ one-to-many
-activities (activity logs)
-
-users
-  ↓ one-to-many
-feedback (optional feature)
+```mermaid
+erDiagram
+    users ||--o{ activities : logs
+    users ||--o{ feedback : provides
+    
+    users {
+        int id PK
+        bigint telegram_id UK "Unique Telegram user ID"
+        string username "Telegram username"
+        string first_name "User's first name"
+        string guild "Guild affiliation"
+        int points "Total accumulated points"
+        timestamp created_at "Registration timestamp"
+    }
+    
+    activities {
+        int id PK
+        int user_id FK "References users(id)"
+        string activity_type "Type of activity logged"
+        int duration "Duration in minutes"
+        int points "Points earned"
+        date activity_date "Date activity occurred"
+        timestamp created_at "Log timestamp"
+    }
+    
+    feedback {
+        int id PK
+        int user_id FK "References users(id)"
+        int ease_of_use "Rating 1-5"
+        int usefulness "Rating 1-5"
+        int overall_satisfaction "Rating 1-5"
+        text text_feedback "Optional text comments"
+        timestamp created_at "Feedback timestamp"
+    }
 ```
 
 ## Tables
@@ -39,7 +65,7 @@ CREATE INDEX idx_users_points ON users(points DESC);
 
 **Key Fields:**
 - `telegram_id`: VARCHAR(50) handles large Telegram IDs safely
-- `guild`: No foreign key - validated in application layer
+- `guild`: No foreign key - validated in application layer (see [Guild Management](/admin/guild-management.md))
 - `points`: DECIMAL(10,2) for precision (no float errors)
 
 ### activities
@@ -68,7 +94,9 @@ CREATE UNIQUE INDEX idx_unique_activity ON activities(
 
 **Key Fields:**
 - `activity_type`: Full hierarchy path string (e.g., "Sports > Basketball > Playing basketball, game > competitive")
+  - See [Activity Hierarchy](/reference/activity-hierarchy.md) for structure details
 - `activity_date`: When performed (separate from `created_at` for retroactive logging)
+- `points`: Calculated using MET formula (see [Point System](/reference/point-system.md))
 - `CASCADE DELETE`: Remove activities when user deleted
 
 ### feedback
@@ -110,11 +138,15 @@ Instead of foreign keys: `"Sports > Basketball > Playing basketball, game > comp
 
 **Trade-off:** Can't enforce referential integrity at DB level, but hierarchy is validated in application code.
 
+See [Activity Hierarchy](/reference/activity-hierarchy.md) for complete structure.
+
 ### 3. No Guild Foreign Key
 
 Guild names validated in application, not database.
 
 **Why?** Add/remove guilds without migrations. Guild list is in code (version controlled, type-safe).
+
+See [Guild Management](/admin/guild-management.md) for configuration.
 
 ### 4. Separate Date Fields
 
@@ -167,6 +199,8 @@ GROUP BY guild
 ORDER BY avg_points DESC;
 ```
 
+See [Database Operations](/admin/database-operations.md) for more operational queries.
+
 ## Data Operations
 
 ### Creating a User
@@ -206,6 +240,8 @@ export async function logActivity(data: ActivityData) {
 }
 ```
 
+See [Project Structure](/development/project-structure.md) for full database module organization.
+
 ## Performance
 
 ### Index Strategy
@@ -232,6 +268,8 @@ RANK() OVER (ORDER BY points DESC)
 SELECT * FROM users ORDER BY points DESC LIMIT 20;
 ```
 
+See [Local Development](/guide/local-development.md) for performance optimization tips.
+
 ## Migrations
 
 **Location:** `src/db/schema.sql`
@@ -245,15 +283,16 @@ The bot runs migrations automatically on startup. Schema uses `CREATE IF NOT EXI
 
 ## Backup
 
+See [Database Operations](/admin/database-operations.md) for comprehensive backup and restore procedures:
+- Automated daily backups
+- Backup retention policies
+- Testing restore procedures
+- Point-in-time recovery
+
+**Quick backup:**
 ```bash
-# Full backup
 pg_dump -U postgres activity_challenge_bot > backup.sql
-
-# Restore
-psql -U postgres -d activity_challenge_bot < backup.sql
 ```
-
-See [Database Operations](/admin/database-operations) for automated backups.
 
 ## Data Integrity
 
@@ -277,10 +316,21 @@ WHERE a.activity_date < '2025-12-24' OR a.activity_date > '2026-03-31'
 ORDER BY a.activity_date DESC;
 ```
 
+See [Competition Setup](/admin/competition-setup.md) for competition period configuration.
+
 ## Security
 
 - Use parameterized queries (always): `sql\`SELECT * FROM users WHERE id = ${id}\``
 - Limited user privileges in production (not postgres superuser)
 - Minimal data stored (no email, phone, location, health metrics)
 
-For advanced topics, see [PostgreSQL Documentation](https://www.postgresql.org/docs/current/).
+See [Database Operations](/admin/database-operations.md) for security best practices including limited user permissions.
+
+## Further Reading
+
+- [Database Operations](/admin/database-operations.md) - Backup, maintenance, and operations
+- [Competition Setup](/admin/competition-setup.md) - Configure competition periods
+- [Guild Management](/admin/guild-management.md) - Manage guild configuration
+- [Activity Hierarchy](/reference/activity-hierarchy.md) - Activity structure
+- [Point System](/reference/point-system.md) - Point calculation
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/current/) - Official docs

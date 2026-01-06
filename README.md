@@ -61,7 +61,7 @@ bun run pod:down
 
 ### Environment Variables
 
-```env
+```dotenv
 BOT_TOKEN=your_telegram_bot_token
 DATABASE_URL=postgresql://user:password@localhost:5432/activity_challenge_bot
 NODE_ENV=development

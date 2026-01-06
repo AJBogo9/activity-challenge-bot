@@ -119,6 +119,8 @@ bun run pod:db:psql
 # SELECT * FROM users;
 ```
 
+See [Database Operations](/admin/database-operations.md) for more database management tasks.
+
 ### Testing Scripts
 
 ```bash
@@ -131,6 +133,8 @@ bun run test:watch
 # Run tests with coverage report
 bun run test:coverage
 ```
+
+See [Testing Guide](/development/testing.md) for detailed testing patterns.
 
 ### Documentation Scripts
 
@@ -182,15 +186,18 @@ psql -U postgres -d activity_challenge_bot
 
 ### Common Database Tasks
 
+See [Database Operations](/admin/database-operations.md) for comprehensive database management, including:
+- Backup and restore procedures
+- Data export for analysis
+- Archive old competition data
+- Security best practices
+
+**Quick queries for development:**
+
 #### View All Users
 
 ```sql
-SELECT 
-  id, 
-  username, 
-  first_name, 
-  guild, 
-  points 
+SELECT id, username, first_name, guild, points 
 FROM users 
 ORDER BY points DESC;
 ```
@@ -198,12 +205,7 @@ ORDER BY points DESC;
 #### View Recent Activities
 
 ```sql
-SELECT 
-  u.username,
-  a.activity_type,
-  a.duration,
-  a.points,
-  a.activity_date
+SELECT u.username, a.activity_type, a.duration, a.points, a.activity_date
 FROM activities a
 JOIN users u ON a.user_id = u.id
 ORDER BY a.created_at DESC
@@ -213,30 +215,11 @@ LIMIT 10;
 #### View Guild Standings
 
 ```sql
-SELECT 
-  guild,
-  COUNT(*) as member_count,
-  SUM(points) as total_points,
-  AVG(points) as avg_points
+SELECT guild, COUNT(*) as member_count, SUM(points) as total_points, AVG(points) as avg_points
 FROM users
 WHERE guild IS NOT NULL
 GROUP BY guild
 ORDER BY total_points DESC;
-```
-
-#### Reset a User's Points
-
-```sql
-UPDATE users 
-SET points = 0 
-WHERE telegram_id = 'user_telegram_id';
-```
-
-#### Delete All Test Data
-
-```bash
-# Use the clear script
-bun run clear
 ```
 
 ### Database Migrations
@@ -252,10 +235,7 @@ To run migrations manually:
 bun src/db/migrate.ts
 ```
 
-The migration script:
-1. Reads `src/db/schema.sql`
-2. Executes all CREATE TABLE and CREATE INDEX statements
-3. Uses `IF NOT EXISTS` so it's safe to run multiple times
+The migration script reads `src/db/schema.sql` and uses `IF NOT EXISTS` so it's safe to run multiple times.
 
 ## Development Best Practices
 
@@ -263,28 +243,15 @@ The migration script:
 
 The bot automatically restarts when you save changes to any `.ts` file. However:
 
-- **Environment variables** require a manual restart
+- **Environment variables** require a manual restart (see [Environment Setup](/guide/environment-setup.md))
 - **Database schema changes** require running migrations
 - **Package.json changes** require `bun install` and restart
 
 ### Testing Your Changes
 
-1. **Unit Tests**: Add tests to `tests/` for new functions
-   ```bash
-   bun test
-   ```
-
+1. **Unit Tests**: Add tests to `tests/` for new functions (see [Testing Guide](/development/testing.md))
 2. **Manual Testing**: Test flows in Telegram
-   - Start fresh: `/start`
-   - Register as different guilds
-   - Log various activities
-   - Check point calculations
-
-3. **Database Testing**: Verify data integrity
-   ```bash
-   bun run pod:db:psql
-   SELECT * FROM activities ORDER BY created_at DESC LIMIT 5;
-   ```
+3. **Database Testing**: Verify data integrity with SQL queries
 
 ### Debugging
 
@@ -306,6 +273,8 @@ Watch logs in real-time:
 bun run pod:logs
 ```
 
+See [Monitoring](/admin/monitoring.md) for production logging strategies.
+
 #### Database Debugging
 
 View queries as they execute by modifying `src/db/connection.ts`:
@@ -313,7 +282,7 @@ View queries as they execute by modifying `src/db/connection.ts`:
 ```typescript
 const sql = postgres(connectionString, {
   debug: true,  // Add this line
-  onnotice: () => {}  // Keep this to suppress notices
+  onnotice: () => {}
 })
 ```
 
@@ -330,7 +299,7 @@ bot.use((ctx, next) => {
 
 ### Working with Flows
 
-When adding or modifying conversation flows:
+When adding or modifying conversation flows (see [Flows and Wizards](/architecture/flows-and-wizards.md)):
 
 1. **Test the happy path**: User completes the flow normally
 2. **Test cancellation**: User cancels at each step
@@ -355,11 +324,7 @@ watch -n 1 'psql -U postgres -d activity_challenge_bot -c "SELECT COUNT(*) FROM 
 bun run populate
 ```
 
-This creates:
-- 50+ users across different guilds
-- 200+ activities with varied types
-- Activities spread over the past 30 days
-- Realistic point distributions
+This creates 50+ users, 200+ activities, and realistic point distributions.
 
 #### Clear Data Between Tests
 
@@ -367,24 +332,11 @@ This creates:
 bun run clear
 ```
 
-This removes all data but keeps:
-- Table structure
-- Indexes
-- Constraints
+Removes all data but keeps table structure, indexes, and constraints.
 
 #### Custom Test Scenarios
 
-Edit `scripts/populateTestData.ts` to create specific scenarios:
-
-```typescript
-// Add a user with specific characteristics
-await createUser({
-  telegramId: '12345',
-  username: 'test_user',
-  guild: 'Test Guild',
-  points: 100
-})
-```
+Edit `scripts/populateTestData.ts` to create specific scenarios.
 
 ## IDE Setup
 
@@ -432,7 +384,7 @@ Create `.vscode/launch.json`:
 
 ### Database Query Performance
 
-Always use indexed columns in WHERE clauses:
+Always use indexed columns in WHERE clauses (see [Database Schema](/architecture/database.md) for index details):
 
 ```typescript
 // ✅ Good - uses index
@@ -462,6 +414,8 @@ const allActivities = await sql`SELECT * FROM activities`
 - Use `answerCbQuery()` for callback queries
 - Avoid heavy computation in message handlers
 
+See [Code Patterns](/development/patterns.md) for best practices.
+
 ## Troubleshooting
 
 ### Bot stops responding
@@ -483,6 +437,8 @@ psql -U postgres -l | grep activity
 # Test connection
 psql -U postgres -d activity_challenge_bot -c "SELECT 1"
 ```
+
+See [Environment Setup](/guide/environment-setup.md) for configuration troubleshooting.
 
 ### Port conflicts
 
@@ -512,7 +468,8 @@ bun install
 
 ## Next Steps
 
-- Learn about [Code Patterns](/development/patterns)
-- Understand [Testing](/development/testing)
-- Explore [Project Structure](/development/project-structure)
-- Read [Contributing Guidelines](/CONTRIBUTING)
+- Learn about [Code Patterns](/development/patterns.md) - Bot-specific patterns
+- Understand [Testing](/development/testing.md) - Testing strategies
+- Explore [Project Structure](/development/project-structure.md) - Code organization
+- Review [Architecture Overview](/architecture/overview.md) - System design
+- Read [Contributing Guidelines](/CONTRIBUTING) - Contribution process

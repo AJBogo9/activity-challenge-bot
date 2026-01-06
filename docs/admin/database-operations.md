@@ -13,7 +13,7 @@ See [Database Architecture](/architecture/database) for detailed schema.
 
 ## Connection Information
 
-```env
+```dotenv
 DATABASE_URL=postgresql://postgres:password@localhost:5432/activity_challenge_bot
 ```
 
@@ -264,7 +264,7 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO bot_user;
 ```
 
 Update `.env`:
-```env
+```dotenv
 DATABASE_URL=postgresql://bot_user:secure_password@localhost:5432/activity_challenge_bot
 ```
 

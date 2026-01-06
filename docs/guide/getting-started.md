@@ -33,36 +33,21 @@ bun install
 
 ### 3. Set Up Environment Variables
 
-Copy the example environment file and configure it:
+Copy the example environment file and configure it. See [Environment Setup](/guide/environment-setup.md) for detailed configuration.
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` with your configuration:
+Edit `.env` with your bot token and database credentials:
 
-```env
-# Required: Get from @BotFather on Telegram
-BOT_TOKEN=your_bot_token_here
-
-# Database (use defaults for local development)
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-POSTGRES_DB=activity_challenge_bot
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
+```dotenv
+BOT_TOKEN=your_bot_token_here  # Get from @BotFather on Telegram
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/activity_challenge_bot
-
-# Optional: For web app features
-WEBAPP_URL=http://localhost:5173
-API_PORT=3001
 ```
 
 ::: warning Get a Bot Token
-You need to create a Telegram bot to get a token:
-1. Message [@BotFather](https://t.me/botfather) on Telegram
-2. Send `/newbot` and follow the instructions
-3. Copy the token and paste it into your `.env` file
+Message [@BotFather](https://t.me/botfather) on Telegram, send `/newbot`, follow instructions, and copy the token to your `.env` file.
 :::
 
 ### 4. Set Up the Database
@@ -98,10 +83,7 @@ Add sample data for testing:
 bun run populate
 ```
 
-This creates:
-- Sample users from different guilds
-- Test activities with various points
-- Realistic competition data
+This creates sample users, activities, and realistic competition data.
 
 ### 6. Start the Bot
 
@@ -170,26 +152,21 @@ bun run cluster:deploy
 bun run cluster:logs
 ```
 
-See [Kubernetes Dev Guide](/kubernetes-dev) for details.
+See [Kubernetes Dev Guide](/guide/kubernetes-dev.md) for details.
 
 ## Project Structure Overview
 
 ```
 activity-challenge-bot/
-├── src/
-│   ├── bot/              # Bot initialization and setup
-│   ├── flows/            # Conversation flows (wizards)
-│   ├── db/               # Database queries and migrations
-│   ├── config/           # Configuration files
-│   └── utils/            # Utility functions
-├── scripts/              # Helper scripts
-├── data/                 # Activity data (MET values)
-├── tests/                # Test files
-├── docs/                 # Documentation (VitePress)
-└── webapp/               # Web app for statistics
+├── src/              # Source code
+├── scripts/          # Helper scripts
+├── data/             # Activity data (MET values)
+├── tests/            # Test files
+├── docs/             # Documentation
+└── webapp/           # Web app for statistics
 ```
 
-See [Project Structure](/development/project-structure) for a detailed walkthrough.
+See [Project Structure](/development/project-structure.md) for a detailed walkthrough.
 
 ## Common Tasks
 
@@ -221,6 +198,8 @@ bun run test:watch
 bun run test:coverage
 ```
 
+See [Testing Guide](/development/testing.md) for more details.
+
 ### Lint Code
 
 ```bash
@@ -231,10 +210,11 @@ bun run lint
 
 Now that you have the bot running locally:
 
-1. **Explore the code** - Start with [Project Structure](/development/project-structure)
-2. **Understand flows** - Read [Flows and Wizards](/architecture/flows-and-wizards)
-3. **Learn patterns** - Check out [Code Patterns](/development/patterns)
-4. **Start contributing** - See [Contributing Guide](/CONTRIBUTING)
+1. **Explore the code** - Start with [Project Structure](/development/project-structure.md)
+2. **Understand flows** - Read [Flows and Wizards](/architecture/flows-and-wizards.md)
+3. **Learn patterns** - Check out [Code Patterns](/development/patterns.md)
+4. **Configure the bot** - See [Competition Setup](/admin/competition-setup.md) and [Guild Management](/admin/guild-management.md)
+5. **Start contributing** - See [Contributing Guide](/CONTRIBUTING)
 
 ## Getting Help
 
@@ -250,7 +230,7 @@ Make sure you copied the entire token from BotFather, including any hyphens or c
 
 ### Database connection failed
 
-Check that PostgreSQL is running and the credentials in `.env` match your database setup.
+Check that PostgreSQL is running and the credentials in `.env` match your database setup. See [Environment Setup](/guide/environment-setup.md) for configuration details.
 
 ### Port already in use
 
@@ -265,3 +245,5 @@ dropdb activity_challenge_bot
 createdb activity_challenge_bot
 bun run migrate
 ```
+
+For more troubleshooting help, see [Local Development](/guide/local-development.md).

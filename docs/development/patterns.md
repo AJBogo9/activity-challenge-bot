@@ -8,7 +8,11 @@ Bot-specific patterns and architectural decisions. For general TypeScript best p
 
 **The most important UX pattern** - maintains exactly two persistent messages per user.
 
-See [Two-Message Manager](/architecture/two-message-manager) for full documentation.
+See [Two-Message Manager](/architecture/two-message-manager.md) for complete documentation including:
+- Implementation details
+- Navigation patterns
+- Error handling
+- Usage examples
 
 **Quick Usage:**
 ```typescript
@@ -44,6 +48,8 @@ export async function showXxxSelection(ctx: any) { }
 // Process the response
 export async function handleXxxSelection(ctx: any) { }
 ```
+
+See [Flows and Wizards](/architecture/flows-and-wizards.md) for detailed flow implementation.
 
 ### Wizard Composition
 
@@ -111,6 +117,8 @@ export async function createUser(data: CreateUserData) {
   return user
 }
 ```
+
+See [Database Schema](/architecture/database.md) for complete schema and query patterns.
 
 ### Transactions for Related Operations
 
@@ -211,6 +219,8 @@ for (const activity of activities) {
 }
 ```
 
+See [Database Schema](/architecture/database.md) for query optimization techniques.
+
 ### Cache Static Data
 
 ```typescript
@@ -218,6 +228,8 @@ for (const activity of activities) {
 import activitiesData from '../../../../data/processed/activity-hierarchy.json'
 export const hierarchy = activitiesData as HierarchyData
 ```
+
+See [Activity Hierarchy](/reference/activity-hierarchy.md) for data structure.
 
 ### Use Database for Heavy Lifting
 
@@ -255,6 +267,8 @@ import { TwoMessageManager } from '../../utils'
 import { getMainCategories } from './helpers/activity-data'
 ```
 
+See [Project Structure](/development/project-structure.md) for detailed organization.
+
 ### Error Handling
 
 ```typescript
@@ -272,6 +286,8 @@ export async function handleUserAction(ctx: any) {
   }
 }
 ```
+
+See [Monitoring](/admin/monitoring.md) for production error handling.
 
 ## Common Pitfalls
 
@@ -301,6 +317,8 @@ Extract shared code to a third file instead of importing between dependent files
 
 ## Next Steps
 
-- Review [Testing Guide](/development/testing)
-- Understand [Project Structure](/development/project-structure)
-- Read [Architecture Overview](/architecture/overview)
+- Review [Testing Guide](/development/testing.md) - Testing strategies
+- Understand [Project Structure](/development/project-structure.md) - Code organization
+- Read [Architecture Overview](/architecture/overview.md) - System design
+- Study [Flows and Wizards](/architecture/flows-and-wizards.md) - Flow implementation
+- Reference [Two-Message Manager](/architecture/two-message-manager.md) - Core pattern
