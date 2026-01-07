@@ -96,9 +96,11 @@
     "@types/node": "^25.0.2",
     "eslint": "^9.39.2",
     "globals": "^16.5.0",
+    "mermaid": "^11.12.2",
     "telegram-inline-calendar-types": "^1.0.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.49.0",
-    "vitepress": "^1.6.4"
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-mermaid": "^2.0.17"
   }
 }
