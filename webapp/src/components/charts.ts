@@ -1,5 +1,5 @@
 /**
- * Modern, clean SVG Charts for Telegram WebApp with Interactivity
+ * Modern, clean SVG Charts for Telegram WebApp
  */
 
 const THEME = {
@@ -17,32 +17,28 @@ function formatLabel(dateStr: string) {
 }
 
 /**
- * Handle chart interactions globally using event delegation.
- * This works even when elements are replaced via innerHTML.
+ * Optimized interaction handler
  */
 function handleInteraction(e: MouseEvent | TouchEvent) {
-  const target = (e instanceof MouseEvent ? e.target : document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY)) as HTMLElement;
+  const isTouch = 'touches' in e;
+  const clientX = isTouch ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
+  const clientY = isTouch ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
   
-  // Find the closest hit zone
+  const target = document.elementFromPoint(clientX, clientY) as HTMLElement;
   const zone = target?.closest('.chart-hit-zone') as HTMLElement;
   const container = target?.closest('.chart-container') as HTMLElement;
 
   if (!zone || !container) {
-    // Hide all tooltips/indicators if we're not over a chart
     document.querySelectorAll('.chart-tooltip, .chart-indicator').forEach((el: any) => {
       el.style.opacity = '0';
     });
     return;
   }
 
-  // Prevent scrolling while scrubbing on mobile
-  if (e instanceof TouchEvent) {
-    if (e.cancelable) e.preventDefault();
-  }
+  if (isTouch && e.cancelable) e.preventDefault();
 
   const tooltip = container.querySelector('.chart-tooltip') as HTMLElement;
   const indicator = container.querySelector('.chart-indicator') as SVGLineElement;
-  
   if (!tooltip || !indicator) return;
 
   const date = zone.dataset.date;
@@ -51,15 +47,13 @@ function handleInteraction(e: MouseEvent | TouchEvent) {
   const width = parseFloat(zone.getAttribute('width') || '0');
   const centerX = x + width / 2;
 
-  // Position indicator
   indicator.setAttribute('x1', centerX.toString());
   indicator.setAttribute('x2', centerX.toString());
   indicator.style.opacity = '1';
 
-  // Build Tooltip HTML
   let html = `<div style="font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.2); margin-bottom:4px; padding-bottom:2px; text-align:center">${date}</div>`;
   values.forEach((v: any) => {
-    html += `<div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">`;
+    html += `<div style="display:flex; justify-content:space-between; gap:12px;">`;
     if (v.name) html += `<span style="opacity:0.7">${v.name}:</span>`;
     html += `<span style="font-weight:bold">#${v.val}</span></div>`;
   });
@@ -67,28 +61,28 @@ function handleInteraction(e: MouseEvent | TouchEvent) {
   tooltip.innerHTML = html;
   tooltip.style.opacity = '1';
 
-  // Position Tooltip
-  const containerRect = container.getBoundingClientRect();
-  const relX = (centerX / 400) * containerRect.width;
-
-  if (relX > containerRect.width / 2) {
+  const rect = container.getBoundingClientRect();
+  const relX = (centerX / 400) * rect.width;
+  if (relX > rect.width / 2) {
     tooltip.style.left = 'auto';
-    tooltip.style.right = (containerRect.width - relX + 10) + 'px';
+    tooltip.style.right = (rect.width - relX + 10) + 'px';
   } else {
     tooltip.style.right = 'auto';
     tooltip.style.left = (relX + 10) + 'px';
   }
 }
 
-// Attach global listeners once
+// Global listeners optimized
 if (typeof window !== 'undefined') {
-  window.addEventListener('mousemove', handleInteraction);
-  window.addEventListener('touchstart', handleInteraction, { passive: false });
+  window.addEventListener('mousemove', (e) => {
+    if ((e.target as HTMLElement)?.closest('.chart-container')) handleInteraction(e);
+    else {
+        document.querySelectorAll('.chart-tooltip, .chart-indicator').forEach((el: any) => el.style.opacity = '0');
+    }
+  });
   window.addEventListener('touchmove', handleInteraction, { passive: false });
   window.addEventListener('touchend', () => {
-    document.querySelectorAll('.chart-tooltip, .chart-indicator').forEach((el: any) => {
-        el.style.opacity = '0';
-    });
+    document.querySelectorAll('.chart-tooltip, .chart-indicator').forEach((el: any) => el.style.opacity = '0');
   });
 }
 
@@ -113,12 +107,11 @@ export function renderRankingChart(config: {
   const minRank = Math.min(...allValues);
   const maxRank = Math.max(...allValues);
   const rankRange = maxRank - minRank || 1;
-  
   const yMin = minRank - rankRange * 0.1;
   const yMax = maxRank + rankRange * 0.1;
   const yRange = yMax - yMin;
 
-  const dataCount = labels.length || series[0].data.length;
+  const dataCount = labels.length;
   const xStep = dataCount > 1 ? graphWidth / (dataCount - 1) : graphWidth / 2;
 
   let gridHtml = '';
@@ -129,7 +122,6 @@ export function renderRankingChart(config: {
     const x = padding.left + (dataCount > 1 ? i * xStep : graphWidth / 2);
     gridHtml += `<line x1="${x}" y1="${padding.top}" x2="${x}" y2="${padding.top + graphHeight}" stroke="${THEME.grid}" stroke-width="0.5" stroke-opacity="0.1" />`;
     xLabelsHtml += `<text x="${x}" y="${padding.top + graphHeight + 12}" fill="${THEME.text}" font-size="8" font-weight="600" text-anchor="end" transform="rotate(-45, ${x}, ${padding.top + graphHeight + 12})">${formatLabel(label)}</text>`;
-
     const zoneWidth = dataCount > 1 ? graphWidth / (dataCount - 1) : graphWidth;
     touchZonesHtml += `<rect class="chart-hit-zone" x="${x - zoneWidth / 2}" y="${padding.top}" width="${zoneWidth}" height="${graphHeight}" fill="transparent" data-date="${formatLabel(label)}" data-values='${JSON.stringify(series.map(s => ({ name: s.name, val: s.data[i], color: s.color })))}' />`;
   });
@@ -154,20 +146,6 @@ export function renderRankingChart(config: {
            }).join('');
   }).join('');
 
-  let legendHtml = '';
-  if (config.isMulti) {
-    legendHtml = `
-      <div class="mt-6 px-2 flex flex-wrap justify-center gap-2">
-        ${series.map(s => `
-          <div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[var(--tg-theme-secondary-bg-color)] border border-[var(--tg-theme-hint-color)] border-opacity-10">
-            <div style="width: 8px; height: 8px; background-color: ${s.color}; border-radius: 50%;"></div>
-            <span class="text-[9px] font-bold uppercase tracking-tight opacity-90 whitespace-nowrap">${s.name}</span>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  }
-
   return `
     <div class="chart-container w-full relative overflow-visible select-none">
       <style>
@@ -187,7 +165,7 @@ export function renderRankingChart(config: {
         ${xLabelsHtml}
         ${touchZonesHtml}
       </svg>
-      ${legendHtml}
+      ${config.isMulti ? `<div class="mt-6 px-2 flex flex-wrap justify-center gap-2">${series.map(s => `<div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[var(--tg-theme-secondary-bg-color)] border border-[var(--tg-theme-hint-color)] border-opacity-10"><div style="width: 8px; height: 8px; background-color: ${s.color}; border-radius: 50%;"></div><span class="text-[9px] font-bold uppercase tracking-tight opacity-90 whitespace-nowrap">${s.name}</span></div>`).join('')}</div>` : ''}
     </div>
   `;
 }
@@ -200,43 +178,6 @@ export function renderMultiLineChart(series: { name: string, data: number[], col
   return renderRankingChart({ series, labels, height, isMulti: true });
 }
 
-/**
- * Ultra-minimal sparkline for lists
- */
-export function renderSparkline(data: number[], color: string = THEME.accent) {
-  if (!data || data.length < 2) return '';
-  
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const range = max - min || 1;
-  const height = 20;
-  const width = 60;
-  
-  const points = data.map((val, i) => {
-    const x = (i / (data.length - 1)) * width;
-    const y = ((val - min) / range) * height;
-    return `${x},${y}`;
-  }).join(' ');
-
-  return `
-    <svg viewBox="0 0 ${width} ${height}" style="width: ${width}px; height: ${height}px; overflow: visible;">
-      <polyline
-        fill="none"
-        stroke="${color}"
-        stroke-width="2"
-        points="${points}"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        vector-effect="non-scaling-stroke"
-        opacity="0.5"
-      />
-    </svg>
-  `;
-}
-
-/**
- * Donut Chart for mix breakdown
- */
 export function renderDonutChart(data: { name: string, value: number, color: string }[], size: number = 180) {
   if (!data || data.length === 0) return '';
   const total = data.reduce((s, i) => s + i.value, 0);
@@ -255,4 +196,15 @@ export function renderDonutChart(data: { name: string, value: number, color: str
       <div class="w-full px-4 grid grid-cols-2 gap-x-6 gap-y-2 mt-4">${data.map(item => `<div class="flex items-center justify-between"><div class="flex items-center gap-2"><div style="width: 8px; height: 8px; border-radius: 50%; background-color: ${item.color}"></div><span class="text-[10px] font-bold opacity-60 uppercase">${item.name}</span></div><span class="text-[10px] font-mono font-bold">${Math.round((item.value/total)*100)}%</span></div>`).join('')}</div>
     </div>
   `;
+}
+
+export function renderSparkline(data: number[], color: string = THEME.accent) {
+  if (!data || data.length < 2) return '';
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const height = 20;
+  const width = 60;
+  const points = data.map((val, i) => `${(i / (data.length - 1)) * width},${((val - min) / range) * height}`).join(' ');
+  return `<svg viewBox="0 0 ${width} ${height}" style="width: ${width}px; height: ${height}px; overflow: visible;"><polyline fill="none" stroke="${color}" stroke-width="2" points="${points}" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" opacity="0.5" /></svg>`;
 }

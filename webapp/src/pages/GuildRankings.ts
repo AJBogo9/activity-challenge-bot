@@ -13,10 +13,10 @@ export async function renderGuildRankings() {
     modal.innerHTML = `
       <div class="bg-[var(--tg-theme-bg-color)] w-full max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto p-6 shadow-2xl animate-slide-up">
         <div class="flex items-center mb-6 gap-4">
-          <button class="modal-close p-2 -ml-2 text-link flex items-center justify-center bg-[var(--tg-theme-secondary-bg-color)] rounded-full w-10 h-10">
-            ${icons.close || '✕'}
+          <button class="modal-close -ml-4 p-4 text-link flex items-center justify-center bg-[var(--tg-theme-secondary-bg-color)] rounded-full w-12 h-12 active:scale-90 transition-transform">
+            <div style="width: 24px; height: 24px;">${icons.close || '✕'}</div>
           </button>
-          <h2 class="text-xl font-bold flex-1">${guild.guild}</h2>
+          <h2 class="text-xl font-bold flex-1 truncate">${guild.guild}</h2>
         </div>
         
         <div class="grid grid-cols-2 gap-4 mb-8">
@@ -51,14 +51,14 @@ export async function renderGuildRankings() {
     `;
 
     document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden'; // Lock scroll
+    document.body.classList.add('no-scroll');
 
     const close = () => {
       modal.classList.add('animate-fade-out');
       modal.querySelector('.bg-\\[var\\(--tg-theme-bg-color\\)\\]')?.classList.add('animate-slide-down');
       setTimeout(() => {
         modal.remove();
-        document.body.style.overflow = ''; // Unlock scroll
+        document.body.classList.remove('no-scroll');
       }, 200);
     };
 
@@ -101,7 +101,8 @@ export async function renderGuildRankings() {
     const history = data.rankingHistory || [];
     
     // Extract unique dates for X-axis
-    const labels = [...new Set(history.map((h: any) => h.date))].sort();
+    const labels = [...new Set(history.map((h: any) => h.date))] as string[];
+    labels.sort();
 
     // Process history for top 5 guilds
     const top5GuildNames = guilds.slice(0, 5).map((g: any) => g.guild);

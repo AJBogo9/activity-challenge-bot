@@ -107,6 +107,21 @@ export async function getNearbyUsers(telegramId: string) {
 }
 
 /**
+ * Get global competition stats
+ */
+export async function getGlobalStats() {
+  const [stats] = await sql`
+    SELECT 
+      COUNT(id)::INTEGER as total_players,
+      SUM(points)::FLOAT as total_points,
+      (SELECT COUNT(*) FROM activities)::INTEGER as total_activities,
+      (SELECT activity_type FROM activities GROUP BY activity_type ORDER BY COUNT(*) DESC LIMIT 1) as popular_activity
+    FROM users
+  `
+  return stats
+}
+
+/**
  * Takes a snapshot of current user and guild rankings
  */
 export async function takeDailySnapshot() {

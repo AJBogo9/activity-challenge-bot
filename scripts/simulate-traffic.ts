@@ -50,7 +50,14 @@ async function executeRequest(dbUser: any, headers: any) {
     method = 'POST';
   } else if (r < 0.40) {
     endpoint = '/api/stats/guilds';
-  } else if (r < 0.60) {
+  } else if (r < 0.45) { // 5% Guild Details
+    const guilds = ['Tietokilta', 'Athene', 'Inkubio', 'TiK', 'AS'];
+    const g = guilds[Math.floor(Math.random() * guilds.length)];
+    endpoint = `/api/stats/guild/details?name=${encodeURIComponent(g)}`;
+  } else if (r < 0.50) { // 5% Player Details
+    const targetId = ['12345678', '87654321', '13572468'][Math.floor(Math.random() * 3)];
+    endpoint = `/api/stats/player/details?id=${targetId}`;
+  } else if (r < 0.70) {
     endpoint = '/api/stats/personal';
   } else {
     // Deep paging leaderboard

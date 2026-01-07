@@ -159,6 +159,51 @@ export function startApiServer(port: number = 3000) {
           return json(responseData);
         }
 
+        if (url.pathname === '/api/stats/player/details') {
+            const targetTelegramId = url.searchParams.get('id');
+            if (!targetTelegramId) return new Response('Missing id', { status: 400 });
+
+            const cacheKey = `player_details_${targetTelegramId}`;
+            const data = await apiCache.getOrFetch(cacheKey, async () => {
+                const userSummary = await pointsDb.getUserSummary(targetTelegramId);
+                const user = await usersDb.findUserByTelegramId(targetTelegramId);
+                
+                let rankingHistory: any[] = [];
+                let history: any[] = [];
+                let typeBreakdown: any[] = [];
+
+                if (user) {
+                    rankingHistory = await pointsDb.getUserRankingHistory(targetTelegramId, 30);
+                    const activities = await activitiesDb.getActivitiesByUser(user.id);
+                    
+                    const aggregated = activities.reduce((acc: any, curr) => {
+                        const date = new Date(curr.activity_date).toISOString().split('T')[0];
+                        acc[date] = (acc[date] || 0) + Number(curr.points);
+                        return acc;
+                    }, {});
+                    
+                    history = Object.entries(aggregated)
+                        .map(([date, points]) => ({ date, points }))
+                        .sort((a, b) => a.date.localeCompare(b.date))
+                        .slice(-14);
+
+                    const types = activities.reduce((acc: any, curr) => {
+                        const type = curr.activity_type;
+                        acc[type] = (acc[type] || 0) + Number(curr.points);
+                        return acc;
+                    }, {});
+
+                    typeBreakdown = Object.entries(types)
+                        .map(([name, value]) => ({ name, value }))
+                        .sort((a: any, b: any) => b.value - a.value);
+                }
+
+                return { ...userSummary, rankingHistory, history, typeBreakdown };
+            }, 60);
+
+            return json(data);
+        }
+
         if (url.pathname === '/api/stats/guild/details') {
             const guildName = url.searchParams.get('name');
             if (!guildName) return new Response('Missing name', { status: 400 });
@@ -179,14 +224,25 @@ export function startApiServer(port: number = 3000) {
             const limit = parseInt(url.searchParams.get('limit') || '50');
             const cacheKey = `players_${page}_${limit}`;
             
-            const players = await apiCache.getOrFetch(cacheKey, async () => {
+            const data = await apiCache.getOrFetch(cacheKey, async () => {
                 const offset = page * limit;
-                const p = await pointsDb.getTopUsers(limit, offset);
+                const players = await pointsDb.getTopUsers(limit, offset) || [];
+                const globalStats = await pointsDb.getGlobalStats();
+                
+                let topTrends: any[] = [];
+                if (page === 0) {
+                    const top5 = players.slice(0, 5);
+                    topTrends = await Promise.all(top5.map(async (p) => {
+                        const history = await pointsDb.getUserRankingHistory(p.telegram_id, 30);
+                        return { name: p.first_name, history, telegram_id: p.telegram_id };
+                    }));
+                }
+
                 console.log(`📊 [DB HIT] Player list Page: ${page}`);
-                return p;
+                return { players, topTrends, globalStats };
             }, 60);
 
-            return json(players);
+            return json(data);
         }
 
         if (url.pathname === '/api/simulation/users') {
@@ -207,6 +263,10 @@ export function startApiServer(port: number = 3000) {
                 });
                 await pointsDb.addPointsToUser(user.id, body.points || 5);
                 apiCache.delete(`personal_${telegramId}`);
+                apiCache.delete('guild_stats');
+                apiCache.deleteByPattern(/^players_/);
+                apiCache.deleteByPattern(/^guild_details_/);
+                apiCache.deleteByPattern(/^player_details_/);
                 return Response.json({ success: true }, { headers: { 'Access-Control-Allow-Origin': '*' } });
             }
         }
@@ -220,6 +280,10 @@ export function startApiServer(port: number = 3000) {
                     await activitiesDb.deleteActivity(latest.id);
                     await pointsDb.addPointsToUser(user.id, -latest.points);
                     apiCache.delete(`personal_${telegramId}`);
+                    apiCache.delete('guild_stats');
+                    apiCache.deleteByPattern(/^players_/);
+                    apiCache.deleteByPattern(/^guild_details_/);
+                    apiCache.deleteByPattern(/^player_details_/);
                     return Response.json({ success: true, deleted: latest.id }, { headers: { 'Access-Control-Allow-Origin': '*' } });
                 }
                 return Response.json({ success: false, reason: 'no activities' }, { headers: { 'Access-Control-Allow-Origin': '*' } });
