@@ -384,7 +384,6 @@ Look in `src/bot/`:
 
 ## Next Steps
 
-- Understand [Code Patterns](/development/patterns)
 - Learn about [Testing](/development/testing)
 - Read [Architecture Overview](/architecture/overview)
 - Explore [Flows and Wizards](/architecture/flows-and-wizards)

@@ -54,12 +54,11 @@ Activity Challenge Bot is a Telegram-based fitness competition platform designed
 ### For Developers
 - [Getting Started](/guide/getting-started) - Set up your local development environment
 - [Architecture Overview](/architecture/overview) - Understand the bot's structure
-- [Contributing Guide](/CONTRIBUTING) - Learn how to contribute to the project
+- [Contributing Guide](https://github.com/YOUR-USERNAME/activity-challenge-bot/blob/main/CONTRIBUTING.md) - Learn how to contribute to the project
 
 ### Reference
 - [Point System](/reference/point-system) - How points are calculated
 - [Activity Hierarchy](/reference/activity-hierarchy) - Browse the complete activity database
-- [Configuration](/reference/configuration) - Environment variables and settings
 
 ## Technology Stack
 
