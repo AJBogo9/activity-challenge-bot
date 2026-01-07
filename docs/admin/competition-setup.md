@@ -104,5 +104,4 @@ After deploying the new competition:
 ## Next Steps
 
 - Learn about [Guild Management](/admin/guild-management)
-- Configure [Monitoring](/admin/monitoring)
 - Review [Competition Setup](/guide/environment-setup) for environment variables

@@ -184,8 +184,7 @@ psql -U postgres -d activity_challenge_bot
 
 ## Next Steps
 
-- Learn about [Code Patterns](/development/patterns.md) - Bot-specific patterns
 - Understand [Testing](/development/testing.md) - Testing strategies
 - Explore [Project Structure](/development/project-structure.md) - Code organization
 - Review [Architecture Overview](/architecture/overview.md) - System design
-- Read [Contributing Guidelines](/CONTRIBUTING) - Contribution process
+- Read [Contributing Guidelines](https://github.com/YOUR-USERNAME/activity-challenge-bot/blob/main/CONTRIBUTING.md) - Contribution process

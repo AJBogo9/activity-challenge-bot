@@ -212,6 +212,5 @@ Now that you have the bot running locally:
 
 1. **Explore the code** - Start with [Project Structure](/development/project-structure.md)
 2. **Understand flows** - Read [Flows and Wizards](/architecture/flows-and-wizards.md)
-3. **Learn patterns** - Check out [Code Patterns](/development/patterns.md)
-4. **Configure the bot** - See [Competition Setup](/admin/competition-setup.md) and [Guild Management](/admin/guild-management.md)
-5. **Start contributing** - See [Contributing Guide](/CONTRIBUTING)
+3. **Configure the bot** - See [Competition Setup](/admin/competition-setup.md) and [Guild Management](/admin/guild-management.md)
+4. **Start contributing** - See [Contributing Guide](https://github.com/YOUR-USERNAME/activity-challenge-bot/blob/main/CONTRIBUTING.md)
