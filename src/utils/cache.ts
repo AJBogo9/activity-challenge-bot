@@ -35,7 +35,7 @@ export class SimpleCache {
   async getOrFetch<T>(key: string, fetchFn: () => Promise<T>, ttlSeconds: number): Promise<T> {
     // 1. Check valid cache
     const cached = this.get<T>(key);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     // 2. Check for pending request
     const pending = this.pending.get(key);
@@ -57,6 +57,14 @@ export class SimpleCache {
 
   delete(key: string): void {
     this.cache.delete(key);
+  }
+
+  deleteByPattern(pattern: RegExp): void {
+    for (const key of this.cache.keys()) {
+      if (pattern.test(key)) {
+        this.cache.delete(key);
+      }
+    }
   }
 
   clear(): void {

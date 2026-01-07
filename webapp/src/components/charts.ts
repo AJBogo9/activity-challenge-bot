@@ -1,145 +1,258 @@
-// Ultra-lightweight SVG chart generators
+/**
+ * Modern, clean SVG Charts for Telegram WebApp with Interactivity
+ */
 
-export function renderLineChart(data: number[], height: number = 200, color: string = '#FF8042') {
-  if (!data || data.length === 0) return '<div class="text-center text-hint p-4">No data</div>';
+const THEME = {
+  grid: 'var(--tg-theme-hint-color)',
+  text: 'var(--tg-theme-hint-color)',
+  bg: 'var(--tg-theme-bg-color)',
+  accent: 'var(--tg-theme-link-color)',
+  indicator: 'var(--tg-theme-button-color)',
+};
+
+function formatLabel(dateStr: string) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  return `${d.getDate()}.${d.getMonth() + 1}.`;
+}
+
+/**
+ * Handle chart interactions globally using event delegation.
+ * This works even when elements are replaced via innerHTML.
+ */
+function handleInteraction(e: MouseEvent | TouchEvent) {
+  const target = (e instanceof MouseEvent ? e.target : document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY)) as HTMLElement;
   
-  const max = Math.max(...data);
+  // Find the closest hit zone
+  const zone = target?.closest('.chart-hit-zone') as HTMLElement;
+  const container = target?.closest('.chart-container') as HTMLElement;
+
+  if (!zone || !container) {
+    // Hide all tooltips/indicators if we're not over a chart
+    document.querySelectorAll('.chart-tooltip, .chart-indicator').forEach((el: any) => {
+      el.style.opacity = '0';
+    });
+    return;
+  }
+
+  // Prevent scrolling while scrubbing on mobile
+  if (e instanceof TouchEvent) {
+    if (e.cancelable) e.preventDefault();
+  }
+
+  const tooltip = container.querySelector('.chart-tooltip') as HTMLElement;
+  const indicator = container.querySelector('.chart-indicator') as SVGLineElement;
+  
+  if (!tooltip || !indicator) return;
+
+  const date = zone.dataset.date;
+  const values = JSON.parse(zone.dataset.values || '[]');
+  const x = parseFloat(zone.getAttribute('x') || '0');
+  const width = parseFloat(zone.getAttribute('width') || '0');
+  const centerX = x + width / 2;
+
+  // Position indicator
+  indicator.setAttribute('x1', centerX.toString());
+  indicator.setAttribute('x2', centerX.toString());
+  indicator.style.opacity = '1';
+
+  // Build Tooltip HTML
+  let html = `<div style="font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.2); margin-bottom:4px; padding-bottom:2px; text-align:center">${date}</div>`;
+  values.forEach((v: any) => {
+    html += `<div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">`;
+    if (v.name) html += `<span style="opacity:0.7">${v.name}:</span>`;
+    html += `<span style="font-weight:bold">#${v.val}</span></div>`;
+  });
+
+  tooltip.innerHTML = html;
+  tooltip.style.opacity = '1';
+
+  // Position Tooltip
+  const containerRect = container.getBoundingClientRect();
+  const relX = (centerX / 400) * containerRect.width;
+
+  if (relX > containerRect.width / 2) {
+    tooltip.style.left = 'auto';
+    tooltip.style.right = (containerRect.width - relX + 10) + 'px';
+  } else {
+    tooltip.style.right = 'auto';
+    tooltip.style.left = (relX + 10) + 'px';
+  }
+}
+
+// Attach global listeners once
+if (typeof window !== 'undefined') {
+  window.addEventListener('mousemove', handleInteraction);
+  window.addEventListener('touchstart', handleInteraction, { passive: false });
+  window.addEventListener('touchmove', handleInteraction, { passive: false });
+  window.addEventListener('touchend', () => {
+    document.querySelectorAll('.chart-tooltip, .chart-indicator').forEach((el: any) => {
+        el.style.opacity = '0';
+    });
+  });
+}
+
+export function renderRankingChart(config: {
+  series: { name?: string; data: number[]; color: string }[];
+  labels: string[];
+  height?: number;
+  isMulti?: boolean;
+}) {
+  const { series, labels, height = 220 } = config;
+  if (!series || series.length === 0 || series[0].data.length === 0) {
+    return '<div class="text-center p-8 text-hint opacity-50 font-medium">No data available yet</div>';
+  }
+
+  const padding = { top: 20, right: 10, bottom: 50, left: 45 };
+  const viewWidth = 400;
+  const viewHeight = height;
+  const graphWidth = viewWidth - padding.left - padding.right;
+  const graphHeight = viewHeight - padding.top - padding.bottom;
+
+  const allValues = series.flatMap((s) => s.data);
+  const minRank = Math.min(...allValues);
+  const maxRank = Math.max(...allValues);
+  const rankRange = maxRank - minRank || 1;
+  
+  const yMin = minRank - rankRange * 0.1;
+  const yMax = maxRank + rankRange * 0.1;
+  const yRange = yMax - yMin;
+
+  const dataCount = labels.length || series[0].data.length;
+  const xStep = dataCount > 1 ? graphWidth / (dataCount - 1) : graphWidth / 2;
+
+  let gridHtml = '';
+  let xLabelsHtml = '';
+  let touchZonesHtml = '';
+  
+  labels.forEach((label, i) => {
+    const x = padding.left + (dataCount > 1 ? i * xStep : graphWidth / 2);
+    gridHtml += `<line x1="${x}" y1="${padding.top}" x2="${x}" y2="${padding.top + graphHeight}" stroke="${THEME.grid}" stroke-width="0.5" stroke-opacity="0.1" />`;
+    xLabelsHtml += `<text x="${x}" y="${padding.top + graphHeight + 12}" fill="${THEME.text}" font-size="8" font-weight="600" text-anchor="end" transform="rotate(-45, ${x}, ${padding.top + graphHeight + 12})">${formatLabel(label)}</text>`;
+
+    const zoneWidth = dataCount > 1 ? graphWidth / (dataCount - 1) : graphWidth;
+    touchZonesHtml += `<rect class="chart-hit-zone" x="${x - zoneWidth / 2}" y="${padding.top}" width="${zoneWidth}" height="${graphHeight}" fill="transparent" data-date="${formatLabel(label)}" data-values='${JSON.stringify(series.map(s => ({ name: s.name, val: s.data[i], color: s.color })))}' />`;
+  });
+
+  for (let i = 0; i <= 4; i++) {
+    const y = padding.top + (i * graphHeight) / 4;
+    const rankVal = Math.round(yMin + (i * yRange) / 4);
+    gridHtml += `<line x1="${padding.left}" y1="${y}" x2="${viewWidth - padding.right}" y2="${y}" stroke="${THEME.grid}" stroke-width="0.5" stroke-opacity="0.1" />`;
+    gridHtml += `<text x="${padding.left - 8}" y="${y + 3}" fill="${THEME.text}" font-size="9" font-weight="bold" text-anchor="end">#${rankVal}</text>`;
+  }
+
+  const linesHtml = series.map((s) => {
+    const points = s.data.map((val, i) => {
+      const x = padding.left + (dataCount > 1 ? i * xStep : graphWidth / 2);
+      const y = padding.top + ((val - yMin) / yRange) * graphHeight;
+      return `${x},${y}`;
+    });
+    return `<path d="M ${points.join(' L ')}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />` +
+           points.map((p) => {
+             const [px, py] = p.split(',');
+             return `<circle cx="${px}" cy="${py}" r="2.5" fill="${THEME.bg}" stroke="${s.color}" stroke-width="1.5" />`;
+           }).join('');
+  }).join('');
+
+  let legendHtml = '';
+  if (config.isMulti) {
+    legendHtml = `
+      <div class="mt-6 px-2 flex flex-wrap justify-center gap-2">
+        ${series.map(s => `
+          <div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[var(--tg-theme-secondary-bg-color)] border border-[var(--tg-theme-hint-color)] border-opacity-10">
+            <div style="width: 8px; height: 8px; background-color: ${s.color}; border-radius: 50%;"></div>
+            <span class="text-[9px] font-bold uppercase tracking-tight opacity-90 whitespace-nowrap">${s.name}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="chart-container w-full relative overflow-visible select-none">
+      <style>
+        .chart-tooltip {
+            position: absolute; top: 10px; background: rgba(0, 0, 0, 0.85); color: white;
+            padding: 8px 12px; border-radius: 8px; font-size: 11px; pointer-events: none;
+            opacity: 0; transition: opacity 0.15s; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            min-width: 100px; backdrop-filter: blur(4px);
+        }
+        .chart-indicator { transition: opacity 0.1s; pointer-events: none; }
+      </style>
+      <div class="chart-tooltip"></div>
+      <svg viewBox="0 0 ${viewWidth} ${viewHeight}" class="w-full h-auto" style="display: block; font-family: inherit; overflow: visible;">
+        ${gridHtml}
+        <line class="chart-indicator" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + graphHeight}" stroke="${THEME.indicator}" stroke-width="1.5" stroke-opacity="0.8" style="opacity: 0" />
+        ${linesHtml}
+        ${xLabelsHtml}
+        ${touchZonesHtml}
+      </svg>
+      ${legendHtml}
+    </div>
+  `;
+}
+
+export function renderLineChart(data: number[], labels: string[] = [], height: number = 220, color: string = THEME.accent) {
+  return renderRankingChart({ series: [{ data, color }], labels, height });
+}
+
+export function renderMultiLineChart(series: { name: string, data: number[], color: string }[], labels: string[] = [], height: number = 240) {
+  return renderRankingChart({ series, labels, height, isMulti: true });
+}
+
+/**
+ * Ultra-minimal sparkline for lists
+ */
+export function renderSparkline(data: number[], color: string = THEME.accent) {
+  if (!data || data.length < 2) return '';
+  
   const min = Math.min(...data);
+  const max = Math.max(...data);
   const range = max - min || 1;
-  const width = 100; // viewbox units
+  const height = 20;
+  const width = 60;
   
   const points = data.map((val, i) => {
     const x = (i / (data.length - 1)) * width;
-    const normalizedY = ((val - min) / range) * height; 
-    return `${x},${normalizedY}`;
+    const y = ((val - min) / range) * height;
+    return `${x},${y}`;
   }).join(' ');
 
   return `
-    <svg viewBox="0 0 100 ${height}" preserveAspectRatio="none" style="width: 100%; height: ${height}px; overflow: visible;">
+    <svg viewBox="0 0 ${width} ${height}" style="width: ${width}px; height: ${height}px; overflow: visible;">
       <polyline
         fill="none"
         stroke="${color}"
         stroke-width="2"
         points="${points}"
+        stroke-linecap="round"
+        stroke-linejoin="round"
         vector-effect="non-scaling-stroke"
+        opacity="0.5"
       />
-      ${data.map((val, i) => {
-         const x = (i / (data.length - 1)) * 100;
-         const y = ((val - min) / range) * height;
-         return `<circle cx="${x}" cy="${y}" r="3" fill="${color}" vector-effect="non-scaling-stroke"/>`;
-      }).join('')}
     </svg>
   `;
 }
 
-export function renderMultiLineChart(series: { name: string, data: number[], color: string }[], height: number = 200) {
-    if (!series || series.length === 0) return '<div class="text-center text-hint p-4">No data</div>';
-    
-    // Find global min/max
-    const allValues = series.flatMap(s => s.data);
-    const max = Math.max(...allValues);
-    const min = Math.min(...allValues);
-    const range = max - min || 1;
-    const width = 100;
-
-    const lines = series.map(s => {
-        const points = s.data.map((val, i) => {
-            const x = (i / (s.data.length - 1)) * width;
-            // Rank: 1 is top (y=0), Higher number is bottom (y=height).
-            // So y = ((val - min) / range) * height maps min->0, max->height.
-            // But if 'val' is RANK, min=1 (BEST), max=10 (WORST).
-            // So we want min at 0, max at height. Correct.
-            const y = ((val - min) / range) * height;
-            return `${x},${y}`;
-        }).join(' ');
-        
-        return `
-            <polyline
-                fill="none"
-                stroke="${s.color}"
-                stroke-width="2"
-                points="${points}"
-                vector-effect="non-scaling-stroke"
-                opacity="0.8"
-            />
-        `;
-    }).join('');
-    
-    // Legend
-    const legend = `
-      <div class="mt-4 flex flex-wrap justify-center gap-4">
-        ${series.map(s => `
-          <div class="flex items-center gap-2">
-            <span style="width: 10px; height: 10px; background-color: ${s.color}; border-radius: 50%; display: inline-block;"></span>
-            <span class="text-xs font-bold">${s.name}</span>
-          </div>
-        `).join('')}
-      </div>
-    `;
-
-    return `
-      <div class="flex flex-col">
-          <svg viewBox="0 0 100 ${height}" preserveAspectRatio="none" style="width: 100%; height: ${height}px; overflow: visible;">
-            ${lines}
-          </svg>
-          ${legend}
-      </div>
-    `;
-}
-
-export function renderDonutChart(data: { name: string, value: number, color: string }[], size: number = 200) {
-    if (!data || data.length === 0) return '<div class="text-center text-hint p-4">No data</div>';
-
-    const total = data.reduce((sum, item) => sum + item.value, 0);
-    let currentAngle = 0;
-    const center = size / 2;
-    const radius = size / 2;
-    const holeRadius = size * 0.35; // 70% diameter hole = 35% radius
-
-    const slices = data.map(item => {
-        const angle = (item.value / total) * 360;
-        const x1 = center + radius * Math.cos(Math.PI * currentAngle / 180);
-        const y1 = center + radius * Math.sin(Math.PI * currentAngle / 180);
-        const x2 = center + radius * Math.cos(Math.PI * (currentAngle + angle) / 180);
-        const y2 = center + radius * Math.sin(Math.PI * (currentAngle + angle) / 180);
-        
-        // Large arc flag
-        const largeArc = angle > 180 ? 1 : 0;
-        
-        const pathData = [
-            `M ${center} ${center}`,
-            `L ${x1} ${y1}`,
-            `A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}`,
-            `Z`
-        ].join(' ');
-
-        const slice = `<path d="${pathData}" fill="${item.color}" />`;
-        currentAngle += angle;
-        return slice;
-    }).join('');
-    
-    // Create hole
-    const hole = `<circle cx="${center}" cy="${center}" r="${holeRadius}" fill="var(--tg-theme-bg-color)" />`;
-    
-    // Legend
-    const legend = `
-      <div class="mt-4 flex flex-wrap justify-center gap-4">
-        ${data.map(item => `
-          <div class="flex items-center gap-2">
-            <span style="width: 10px; height: 10px; background-color: ${item.color}; border-radius: 50%; display: inline-block;"></span>
-            <span class="text-xs font-bold">${item.name}</span>
-          </div>
-        `).join('')}
-      </div>
-    `;
-
-    return `
-      <div class="flex flex-col items-center">
-        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform: rotate(-90deg);">
-          ${slices}
-          ${hole}
-        </svg>
-        ${legend}
-      </div>
-    `;
+/**
+ * Donut Chart for mix breakdown
+ */
+export function renderDonutChart(data: { name: string, value: number, color: string }[], size: number = 180) {
+  if (!data || data.length === 0) return '';
+  const total = data.reduce((s, i) => s + i.value, 0);
+  const circumference = 2 * Math.PI * 70;
+  let offset = 0;
+  return `
+    <div class="flex flex-col items-center">
+      <svg width="${size}" height="${size}" viewBox="0 0 200 200">
+        ${data.map(item => {
+          const dash = (item.value / total) * circumference;
+          const currentOffset = offset; offset -= dash;
+          return `<circle cx="100" cy="100" r="70" fill="none" stroke="${item.color}" stroke-width="25" stroke-dasharray="${dash} ${circumference}" stroke-dashoffset="${currentOffset}" transform="rotate(-90 100 100)" />`;
+        }).join('')}
+        <text x="100" y="105" text-anchor="middle" fill="${THEME.text}" font-size="16" font-weight="900" opacity="0.5">MIX</text>
+      </svg>
+      <div class="w-full px-4 grid grid-cols-2 gap-x-6 gap-y-2 mt-4">${data.map(item => `<div class="flex items-center justify-between"><div class="flex items-center gap-2"><div style="width: 8px; height: 8px; border-radius: 50%; background-color: ${item.color}"></div><span class="text-[10px] font-bold opacity-60 uppercase">${item.name}</span></div><span class="text-[10px] font-mono font-bold">${Math.round((item.value/total)*100)}%</span></div>`).join('')}</div>
+    </div>
+  `;
 }

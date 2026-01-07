@@ -2,6 +2,7 @@ import { validateInitData, getWebAppData } from '../utils/webapp-auth';
 import * as pointsDb from '../db/points';
 import * as activitiesDb from '../db/activities';
 import * as usersDb from '../db/users';
+import * as guildsDb from '../db/guilds';
 import { apiCache, authCache } from '../utils/cache';
 import { join } from 'path';
 
@@ -96,6 +97,7 @@ export function startApiServer(port: number = 3000) {
               let history: any[] = [];
               let typeBreakdown: any[] = [];
               let rankingHistory: any[] = [];
+              let guildRankingHistory: any[] = [];
               let topUsersHistory: any[] = [];
               let nearbyUsers: any[] = [];
               
@@ -103,6 +105,11 @@ export function startApiServer(port: number = 3000) {
                 const activities = await activitiesDb.getActivitiesByUser(user.id);
                 rankingHistory = await pointsDb.getUserRankingHistory(telegramId, 30);
                 nearbyUsers = await pointsDb.getNearbyUsers(telegramId);
+                
+                if (user.guild) {
+                  const allGuildHistory = await pointsDb.getGuildRankingHistory(30);
+                  guildRankingHistory = allGuildHistory.filter((h: any) => h.guild === user.guild);
+                }
                 
                 const topUsers = await pointsDb.getTopUsers(3);
                 topUsersHistory = await Promise.all(topUsers.map(async (u) => {
@@ -134,7 +141,7 @@ export function startApiServer(port: number = 3000) {
                   .sort((a: any, b: any) => b.value - a.value);
               }
 
-              return { ...userSummary, topUsers: await pointsDb.getTopUsers(10), history, typeBreakdown, rankingHistory, topUsersHistory, nearbyUsers };
+              return { ...userSummary, topUsers: await pointsDb.getTopUsers(10), history, typeBreakdown, rankingHistory, guildRankingHistory, topUsersHistory, nearbyUsers };
           }, 15);
 
           return json(responseData);
@@ -150,6 +157,21 @@ export function startApiServer(port: number = 3000) {
           }, 60);
 
           return json(responseData);
+        }
+
+        if (url.pathname === '/api/stats/guild/details') {
+            const guildName = url.searchParams.get('name');
+            if (!guildName) return new Response('Missing name', { status: 400 });
+
+            const cacheKey = `guild_details_${guildName}`;
+            const data = await apiCache.getOrFetch(cacheKey, async () => {
+                const members = await guildsDb.getTopGuildMembers(guildName, 20);
+                const allHistory = await pointsDb.getGuildRankingHistory(30);
+                const guildHistory = allHistory.filter((h: any) => h.guild === guildName);
+                return { members, history: guildHistory };
+            }, 60);
+
+            return json(data);
         }
 
         if (url.pathname === '/api/stats/players') {

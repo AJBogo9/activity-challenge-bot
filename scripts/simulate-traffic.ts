@@ -113,7 +113,7 @@ async function startTraffic() {
   console.log(`💀 [INSANE MODE] 500 Concurrent Sessions | 30% Write Traffic | Deep Paging`);
   console.log("Press Ctrl+C to abort stress test.");
 
-  const CONCURRENCY = 2000;
+  const CONCURRENCY = 20000;
   for (let i = 0; i < CONCURRENCY; i++) {
     const user = users[Math.floor(Math.random() * users.length)];
     simulateUserSession(user);

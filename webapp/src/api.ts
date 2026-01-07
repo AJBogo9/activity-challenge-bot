@@ -37,3 +37,9 @@ export async function fetchPlayerStats(page: number = 0, limit: number = 50) {
   if (!res.ok) throw new Error('Failed to fetch player stats');
   return res.json();
 }
+
+export async function fetchGuildDetails(name: string) {
+  const res = await fetch(`${BASE_URL}/stats/guild/details?name=${encodeURIComponent(name)}`, { headers: getHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch guild details');
+  return res.json();
+}

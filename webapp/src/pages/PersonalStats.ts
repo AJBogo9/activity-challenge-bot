@@ -11,6 +11,11 @@ export async function renderPersonalStats() {
     const data = await fetchPersonalStats();
 
     const rankHistory = (data.rankingHistory || []).map((h: any) => h.rank);
+    const labels = (data.rankingHistory || []).map((h: any) => h.date);
+    
+    const guildRankHistory = (data.guildRankingHistory || []).map((h: any) => h.rank);
+    const guildLabels = (data.guildRankingHistory || []).map((h: any) => h.date);
+
     const activityMix = (data.typeBreakdown || []).map((t: any, i: number) => ({
       name: t.name,
       value: t.value,
@@ -18,12 +23,21 @@ export async function renderPersonalStats() {
     }));
 
     container.innerHTML = `
-      <div class="card p-6 mb-4">
-        <h3 class="text-xs font-bold uppercase tracking-widest mb-6 flex items-center gap-2 text-hint">
-          <span style="width: 14px">${icons.trendingUp}</span> 30-Day Rank Trend
+      <div class="card p-6 mb-4 overflow-hidden">
+        <h3 class="text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2 text-hint">
+          <span style="width: 14px">${icons.trendingUp}</span> 30-Day Rank Trend (Global)
         </h3>
-        ${renderLineChart(rankHistory)}
+        ${renderLineChart(rankHistory, labels)}
       </div>
+
+      ${data.guild ? `
+      <div class="card p-6 mb-4 overflow-hidden">
+        <h3 class="text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2 text-hint">
+          <span style="width: 14px">${icons.trophy}</span> ${data.guild} Rank Trend
+        </h3>
+        ${renderLineChart(guildRankHistory, guildLabels, 150, '#00C49F')}
+      </div>
+      ` : ''}
 
       <div class="card p-4 mb-4">
         <h3 class="text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2 text-hint">
