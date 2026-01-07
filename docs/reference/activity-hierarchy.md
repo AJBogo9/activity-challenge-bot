@@ -1,6 +1,6 @@
 # Activity Hierarchy
 
-The Activity Challenge Bot organizes over 1000 physical activities into a 4-level hierarchical structure, making it easy for users to find and log their activities accurately.
+The Activity Challenge Bot organizes over 10 physical activities into a 4-level hierarchical structure, making it easy for users to find and log their activities accurately.
 
 ## Structure Overview
 
@@ -10,7 +10,7 @@ The hierarchy consists of four levels:
 Main Category (19 categories)
 └── Subcategory (~100 subcategories)
     └── Activity (~400 activities)
-        └── Intensity (~1000+ variations)
+        └── Intensity (~10+ variations)
             └── MET Data (MET value + examples)
 ```
 
@@ -177,80 +177,6 @@ Each intensity level contains MET data with two fields:
 }
 ```
 
-## Navigation in the Bot
-
-Users navigate the hierarchy through inline keyboard buttons:
-
-### Step-by-Step Flow
-
-1. **Select Category**: User sees 19 category buttons
-2. **Select Subcategory**: User sees subcategories for chosen category
-3. **Select Activity**: User sees activities for chosen subcategory
-4. **Select Intensity**: User sees intensity levels for chosen activity
-5. **Enter Date**: User selects when they did the activity
-6. **Enter Duration**: User enters how many minutes
-7. **Confirm**: User reviews and submits
-
-At each step, users can navigate back to change their selection.
-
-### UI Example
-
-```
-📋 Select a category:
-[🚴 Bicycling] [💪 Conditioning] [💃 Dancing]
-[🏡 Home Activities] [🏃 Running] [⚽ Sports]
-[🚶 Walking] [🏊 Water Activities] [⛷️ Winter]
-... more buttons ...
-```
-
-## Helper Functions
-
-The codebase provides utility functions for working with the hierarchy:
-
-### Reading the Hierarchy
-
-```typescript
-// Get all main categories
-getMainCategories(): string[]
-
-// Get subcategories for a category
-getSubcategories(mainCategory: string): string[]
-
-// Get activities for a category + subcategory
-getActivities(mainCategory: string, subcategory: string): string[]
-
-// Get intensity levels for a specific activity
-getIntensities(
-  mainCategory: string, 
-  subcategory: string, 
-  activity: string
-): string[]
-```
-
-### Getting MET Values
-
-```typescript
-// Get the MET value for a specific activity + intensity
-getMetValue(
-  mainCategory: string,
-  subcategory: string,
-  activity: string,
-  intensity: string
-): number
-
-// Returns 0 if not found
-```
-
-### Validation
-
-```typescript
-// Check if each level exists
-isValidCategory(category: string): boolean
-isValidSubcategory(mainCategory: string, subcategory: string): boolean
-isValidActivity(mainCategory: string, subcategory: string, activity: string): boolean
-isValidIntensity(mainCategory: string, subcategory: string, activity: string, intensity: string): boolean
-```
-
 ## Data Storage in Database
 
 When an activity is logged, these values are stored:
@@ -294,72 +220,6 @@ To update to a newer version of the compendium:
 3. Run `bun scripts/pdf-to-json.py`
 4. Review the generated `activity-hierarchy.json`
 5. No database migration needed (activities stored as strings)
-
-## Design Decisions
-
-### Why 4 Levels?
-
-The 4-level hierarchy balances specificity with usability:
-- **Too Few Levels**: 1000+ activities in a flat list would be overwhelming
-- **Too Many Levels**: Navigation becomes tedious
-
-4 levels provide enough organization without excessive clicking.
-
-### Why Store Full Path as String?
-
-Instead of separate columns for each hierarchy level, we store the full path as a single string:
-
-**Advantages:**
-- Flexible: Can change hierarchy without database migration
-- Simple: One field to search/filter
-- Human-readable in queries and exports
-
-**Disadvantages:**
-- Slightly more storage (but negligible)
-- Can't easily query "all basketball activities" without string matching
-
-The trade-off heavily favors flexibility for this use case.
-
-### Why Not Full-Text Search?
-
-The original design considered adding fuzzy text search (e.g., "run" → shows all running activities). This wasn't implemented because:
-
-1. Hierarchical navigation is sufficient for most users
-2. Activities have specific naming that may not match user intuition
-3. Search requires understanding MET terminology
-4. Inline keyboards are more mobile-friendly than text input
-
-However, the architecture supports adding search in the future as an alternative entry point.
-
-## Common Activities Quick Reference
-
-For quick reference, here are commonly logged activities:
-
-### Running
-- **General running**: 8.0 METs
-- **Jogging**: 7.0 METs
-- **Sprint training**: 10.0+ METs
-
-### Walking
-- **Casual pace (2.0 mph)**: 2.5 METs
-- **Moderate pace (3.0 mph)**: 3.5 METs
-- **Brisk pace (4.0 mph)**: 5.0 METs
-
-### Cycling
-- **Leisure (<10 mph)**: 5.8 METs
-- **Moderate (12-14 mph)**: 8.0 METs
-- **Fast (16-19 mph)**: 10.0 METs
-
-### Swimming
-- **Leisure**: 6.0 METs
-- **Laps, moderate**: 8.3 METs
-- **Laps, vigorous**: 9.8 METs
-
-### Gym
-- **Weight training, general**: 3.5 METs
-- **Weight training, vigorous**: 6.0 METs
-- **Elliptical, moderate**: 5.0 METs
-- **Rowing machine, vigorous**: 8.5 METs
 
 ## Future Enhancements
 

@@ -21,7 +21,7 @@ features:
     details: Science-backed point calculation using Metabolic Equivalents (METs) from the 2024 Compendium of Physical Activities, ensuring fair scoring across all activity types.
   
   - title: 🎯 Intuitive Activity Logging
-    details: Wizard-based interface guiding users through a 4-level hierarchy of 1000+ activities with intensity levels, making logging quick and accurate.
+    details: Wizard-based interface guiding users through a 4-level hierarchy of 10+ activities with intensity levels, making logging quick and accurate.
   
   - title: 📈 Comprehensive Statistics
     details: Personal rankings, guild standings, activity history, and trend analysis with ranking history visualization.
@@ -50,8 +50,6 @@ Activity Challenge Bot is a Telegram-based fitness competition platform designed
 
 ### For Administrators
 - [Competition Setup](/admin/competition-setup) - Configure competition periods and manage guilds
-- [Database Operations](/admin/database-operations) - Backup, restore, and maintain the database
-- [Monitoring](/admin/monitoring) - Track bot health and usage statistics
 
 ### For Developers
 - [Getting Started](/guide/getting-started) - Set up your local development environment

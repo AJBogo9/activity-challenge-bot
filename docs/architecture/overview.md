@@ -17,7 +17,6 @@ graph TB
     GR --> SC
     GR --> API
     SC --> TMM
-    API --> TMM
   end
   
   subgraph DB["PostgreSQL Database"]
@@ -141,62 +140,6 @@ src/
 
 See [Project Structure](/development/project-structure.md) for detailed breakdown.
 
-## Data Flow
-
-The bot uses multi-step wizards for complex operations like activity logging and registration.
-
-See [Flows and Wizards](./flows-and-wizards.md) for detailed flow diagrams showing:
-- Activity Logging Flow (7 steps)
-- Registration Flow (3 steps)
-
-## Database Design
-
-Three main tables with simple relationships:
-- **users**: Participant information and total points
-- **activities**: Logged activities with individual points
-- **feedback**: User feedback submissions
-
-**Key Design Decisions:**
-1. **Denormalized Points**: Stored in both `users.points` (fast rankings) and `activities.points` (detailed history)
-2. **String-Based Activity Types**: Full hierarchy path as string for flexibility
-3. **No Foreign Key for Guilds**: Validated at application layer for easy guild management
-4. **Separate Date Fields**: `activity_date` (when activity happened) vs `created_at` (when logged)
-
-See [Database Schema](./database.md) for complete ERD and schema details.
-
-## Session Management
-
-Bot sessions store:
-- User registration status
-- Current scene/wizard state
-- Two persistent message IDs
-- Last displayed scene and content (for deduplication)
-
-Sessions are stored in-memory (not persisted between bot restarts).
-
-## Error Handling
-
-### Telegram API Errors
-```typescript
-try {
-  await ctx.telegram.editMessageText(...)
-} catch (error) {
-  // If edit fails, create new message
-  const newMsg = await ctx.reply(...)
-  ctx.session.contentMessageId = newMsg.message_id
-}
-```
-
-### Database Errors
-All database operations wrapped in try-catch with user-friendly error messages.
-
-### User Input Validation
-All inputs validated before database operations:
-- Date within competition period (see [Competition Setup](/admin/competition-setup.md))
-- Duration > 0 and reasonable
-- Guild exists in configuration (see [Guild Management](/admin/guild-management.md))
-- Activity hierarchy path valid
-
 ## Performance Optimizations
 
 ### Guild Leaderboard Caching
@@ -213,23 +156,6 @@ See [Database Schema](./database.md) for index details.
 SELECT *, RANK() OVER (ORDER BY points DESC) as rank
 FROM users
 ```
-
-## Security Considerations
-
-### Input Sanitization
-- All callback data validated before processing
-- SQL injection prevented (parameterized queries)
-- User messages deleted after processing (clean chat)
-
-### Data Privacy
-- Only Telegram ID, name, and guild stored
-- No location tracking or sensitive health data
-- Users can request data deletion
-
-See [Database Operations](/admin/database-operations.md) for security best practices.
-
-### Authentication
-Web app uses Telegram Web App authentication - validates init data signature through Telegram.
 
 ## Deployment Architecture
 
@@ -260,21 +186,6 @@ See [Environment Setup](/guide/environment-setup.md) for complete configuration 
 
 Configuration in code allows version control and type safety.
 
-## Monitoring & Logging
-
-Currently implemented:
-- Console logging for errors
-- Database connection health checks
-- Cache statistics endpoint
-
-See [Monitoring](/admin/monitoring.md) for operations guide.
-
-## Testing Strategy
-
-Tests for point calculations, ranking algorithms, and leaderboard logic using Bun's test runner.
-
-See [Testing Guide](/development/testing.md) for patterns and examples.
-
 ## Further Reading
 
 ### Architecture Deep Dives
@@ -285,14 +196,11 @@ See [Testing Guide](/development/testing.md) for patterns and examples.
 ### Administration
 - [Competition Setup](/admin/competition-setup.md) - Configure competition periods
 - [Guild Management](/admin/guild-management.md) - Manage guilds
-- [Database Operations](/admin/database-operations.md) - Backup and maintenance
-- [Monitoring](/admin/monitoring.md) - Health checks and troubleshooting
 
 ### Development
 - [Getting Started](/guide/getting-started.md) - Setup and first run
 - [Local Development](/guide/local-development.md) - Development workflow
 - [Project Structure](/development/project-structure.md) - Code organization
-- [Code Patterns](/development/patterns.md) - Best practices
 - [Testing](/development/testing.md) - Testing guide
 
 ### Reference

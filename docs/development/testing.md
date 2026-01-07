@@ -13,49 +13,6 @@ bun run test:coverage     # With coverage
 bun run pod:test          # In container
 ```
 
-## Test Structure
-
-Tests in `tests/` directory:
-
-```
-tests/
-├── leaderboard.test.ts
-├── ranking.test.ts
-├── points.test.ts
-└── activities.test.ts
-```
-
-**Naming**: `feature.test.ts`
-
-## Example Test
-
-```typescript
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
-
-describe('User Rankings', () => {
-  beforeEach(() => {
-    // Setup
-  })
-  
-  afterEach(() => {
-    // Cleanup
-  })
-  
-  test('should calculate rankings correctly', () => {
-    const users = [
-      { id: 1, points: 100 },
-      { id: 2, points: 200 },
-      { id: 3, points: 150 }
-    ]
-    
-    const ranked = rankUsers(users)
-    
-    expect(ranked[0].rank).toBe(1)
-    expect(ranked[0].id).toBe(2)  // Highest points
-  })
-})
-```
-
 ## Testing Patterns
 
 ### Unit Testing
@@ -183,16 +140,8 @@ bun test tests/ranking.test.ts
 
 # Run specific test by name
 bun test --test-name-pattern "should calculate rankings"
-
-# Use console.log
-test('should do something', () => {
-  console.log('Debug:', someVariable)
-  expect(true).toBe(true)
-})
 ```
 
 ## Next Steps
 
-- Review [Code Patterns](/development/patterns)
 - Understand [Project Structure](/development/project-structure)
-- Read [Contributing Guidelines](/CONTRIBUTING)

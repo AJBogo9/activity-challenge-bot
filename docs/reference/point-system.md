@@ -40,58 +40,21 @@ MET values represent how many times more energy you burn compared to sitting at 
 ### Data Source
 
 All MET values come from the **2024 Compendium of Physical Activities**, a comprehensive research compilation maintained by Arizona State University. This database includes:
-- Over 1000 specific activities
+- Over 10 specific activities
 - Scientifically validated MET values
 - Multiple intensity levels for most activities
 - Detailed example descriptions
 
 **Citation**: Ainsworth BE, Haskell WL, Herrmann SD, et al. 2024 Compendium of Physical Activities. Available at: https://pacompendium.com/
 
-## Point Examples
+## Point Example: Running (Moderate Pace)
 
-### Example 1: Running (Moderate Pace)
 ```
 Activity: Running, jogging
 Intensity: General (MET = 8.0)
 Duration: 30 minutes
 
 Points = (8.0 × 30) / 60 = 4.0 points
-```
-
-### Example 2: Brisk Walking
-```
-Activity: Walking
-Intensity: Brisk pace, 3.5 mph (MET = 4.3)
-Duration: 45 minutes
-
-Points = (4.3 × 45) / 60 = 3.225 points (rounded to 3.23)
-```
-
-### Example 3: Cycling (Leisure)
-```
-Activity: Bicycling
-Intensity: Leisure, <10 mph (MET = 5.8)
-Duration: 60 minutes
-
-Points = (5.8 × 60) / 60 = 5.8 points
-```
-
-### Example 4: Swimming (Vigorous)
-```
-Activity: Swimming laps
-Intensity: Vigorous effort (MET = 9.8)
-Duration: 20 minutes
-
-Points = (9.8 × 20) / 60 = 3.267 points (rounded to 3.27)
-```
-
-### Example 5: Yoga
-```
-Activity: Yoga
-Intensity: Hatha (MET = 2.5)
-Duration: 60 minutes
-
-Points = (2.5 × 60) / 60 = 2.5 points
 ```
 
 ## Expected Weekly Points
@@ -149,80 +112,6 @@ The leaderboard shows several metrics for context:
 
 Even though KY has the most total points, TiK wins because of higher average points per member.
 
-## Point Storage
-
-Points are stored in two places in the database:
-
-1. **Individual Activities** (`activities.points`): Each logged activity stores its calculated points
-2. **User Total** (`users.points`): Aggregate sum of all user activities
-
-This dual storage allows for:
-- Fast user ranking queries (no need to sum activities each time)
-- Detailed activity history (can see point breakdown by activity)
-- Data validation (can verify totals match activity sums)
-
-### Point Calculation Flow
-
-```
-1. User logs activity with duration
-2. System looks up MET value from hierarchy
-3. Calculate: points = (MET × duration) / 60
-4. Store in activities.points
-5. Add to users.points
-6. Invalidate guild leaderboard cache
-```
-
-## Fair Play Considerations
-
-### Duplicate Prevention
-
-The database has a unique constraint that prevents duplicate submissions:
-- Same user
-- Same activity type
-- Same date
-- Same duration
-- Same points
-
-This prevents accidental double-clicks while still allowing multiple sessions of the same activity per day.
-
-### Activity Date Validation
-
-- Activities can only be logged for dates within the current competition period
-- Future dates are not allowed
-- Past activities can be logged retroactively (useful if you forgot to log)
-
-### No Weekly Caps
-
-Unlike the original design considerations, the production system does **not** cap weekly points. This decision was made to:
-- Avoid demotivating highly active users
-- Trust users to self-regulate
-- Focus on sustainable long-term activity rather than artificial limits
-
-If overtraining becomes an issue, weekly caps could be implemented in future iterations.
-
-## Data Precision
-
-Points are stored as `DECIMAL(10,2)` in the database, allowing:
-- 2 decimal places of precision
-- Values up to 99,999,999.99 points
-- No floating-point rounding errors
-
-In practice, most activities result in points between 0.5 and 15.0 per session.
-
-## Historical Rankings
-
-The system tracks ranking history over time, allowing users to see:
-- Daily ranking position
-- Point accumulation trends
-- Guild position changes over time
-
-Rankings are calculated daily using window functions:
-```sql
-RANK() OVER (ORDER BY points DESC)
-```
-
-This creates a consistent ranking where ties result in the same rank number.
-
 ## Future Enhancements
 
 Potential point system improvements being considered:
@@ -232,5 +121,4 @@ Potential point system improvements being considered:
 3. **Beginner Boost**: Temporary point multiplier for new users to help them get started
 4. **Activity Diversity Bonus**: Encourage trying different types of activities
 5. **Weekly Challenges**: Temporary special scoring for specific activities
-
-These would be carefully balanced to maintain the scientific validity of the core MET-based system.
+6. **Single Source for User points**: Apply the same caching logic for user points that is used for guild points

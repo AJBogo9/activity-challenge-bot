@@ -308,7 +308,7 @@ webapp/
 └── package.json          # Web app dependencies
 ```
 
-**Not fully documented here** - web app is handled by your friend.
+**Not fully documented here** - DOCUMENTATION COMING SOON!.
 
 ## Deployment (`deployment/`)
 
@@ -353,62 +353,6 @@ See [Local Development](/guide/local-development) for script documentation.
 - `compose.yaml` - Docker/Podman compose configuration
 - `compose.dev.yaml` - Development-specific compose overrides
 - `Containerfile` - Container image definition
-
-## Import Patterns
-
-### Absolute Imports
-
-Not used in this project. All imports are relative.
-
-### Relative Imports
-
-```typescript
-// From src/flows/activity/wizard.ts
-import { TwoMessageManager } from '../../utils'
-import { showCategorySelection } from './steps/1-category'
-```
-
-### Index Files
-
-Each module has an `index.ts` that exports public APIs:
-
-```typescript
-// src/db/index.ts
-export * from './users'
-export * from './activities'
-export * from './points'
-export * from './guilds'
-```
-
-Used like:
-
-```typescript
-import { createUser, logActivity } from '../db'
-```
-
-## Code Organization Principles
-
-### Feature-Based Structure
-
-Flows are organized by feature (activity, register, profile), not by layer (controllers, services).
-
-### Separation of Concerns
-
-- **Flows**: Handle user interaction (Telegram UI)
-- **Database**: Handle data persistence
-- **Utilities**: Handle shared logic
-- **Config**: Handle configuration
-
-### Single Responsibility
-
-Each file has one clear purpose:
-- `1-category.ts`: Only category selection logic
-- `users.ts`: Only user database operations
-- `two-message-manager.ts`: Only the two-message pattern
-
-### Minimal Dependencies
-
-Files import only what they need. No circular dependencies.
 
 ## Finding Code
 

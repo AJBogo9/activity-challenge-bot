@@ -50,7 +50,6 @@ export default withMermaid(
           items: [
             { text: 'Competition Setup', link: '/admin/competition-setup' },
             { text: 'Guild Management', link: '/admin/guild-management' },
-            { text: 'Database Operations', link: '/admin/database-operations' },
           ]
         },
         {

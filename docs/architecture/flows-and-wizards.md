@@ -8,7 +8,7 @@ How the bot organizes multi-step conversations using grammY's scene system.
 
 The bot uses two main conversation patterns:
 
-1. **Wizards**: Multi-step forms (activity logging, registration)
+1. **Wizards**: Multi-step forms (activity logging, registration, feedback)
 2. **Simple Scenes**: Single-step views (profile, stats, info)
 
 All flows integrate with the [Two-Message Manager](/architecture/two-message-manager.md) pattern for clean UX.
@@ -17,9 +17,9 @@ All flows integrate with the [Two-Message Manager](/architecture/two-message-man
 
 Our wizards are implemented using `Scenes.WizardScene` with each step as a separate function.
 
-### Activity Logging Wizard (7 Steps)
+### Activity Logging Wizard Example (7 Steps)
 
-The most complex flow - users select from 1000+ activities through a hierarchical menu.
+The most complex flow - users select from 10+ activities through a hierarchical menu.
 
 **State Structure:**
 ```typescript
@@ -52,7 +52,7 @@ flows/activity/
     └── navigation.ts      # Back/cancel handlers
 ```
 
-See [Activity Hierarchy](/reference/activity-hierarchy.md) for details on the 1000+ activities and their MET values.
+See [Activity Hierarchy](/reference/activity-hierarchy.md) for details on the 10+ activities and their MET values.
 
 **Key Implementation Details:**
 
@@ -107,40 +107,6 @@ await addPointsToUser(user.id, calculatedPoints)
 // Invalidate cache
 invalidateGuildCache()
 ```
-
-### Registration Wizard (3 Steps)
-
-Simpler flow for new user onboarding.
-
-**State:**
-```typescript
-interface PendingUser {
-  telegramId: string
-  username: string
-  firstName: string
-  lastName: string
-  guild: string
-}
-```
-
-**File Organization:**
-
-```
-flows/register/
-├── wizard.ts              # Wizard composition
-├── steps/
-│   ├── 1-terms.ts        # Terms and conditions
-│   ├── 2-guild.ts        # Guild selection
-│   └── 3-confirm.ts      # Confirmation
-└── helpers/
-    ├── format.ts         # Text formatting
-    └── keyboard-builder.ts  # Keyboard generation
-```
-
-**Key Features:**
-- Terms must be accepted
-- Guild validated against config (see [Guild Management](/admin/guild-management.md))
-- Keyboard updated after registration (adds registered features)
 
 ## Simple Scenes
 
@@ -240,23 +206,22 @@ bot.use(stage.middleware())
 
 ## Best Practices
 
-✅ **Always validate user input** before advancing steps
-✅ **Provide Cancel buttons** on every step
-✅ **Use escape middleware** for all wizards
-✅ **Clear state on leave** to prevent stale data
-✅ **Answer callback queries** to remove loading indicators
-✅ **Use descriptive callback data** (e.g., `category:Sports`)
+**Do's:**
+- ✅ Always validate user input before advancing steps
+- ✅ Provide Cancel buttons on every step
+- ✅ Use escape middleware for all wizards
+- ✅ Clear state on leave to prevent stale data
+- ✅ Answer callback queries to remove loading indicators
+- ✅ Use descriptive callback data (e.g., `category:Sports`)
 
-❌ Don't skip input validation
-❌ Don't forget to clean up wizard state
-❌ Don't create wizards without escape routes
-
-See [Code Patterns](/development/patterns.md) for more best practices.
+**Don'ts:**
+- ❌ Don't skip input validation
+- ❌ Don't forget to clean up wizard state
+- ❌ Don't create wizards without escape routes
 
 ## Further Reading
 
 - [Two-Message Manager Pattern](/architecture/two-message-manager.md) - Core UX pattern
-- [Code Patterns](/development/patterns.md) - Implementation best practices
 - [Activity Hierarchy](/reference/activity-hierarchy.md) - Activity database structure
 - [Point System](/reference/point-system.md) - How points are calculated
 - [grammY Scenes Documentation](https://grammy.dev/plugins/conversations.html) - Framework reference

@@ -119,8 +119,6 @@ bun run pod:db:psql
 # SELECT * FROM users;
 ```
 
-See [Database Operations](/admin/database-operations.md) for more database management tasks.
-
 ### Testing Scripts
 
 ```bash
