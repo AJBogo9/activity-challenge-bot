@@ -7,7 +7,7 @@ import { showDateSelection, handleDateSelection } from './steps/5-date'
 import { showDurationSelection, handleDurationInput } from './steps/6-duration'
 import { showConfirmation, handleConfirmation } from './steps/7-confirm'
 import { handleCancel } from './helpers/navigation'
-import { TwoMessageManager } from '../../utils'
+import { cleanupActivityCalendar, TwoMessageManager } from '../../utils'
 
 // Wizard state interface for type safety
 interface WizardState {
@@ -93,7 +93,7 @@ export const activityWizard = new Scenes.WizardScene<any>(
     await showDateSelection(ctx)
     return ctx.wizard.next()
   },
-  
+
   // Step 5: Handle Date → Show Duration
   async (ctx: any) => {
     if (ctx.callbackQuery?.data === 'date:cancel') {
@@ -102,17 +102,14 @@ export const activityWizard = new Scenes.WizardScene<any>(
     }
     
     await handleDateSelection(ctx)
+    
+    // Only advance if a date was actually selected
     if (!ctx.wizard.state.activityDate) {
-      if (ctx.callbackQuery) {
-        await ctx.answerCbQuery()
-      }
+      // Stay on this step - user is navigating calendar or clicked empty space
       return
     }
     
-    if (ctx.callbackQuery) {
-      await ctx.answerCbQuery()
-    }
-    
+    // Date was selected, move to next step
     await showDurationSelection(ctx)
     return ctx.wizard.next()
   },
@@ -149,6 +146,9 @@ activityWizard.use(TwoMessageManager.createEscapeMiddleware())
 
 // Clean up on wizard leave
 activityWizard.leave(async (ctx: any) => {
+  // Clean up calendar state
+  cleanupActivityCalendar(ctx)
+  
   // Clear wizard state
   ctx.wizard.state = {}
 })
