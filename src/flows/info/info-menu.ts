@@ -13,7 +13,7 @@ infoMenuScene.enter(async (ctx: any) => {
     ],
     [
       Markup.button.callback('🤖 About Bot', 'info:about'),
-      Markup.button.callback('👥 Credits', 'info:credits')
+      // Markup.button.callback('👥 Credits', 'info:credits')
     ]
   ])
 
@@ -38,8 +38,8 @@ infoMenuScene.action('info:about', async (ctx: any) => {
   await ctx.scene.enter('about_bot_scene')
 })
 
-// Handle Credits button
-infoMenuScene.action('info:credits', async (ctx: any) => {
-  await ctx.answerCbQuery()
-  await ctx.scene.enter('credits')
-})
+// // Handle Credits button
+// infoMenuScene.action('info:credits', async (ctx: any) => {
+//   await ctx.answerCbQuery()
+//   await ctx.scene.enter('credits')
+// })
