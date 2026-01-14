@@ -30,7 +30,6 @@ function buildActivityMessage(
 
   if (pageActivities.length === 0) {
     message += "You haven't logged any activities yet\\."
-    console.log('🔍 DEBUG - Empty activities message:', message)
     return {
       text: message,
       keyboard: null
@@ -42,16 +41,6 @@ function buildActivityMessage(
   
   pageActivities.forEach((activity, index) => {
     const globalIndex = startIdx + index + 1
-    
-    // Log raw activity data
-    console.log('🔍 DEBUG - Raw activity data:', {
-      activity_type: activity.activity_type,
-      duration: activity.duration,
-      points: activity.points,
-      description: activity.description,
-      activity_date: activity.activity_date,
-      formatted_date: formatDate(activity.activity_date)
-    })
     
     message += `*${globalIndex}\\.* ${escapeMarkdownV2(activity.activity_type)}\n`
     
@@ -65,9 +54,7 @@ function buildActivityMessage(
     }
     
     const formattedDate = formatDate(activity.activity_date)
-    console.log('🔍 DEBUG - Date before escape:', formattedDate)
     const escapedDate = escapeMarkdownV2(formattedDate)
-    console.log('🔍 DEBUG - Date after escape:', escapedDate)
     
     message += `   📅 ${escapedDate}\n`
 
@@ -80,10 +67,6 @@ function buildActivityMessage(
   })
 
   message += `_Page ${page + 1} of ${totalPages} • Total activities: ${activities.length}_`
-
-  console.log('🔍 DEBUG - Final message to send:')
-  console.log(message)
-  console.log('🔍 DEBUG - Message length:', message.length)
 
   // Add pagination buttons if needed
   const paginationButtons: any[] = []
@@ -128,7 +111,6 @@ async function displayActivityHistory(ctx: any, page: number = 0) {
 
     if (activities.length === 0) {
       const message = '📜 *Activity History*\n\nYou haven\'t logged any activities yet\\.'
-      console.log('🔍 DEBUG - No activities message:', message)
       await TwoMessageManager.updateContent(ctx, message)
       return
     }
@@ -186,8 +168,6 @@ activityHistoryScene.action(/^delete:(\d+)$/, async (ctx: any) => {
   message += `📅 ${escapeMarkdownV2(formatDate(activity.activity_date))}\n\n`
   message += `This will deduct *${escapeMarkdownV2(activity.points.toString())} points* from your total\\.\n\n`
   message += '_Are you sure you want to delete this activity?_'
-
-  console.log('🔍 DEBUG - Delete confirmation message:', message)
 
   const keyboard = Markup.inlineKeyboard([
     [
