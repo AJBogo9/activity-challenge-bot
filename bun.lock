@@ -8,7 +8,7 @@
         "dotenv": "^17.2.3",
         "fuse.js": "^7.1.0",
         "postgres": "^3.4.7",
-        "telegraf": "^4.16.2",
+        "telegraf": "^4.16.3",
         "telegram-inline-calendar": "^1.10.0",
         "zod": "^4.3.4",
       },
