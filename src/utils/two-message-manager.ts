@@ -67,7 +67,7 @@ export class TwoMessageManager {
         text,
         options
       )
-    } catch (error) {
+    } catch {
       // If edit fails, create new content message
       const contentMsg = await ctx.reply(text, options)
       ctx.session.contentMessageId = contentMsg.message_id
@@ -99,7 +99,7 @@ export class TwoMessageManager {
         text,
         options
       )
-    } catch (error) {
+    } catch {
       // If edit fails, create new keyboard message
       const keyboardMsg = await ctx.reply(text, options)
       ctx.session.keyboardMessageId = keyboardMsg.message_id
@@ -112,23 +112,21 @@ export class TwoMessageManager {
    * - For scenes: do nothing if already there
    */
   static async navigateToScene(ctx: any, sceneId: string) {
-
     await this.deleteUserMessage(ctx)
     
     const currentSceneId = ctx.scene.current?.id
     
     // If already in this scene
     if (currentSceneId === sceneId) {
-      
-      // Check if this is a wizard scene (by ID pattern, not ctx.wizard)
+      // Check if this is a wizard scene (by ID pattern)
       const isWizard = WIZARD_SCENES.has(sceneId)
       
       if (isWizard) {
         // Restart the wizard by leaving and re-entering
         await ctx.scene.leave()
         await ctx.scene.enter(sceneId)
-      } else {
       }
+      // If it's a regular scene, do nothing (stay in place)
       return
     }
     
@@ -172,7 +170,6 @@ export class TwoMessageManager {
    */
   static createNavigationMiddleware() {
     return async (ctx: any, next: any) => {
-      
       // Only handle text messages (reply keyboard), not callback queries (inline buttons)
       if (!ctx.message?.text) {
         return next()
