@@ -16,6 +16,13 @@ const DEFAULT_KEYBOARD_BUTTONS = [
   ['💬 Feedback']
 ]
 
+// List of wizard scene IDs (scenes that should be restarted if already active)
+const WIZARD_SCENES = new Set([
+  'activity_wizard',
+  'register_wizard',
+  'feedback_wizard'
+])
+
 export class TwoMessageManager {
   /**
    * Initialize the two persistent messages
@@ -101,31 +108,32 @@ export class TwoMessageManager {
 
   /**
    * Navigate to a scene and delete user's message
+   * - For wizards: always restart (even if already in that wizard)
+   * - For scenes: do nothing if already there
    */
   static async navigateToScene(ctx: any, sceneId: string) {
+
     await this.deleteUserMessage(ctx)
-    await this.enterScene(ctx, sceneId)
-  }
-
-  /**
-   * Enter a scene only if not already there
-   */
-  static async enterScene(ctx: any, sceneId: string) {
-    if (ctx.scene.current?.id !== sceneId) {
-      await ctx.scene.enter(sceneId)
+    
+    const currentSceneId = ctx.scene.current?.id
+    
+    // If already in this scene
+    if (currentSceneId === sceneId) {
+      
+      // Check if this is a wizard scene (by ID pattern, not ctx.wizard)
+      const isWizard = WIZARD_SCENES.has(sceneId)
+      
+      if (isWizard) {
+        // Restart the wizard by leaving and re-entering
+        await ctx.scene.leave()
+        await ctx.scene.enter(sceneId)
+      } else {
+      }
+      return
     }
-  }
-
-  /**
-   * Handle keyboard button navigation
-   */
-  static async handleNavigation(ctx: any, buttonText: string): Promise<boolean> {
-    const targetScene = NAVIGATION_MAP[buttonText]
-    if (targetScene) {
-      await this.navigateToScene(ctx, targetScene)
-      return true
-    }
-    return false
+    
+    // Different scene, navigate to it
+    await ctx.scene.enter(sceneId)
   }
 
   /**
@@ -159,37 +167,45 @@ export class TwoMessageManager {
   }
 
   /**
-   * Middleware for wizards/scenes to allow escape via /start or reply keyboard
+   * CENTRALIZED navigation middleware - handles ALL reply keyboard navigation
+   * This should be used as GLOBAL middleware, NOT in individual wizards
    */
-  static createEscapeMiddleware() {
+  static createNavigationMiddleware() {
     return async (ctx: any, next: any) => {
-      const messageText = ctx.message?.text
-
-      if (!messageText) {
+      
+      // Only handle text messages (reply keyboard), not callback queries (inline buttons)
+      if (!ctx.message?.text) {
         return next()
       }
 
+      const messageText = ctx.message.text
+
       // Handle /start command
       if (messageText === '/start') {
-        if (ctx.wizard) {
-          ctx.wizard.state = {}
-        }
-        await this.deleteUserMessage(ctx)
-        await ctx.scene.enter('menu_router')
+        await this.navigateToScene(ctx, 'menu_router')
         return
       }
 
-      // Handle navigation buttons
+      // Handle navigation buttons from NAVIGATION_MAP
       const targetScene = NAVIGATION_MAP[messageText]
-      if (targetScene && ctx.scene.current?.id !== targetScene) {
-        if (ctx.wizard) {
-          ctx.wizard.state = {}
-        }
-        await this.deleteUserMessage(ctx)
-        await ctx.scene.enter(targetScene)
+      if (targetScene) {
+        await this.navigateToScene(ctx, targetScene)
         return
       }
 
+      // Not a navigation button, pass to next handler
+      return next()
+    }
+  }
+
+  /**
+   * Wizard middleware - ONLY handles wizard-specific input validation
+   * Does NOT handle navigation (that's done by global middleware)
+   */
+  static createWizardMiddleware() {
+    return async (ctx: any, next: any) => {
+      // This middleware just passes through - navigation is handled globally
+      // Wizards can add their own validation here if needed
       return next()
     }
   }

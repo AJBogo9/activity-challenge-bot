@@ -72,23 +72,3 @@ deleteUserScene.action('delete:cancel', async (ctx: any) => {
   await ctx.answerCbQuery()
   await ctx.scene.enter('profile')
 })
-
-// Handle reply keyboard navigation
-deleteUserScene.on('text', async (ctx: any) => {
-  const handled = await TwoMessageManager.handleNavigation(ctx, ctx.message.text)
-  
-  if (!handled) {
-    // If not a navigation button, delete message and remind to use buttons
-    await TwoMessageManager.deleteUserMessage(ctx)
-    await TwoMessageManager.updateContent(
-      ctx,
-      '⚠️ Please use the buttons to confirm or cancel the deletion\\.',
-      Markup.inlineKeyboard([
-        [
-          Markup.button.callback('✅ Yes, delete', 'delete:confirm'),
-          Markup.button.callback('❌ No, cancel', 'delete:cancel')
-        ]
-      ])
-    )
-  }
-})

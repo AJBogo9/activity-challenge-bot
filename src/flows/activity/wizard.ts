@@ -141,14 +141,8 @@ export const activityWizard = new Scenes.WizardScene<any>(
   }
 )
 
-// Add escape middleware to allow /start and reply keyboard navigation
-activityWizard.use(TwoMessageManager.createEscapeMiddleware())
-
 // Clean up on wizard leave
 activityWizard.leave(async (ctx: any) => {
   // Clean up calendar state
   cleanupActivityCalendar(ctx)
-  
-  // Clear wizard state
-  ctx.wizard.state = {}
 })

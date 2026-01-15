@@ -171,8 +171,8 @@ activityHistoryScene.action(/^delete:(\d+)$/, async (ctx: any) => {
 
   const keyboard = Markup.inlineKeyboard([
     [
-      Markup.button.callback('✅ Confirm Delete', `confirm_delete:${activityId}`),
-      Markup.button.callback('❌ Cancel', 'cancel_delete')
+      Markup.button.callback('❌ Cancel', 'cancel_delete'),
+      Markup.button.callback('✅ Confirm Delete', `confirm_delete:${activityId}`)
     ]
   ])
 
@@ -225,13 +225,4 @@ activityHistoryScene.action('cancel_delete', async (ctx: any) => {
   // Return to activity history at the same page
   const currentPage = ctx.session.activityHistory?.currentPage || 0
   await displayActivityHistory(ctx, currentPage)
-})
-
-// Handle reply keyboard navigation
-activityHistoryScene.on('text', async (ctx: any) => {
-  const handled = await TwoMessageManager.handleNavigation(ctx, ctx.message.text)
-  if (!handled) {
-    // If not a navigation button, just delete the message
-    await TwoMessageManager.deleteUserMessage(ctx)
-  }
 })
