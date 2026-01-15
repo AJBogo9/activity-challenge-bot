@@ -9,7 +9,7 @@ mainMenuScene.enter(async (ctx: any) => {
     ['ℹ️ Info'],
     ['📝 Register']
   ])
-
+  
   // Automatically show info menu
   await ctx.scene.enter('info_menu')
 })

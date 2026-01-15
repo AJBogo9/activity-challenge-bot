@@ -50,11 +50,7 @@ export const registerWizard = new Scenes.WizardScene<any>(
   }
 )
 
-// Escape middleware to allow /start and reply keyboard navigation
-registerWizard.use(TwoMessageManager.createEscapeMiddleware())
-
 // Clean up on wizard leave
 registerWizard.leave(async (ctx: any) => {
-  // Clear wizard state
-  ctx.wizard.state = {}
+  // State is automatically cleaned up
 })

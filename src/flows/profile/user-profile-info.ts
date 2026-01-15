@@ -43,13 +43,3 @@ userProfileInfoScene.enter(async (ctx: any) => {
     await ctx.scene.enter('profile')
   }
 })
-
-// Handle reply keyboard navigation
-userProfileInfoScene.on('text', async (ctx: any) => {
-  const handled = await TwoMessageManager.handleNavigation(ctx, ctx.message.text)
-  
-  if (!handled) {
-    // If not a navigation button, just delete the message
-    await TwoMessageManager.deleteUserMessage(ctx)
-  }
-})

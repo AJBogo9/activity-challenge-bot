@@ -1,60 +1,63 @@
 import { Markup } from 'telegraf'
 
+// Centralized navigation configuration
+const NAVIGATION_MAP: Record<string, string> = {
+  '📝 Register': 'register_wizard',
+  'ℹ️ Info': 'info_menu',
+  '👤 Profile': 'profile',
+  '💪 Log Activity': 'activity_wizard',
+  '📊 Statistics': 'stats_menu',
+  '💬 Feedback': 'feedback_wizard'
+}
+
+const DEFAULT_KEYBOARD_BUTTONS = [
+  ['👤 Profile', '💪 Log Activity'],
+  ['📊 Statistics', 'ℹ️ Info'],
+  ['💬 Feedback']
+]
+
+// List of wizard scene IDs (scenes that should be restarted if already active)
+const WIZARD_SCENES = new Set([
+  'activity_wizard',
+  'register_wizard',
+  'feedback_wizard'
+])
+
 export class TwoMessageManager {
   /**
    * Initialize the two persistent messages
-   * Call this once when user starts or returns to main menu
-   * @param ctx - Telegraf context
-   * @param buttons - Optional custom keyboard layout. If not provided, uses default registered layout
-   * @param keyboardText - Text to display above the keyboard
    */
   static async init(
     ctx: any,
-    buttons?: string[][],
+    buttons: string[][] = DEFAULT_KEYBOARD_BUTTONS,
     keyboardText = '📱 *Main Navigation*'
   ) {
-    // Delete old messages if they exist
     await this.cleanup(ctx)
 
-    // Create content message (will be edited later)
+    // Create content message
     const contentMsg = await ctx.reply('⏳ Loading...')
     ctx.session.contentMessageId = contentMsg.message_id
 
-    // Default buttons for registered users
-    const defaultButtons = [
-      ['👤 Profile', '💪 Log Activity'],
-      ['📊 Statistics', 'ℹ️ Info'],
-      ['💬 Feedback']
-    ]
-
-    // Create reply keyboard message (stays at bottom)
+    // Create keyboard message
     const keyboardMsg = await ctx.reply(keyboardText, {
       parse_mode: 'MarkdownV2',
-      ...Markup.keyboard(buttons || defaultButtons)
-        .resize()
-        .persistent()
+      ...Markup.keyboard(buttons).resize().persistent()
     })
     ctx.session.keyboardMessageId = keyboardMsg.message_id
   }
 
   /**
    * Update the content message with new text and inline keyboard
-   * Also tracks the current scene to prevent duplicate updates
    */
   static async updateContent(ctx: any, text: string, inlineKeyboard?: any) {
+    const options = {
+      parse_mode: 'MarkdownV2' as const,
+      ...(inlineKeyboard || {})
+    }
+
     try {
       if (!ctx.session?.contentMessageId) {
         throw new Error('No content message exists')
-      }
-
-      // Store current scene and content for comparison
-      const currentSceneId = ctx.scene.current?.id
-      const lastSceneId = ctx.session.lastSceneId
-      const lastContent = ctx.session.lastContent
-
-      // If we're in the same scene with the same content, skip update
-      if (currentSceneId === lastSceneId && text === lastContent) {
-        return
       }
 
       await ctx.telegram.editMessageText(
@@ -62,35 +65,28 @@ export class TwoMessageManager {
         ctx.session.contentMessageId,
         undefined,
         text,
-        {
-          parse_mode: 'MarkdownV2',
-          ...inlineKeyboard
-        }
+        options
       )
-
-      // Track the scene and content we just displayed
-      ctx.session.lastSceneId = currentSceneId
-      ctx.session.lastContent = text
-    } catch (error) {
-      // If edit fails (message too old or deleted), create new content message
-      const options = {
-        parse_mode: 'MarkdownV2' as const,
-        ...(inlineKeyboard || {})
-      }
-      
+    } catch {
+      // If edit fails, create new content message
       const contentMsg = await ctx.reply(text, options)
       ctx.session.contentMessageId = contentMsg.message_id
-      
-      // Track the scene and content
-      ctx.session.lastSceneId = ctx.scene.current?.id
-      ctx.session.lastContent = text
     }
   }
 
   /**
-   * Update reply keyboard (for different user states, e.g., registered vs unregistered)
+   * Update reply keyboard
    */
-  static async updateKeyboard(ctx: any, buttons: string[][], text = '📱 *Main Navigation*') {
+  static async updateKeyboard(
+    ctx: any,
+    buttons: string[][],
+    text = '📱 *Main Navigation*'
+  ) {
+    const options = {
+      parse_mode: 'MarkdownV2' as const,
+      ...Markup.keyboard(buttons).resize().persistent()
+    }
+
     try {
       if (!ctx.session?.keyboardMessageId) {
         throw new Error('No keyboard message exists')
@@ -101,164 +97,112 @@ export class TwoMessageManager {
         ctx.session.keyboardMessageId,
         undefined,
         text,
-        {
-          parse_mode: 'MarkdownV2',
-          ...Markup.keyboard(buttons).resize().persistent()
-        }
+        options
       )
-    } catch (error) {
+    } catch {
       // If edit fails, create new keyboard message
-      const keyboardMsg = await ctx.reply(text, {
-        parse_mode: 'MarkdownV2',
-        ...Markup.keyboard(buttons).resize().persistent()
-      })
+      const keyboardMsg = await ctx.reply(text, options)
       ctx.session.keyboardMessageId = keyboardMsg.message_id
     }
   }
 
   /**
-   * Navigate to a scene, but only if not already there
-   * Automatically deletes user messages to keep chat clean
+   * Navigate to a scene and delete user's message
+   * - For wizards: always restart (even if already in that wizard)
+   * - For scenes: do nothing if already there
    */
   static async navigateToScene(ctx: any, sceneId: string) {
-    // Delete the user's message first
     await this.deleteUserMessage(ctx)
     
-    // Only enter if not already in that scene
-    if (ctx.scene.current?.id !== sceneId) {
-      await ctx.scene.enter(sceneId)
-    }
-  }
-
-  /**
-   * Navigate to a scene without deleting user messages
-   * Useful for programmatic navigation (e.g., from .enter() hooks)
-   */
-  static async enterScene(ctx: any, sceneId: string) {
-    // Only enter if not already in that scene
-    if (ctx.scene.current?.id !== sceneId) {
-      await ctx.scene.enter(sceneId)
-    }
-  }
-
-  /**
-   * Handle keyboard button navigation
-   * Maps button text to scene IDs
-   */
-  static async handleNavigation(ctx: any, buttonText: string) {
-    // Map of reply keyboard buttons to their target scenes
-    const navigationMap: Record<string, string> = {
-      '📝 Register': 'register_wizard',
-      'ℹ️ Info': 'info_menu',
-      '👤 Profile': 'profile',
-      '💪 Log Activity': 'activity_wizard',
-      '📊 Statistics': 'stats_menu',
-      '💬 Feedback': 'feedback_wizard'
-    }
-
-    const targetScene = navigationMap[buttonText]
-    if (targetScene) {
-      await this.navigateToScene(ctx, targetScene)
-      return true
+    const currentSceneId = ctx.scene.current?.id
+    
+    // If already in this scene
+    if (currentSceneId === sceneId) {
+      // Check if this is a wizard scene (by ID pattern)
+      const isWizard = WIZARD_SCENES.has(sceneId)
+      
+      if (isWizard) {
+        // Restart the wizard by leaving and re-entering
+        await ctx.scene.leave()
+        await ctx.scene.enter(sceneId)
+      }
+      // If it's a regular scene, do nothing (stay in place)
+      return
     }
     
-    return false
+    // Different scene, navigate to it
+    await ctx.scene.enter(sceneId)
   }
 
   /**
    * Cleanup old messages
    */
   static async cleanup(ctx: any) {
-    const messagesToDelete = [
+    const messageIds = [
       ctx.session?.contentMessageId,
       ctx.session?.keyboardMessageId
-    ]
+    ].filter(Boolean)
 
-    for (const messageId of messagesToDelete) {
-      if (messageId) {
-        try {
-          await ctx.telegram.deleteMessage(ctx.chat.id, messageId)
-        } catch (error) {
-          // Silently ignore deletion errors
-        }
-      }
-    }
+    await Promise.allSettled(
+      messageIds.map(id => ctx.telegram.deleteMessage(ctx.chat.id, id))
+    )
 
     delete ctx.session.contentMessageId
     delete ctx.session.keyboardMessageId
-    delete ctx.session.lastSceneId
-    delete ctx.session.lastContent
   }
 
   /**
-   * Delete any user messages to keep chat clean
+   * Delete user's message to keep chat clean
    */
   static async deleteUserMessage(ctx: any) {
-    try {
-      if (ctx.message?.message_id) {
+    if (ctx.message?.message_id) {
+      try {
         await ctx.deleteMessage()
+      } catch {
+        // Silently ignore deletion errors
       }
-    } catch (error) {
-      // Silently ignore if deletion fails
     }
   }
 
   /**
-   * Middleware for wizards/scenes to allow escape via /start or reply keyboard
-   * Add this to any wizard/scene where users should be able to navigate away
-   * 
-   * @example
-   * myWizard.use(TwoMessageManager.createEscapeMiddleware())
+   * CENTRALIZED navigation middleware - handles ALL reply keyboard navigation
+   * This should be used as GLOBAL middleware, NOT in individual wizards
    */
-  static createEscapeMiddleware() {
+  static createNavigationMiddleware() {
     return async (ctx: any, next: any) => {
-      // Only intercept if we have a text message
-      if (!ctx.message || !('text' in ctx.message)) {
+      // Only handle text messages (reply keyboard), not callback queries (inline buttons)
+      if (!ctx.message?.text) {
         return next()
       }
 
       const messageText = ctx.message.text
 
-      // Check for /start command
+      // Handle /start command
       if (messageText === '/start') {
-        // Clear any wizard state if in a wizard
-        if (ctx.wizard) {
-          ctx.wizard.state = {}
-        }
-        
-        // Navigate to menu router
-        await this.deleteUserMessage(ctx)
-        await ctx.scene.enter('menu_router')
+        await this.navigateToScene(ctx, 'menu_router')
         return
-      }
-      
-      // Check for reply keyboard navigation
-      // Map of reply keyboard buttons to their target scenes
-      const navigationMap: Record<string, string> = {
-        '📝 Register': 'register_wizard',
-        'ℹ️ Info': 'info_menu',
-        '👤 Profile': 'profile',
-        '💪 Log Activity': 'activity_wizard',
-        '📊 Statistics': 'stats_menu',
-        '💬 Feedback': 'feedback_wizard'
       }
 
-      const targetScene = navigationMap[messageText]
-      
-      // Only intercept if it's a navigation button AND we're not already entering that scene
-      if (targetScene && ctx.scene.current?.id !== targetScene) {
-        // Clear wizard state if in a wizard
-        if (ctx.wizard) {
-          ctx.wizard.state = {}
-        }
-        
-        // Navigate away
-        await this.deleteUserMessage(ctx)
-        await ctx.scene.enter(targetScene)
+      // Handle navigation buttons from NAVIGATION_MAP
+      const targetScene = NAVIGATION_MAP[messageText]
+      if (targetScene) {
+        await this.navigateToScene(ctx, targetScene)
         return
       }
-      
-      // If not a navigation command, continue to next middleware/handler
+
+      // Not a navigation button, pass to next handler
+      return next()
+    }
+  }
+
+  /**
+   * Wizard middleware - ONLY handles wizard-specific input validation
+   * Does NOT handle navigation (that's done by global middleware)
+   */
+  static createWizardMiddleware() {
+    return async (ctx: any, next: any) => {
+      // This middleware just passes through - navigation is handled globally
+      // Wizards can add their own validation here if needed
       return next()
     }
   }

@@ -35,10 +35,6 @@ This bot tracks activity points for the Aalto guild competition\\. It's free to 
 *Your Data*
 We collect your Telegram ID, username, and activity logs\\. Your data won't be shared with third parties\\. You can request deletion anytime\\.
 
-*Rules*
-• No offensive names or behavior
-• Violations may result in disqualification
-
 *Important*
 The bot may change or stop at any time\\. We're not liable for issues from using it\\. Terms may update without notice\\.`;
 

@@ -4,13 +4,9 @@ import { TwoMessageManager } from '../../utils'
 export const registeredMenuScene = new Scenes.BaseScene<any>('registered_menu')
 
 registeredMenuScene.enter(async (ctx: any) => {
-  // Initialize the two-message system with the registered user buttons
-  await TwoMessageManager.init(ctx, [
-    ['👤 Profile', '💪 Log Activity'],
-    ['📊 Statistics', 'ℹ️ Info'],
-    ['💬 Feedback']
-  ])
-
-  // Automatically show info menu using centralized navigation
-  await TwoMessageManager.enterScene(ctx, 'info_menu')
+  // Initialize with default registered user buttons
+  await TwoMessageManager.init(ctx)
+  
+  // Automatically show info menu
+  await ctx.scene.enter('info_menu')
 })
