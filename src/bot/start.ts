@@ -1,4 +1,3 @@
-// src/bot/start.ts
 import { bot } from './instance'
 import { registerMiddleware } from './middleware'
 import { registerCommands } from './commands'
