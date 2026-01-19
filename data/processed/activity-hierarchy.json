@@ -223,7 +223,7 @@
         "Very Vigorous": [
           {
             "met_value": 12.5,
-            "examples": "Rowing, stationary, 150 to 199 watts, vigorous effort / Rowing, stationary, \u2265 200 watts, very vigorous effort"
+            "examples": "Rowing, stationary, 150 to 199 watts, vigorous effort / Rowing, stationary, ≥ 200 watts, very vigorous effort"
           }
         ],
         "Vigorous": [
@@ -281,7 +281,7 @@
         "Vigorous": [
           {
             "met_value": 7.8,
-            "examples": "Aerobic, general / Aerobic, step, with 6 \u2013 20 cm step / Aerobic, step, with 10 \u2013 30 cm step"
+            "examples": "Aerobic, general / Aerobic, step, with 6 – 20 cm step / Aerobic, step, with 10 – 30 cm step"
           }
         ],
         "Moderate": [
