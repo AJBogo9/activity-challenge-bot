@@ -2,16 +2,10 @@
   "Endurance Sports": {
     "Bicycling": {
       "Bicycling": {
-        "Very Vigorous": [
+        "Light": [
           {
-            "met_value": 14.0,
-            "examples": "Bicycling, mountain, uphill, vigorous / Bicycling, mountain, competitive racing / Bicycling, 16-30.6 km/h, racing/not drafting or >30.6 km/h drafting, very fast, racing general"
-          }
-        ],
-        "Vigorous": [
-          {
-            "met_value": 8.5,
-            "examples": "Bicycling, BMX / Bicycling, mountain, general / Bicycling, general"
+            "met_value": 2.9,
+            "examples": "Bicycling, leisure 8.9 km/h / Bicycling, eccentric only, 100 to 149 W"
           }
         ],
         "Moderate": [
@@ -20,24 +14,18 @@
             "examples": "Bicycling, <16.1 km/h, leisure, to work or for pleasure (Taylor Code 115) / Bicycling, to/from work, self selected pace / Bicycling, on dirt or farm road, moderate pace"
           }
         ],
-        "Light": [
+        "Vigorous": [
           {
-            "met_value": 2.9,
-            "examples": "Bicycling, leisure 8.9 km/h / Bicycling, eccentric only, 100 to 149 W"
+            "met_value": 8.9,
+            "examples": "Bicycling, mountain, uphill, vigorous / Bicycling, mountain, competitive racing / Bicycling, BMX"
           }
         ]
       },
       "Stationary Bike": {
-        "Very Vigorous": [
+        "Light": [
           {
-            "met_value": 13.8,
-            "examples": "Bicycling, stationary, 230-250 watts, very vigorous / Bicycling, stationary, 270-305 watts, very vigorous / Bicycling, stationary, >325 watts, very vigorous"
-          }
-        ],
-        "Vigorous": [
-          {
-            "met_value": 9.6,
-            "examples": "Bicycling, stationary, 126-150 watts / Bicycling, stationary, 151-199 watts / Bicycling, stationary, 200-229 watts, vigorous"
+            "met_value": 3.5,
+            "examples": "Bicycling, stationary, 25-30 watts, very light to light effort"
           }
         ],
         "Moderate": [
@@ -46,26 +34,20 @@
             "examples": "Bicycling, stationary, general / Bicycling, stationary, 50 watts, light effort / Bicycling, stationary, 60 watts, light to moderate effort"
           }
         ],
-        "Light": [
+        "Vigorous": [
           {
-            "met_value": 3.5,
-            "examples": "Bicycling, stationary, 25-30 watts, very light to light effort"
+            "met_value": 10.8,
+            "examples": "Bicycling, stationary, 126-150 watts / Bicycling, stationary, 151-199 watts / Bicycling, stationary, 200-229 watts, vigorous"
           }
         ]
       }
     },
     "Running": {
       "Running": {
-        "Very Vigorous": [
+        "Light": [
           {
-            "met_value": 13.6,
-            "examples": "Running, 11.3 km/h (5.3 min/km) / Running, 12.1 km/h (5.0 min/km) / Running, 12.9 km/h (4.7 min/km)"
-          }
-        ],
-        "Vigorous": [
-          {
-            "met_value": 9.0,
-            "examples": "Jogging, general, self-selected pace / Running 4.3 to 7.7 km/h / Running, 5.0 to 8.4 km/h (7.5 min/km)"
+            "met_value": 3.3,
+            "examples": "Jogging 2.6 to 6.0 km/h"
           }
         ],
         "Moderate": [
@@ -74,94 +56,76 @@
             "examples": "Jog/walk combination (jogging component of less than 10 minutes) (Taylor Code 180) / Jogging, in place / Jogging on a mini-tramp"
           }
         ],
-        "Light": [
+        "Vigorous": [
           {
-            "met_value": 3.3,
-            "examples": "Jogging 2.6 to 6.0 km/h"
+            "met_value": 11.8,
+            "examples": "Jogging, general, self-selected pace / Running 4.3 to 7.7 km/h / Running, 5.0 to 8.4 km/h (12 min/mile)"
           }
         ]
       }
     },
     "Walking": {
       "Walking": {
-        "Very Vigorous": [
+        "Light": [
           {
-            "met_value": 13.9,
-            "examples": "Carrying load, >33.6 kg load, upstairs / Climbing hills, no load, very steep grade (30-40%), 1.2 to 2.9 km/h / Climbing hills, no load, steep grade (10-40%), 1.8 to 8.0 km/h"
-          }
-        ],
-        "Vigorous": [
-          {
-            "met_value": 8.0,
-            "examples": "Backpacking (Taylor Code 050) / Backpacking, hiking with a daypack, organized walking with daypack / Carrying load upstairs, general"
+            "met_value": 3.3,
+            "examples": "Walking with a day pack, level ground, assumed in the city / Carrying ~4.5 kg child, slow walking / Loading and/or unloading a car, implied walking"
           }
         ],
         "Moderate": [
           {
             "met_value": 5.0,
-            "examples": "Carrying 2.3-6.4 kg (2.3 to 6.4 kg) load (e.g. suitcase, boxes, groceries), level ground, moderate pace / Carrying 6.8-70.3 kg (6.8 - 70.4 kg) load (e.g. suitcase, boxes, furniture), level ground or downstairs, slow pace / Carrying 50 to 68.0 kg load (e.g., equine or bovine feed, fence pipes, furniture), level ground, moderate pace"
+            "examples": "Carrying 5 to 6.4 kg (2.3 to 6.4 kg) load (e.g. suitcase, boxes, groceries), level ground, moderate pace / Carrying 15 - 70.3 kg (6.8 - 70.4 kg) load (e.g. suitcase, boxes, furniture), level ground or downstairs, slow pace / Carrying 50 to 68.0 kg load (e.g., equine or bovine feed, fence pipes, furniture), level ground, moderate pace"
           }
         ],
-        "Light": [
+        "Vigorous": [
           {
-            "met_value": 3.5,
-            "examples": "Walking with a day pack, level ground, assumed in the city / Loading and/or unloading a car, implied walking / Climbing hills, 6.8-22.7 kg load, 1 to 2% grade, slow pace"
+            "met_value": 8.3,
+            "examples": "Backpacking (Taylor Code 050) / Backpacking, hiking with a daypack, organized walking with daypack / Carrying load upstairs, general"
           }
         ]
       }
     },
     "Winter Sports": {
       "Cross-Country Skiing": {
-        "Very Vigorous": [
-          {
-            "met_value": 13.8,
-            "examples": "Skiing, cross country, 5.0-12.7 km/h, brisk speed, vigorous effort / Skiing, cross country, elite skier, >8.0-19.2 km/h, racing / Skiing, cross country, 12-25.7 km/h, elite skier, racing"
-          }
-        ],
-        "Vigorous": [
-          {
-            "met_value": 9.5,
-            "examples": "Skiing, cross country, 4.0-7.9 km/h, moderate speed and effort, general / Skiing, cross-country skiing high-intensity training / Mountaineering, downhill climbing/cross-country skiing"
-          }
-        ],
         "Moderate": [
           {
             "met_value": 6.8,
             "examples": "Skiing, cross country, 4.0 km/h, slow or light effort, ski walking"
           }
+        ],
+        "Vigorous": [
+          {
+            "met_value": 13.3,
+            "examples": "Skiing, cross country, 4.0-7.9 km/h, moderate speed and effort, general / Skiing, cross country, 5.0-12.7 km/h, brisk speed, vigorous effort / Skiing, cross country, elite skier, >8.0-19.2 km/h, racing"
+          }
         ]
       },
       "Downhill Skiing": {
-        "Vigorous": [
-          {
-            "met_value": 8.0,
-            "examples": "Skiing, downhill, alpine or snowboarding, vigorous effort, active time only"
-          }
-        ],
         "Moderate": [
           {
             "met_value": 5.3,
             "examples": "Skiing, downhill, alpine or snowboarding, light effort, active time only / Skiing, downhill, alpine or snowboarding, moderate effort, general, active time only"
           }
-        ]
-      },
-      "Ice Skating": {
-        "Very Vigorous": [
-          {
-            "met_value": 14.0,
-            "examples": "Skating, ice dancing"
-          }
         ],
         "Vigorous": [
           {
             "met_value": 8.0,
-            "examples": "Skating, ice, general (Taylor Code 360) / Skating, ice, rapidly, more than 14.5 km/h but not competitive"
+            "examples": "Skiing, downhill, alpine or snowboarding, vigorous effort, active time only"
           }
-        ],
+        ]
+      },
+      "Ice Skating": {
         "Moderate": [
           {
             "met_value": 5.5,
             "examples": "Skating, ice, 14.5 km/h or less"
+          }
+        ],
+        "Vigorous": [
+          {
+            "met_value": 9.0,
+            "examples": "Skating, ice dancing / Skating, ice, general (Taylor Code 360) / Skating, ice, rapidly, more than 14.5 km/h but not competitive"
           }
         ]
       },
@@ -178,16 +142,10 @@
   "Fitness & Wellness": {
     "Dancing": {
       "Dancing": {
-        "Very Vigorous": [
+        "Light": [
           {
-            "met_value": 11.3,
-            "examples": "Ballroom dancing, competitive, general"
-          }
-        ],
-        "Vigorous": [
-          {
-            "met_value": 8.6,
-            "examples": "Chinese square dance, aerobic dance / Nightclub or folk dancing, vigorous effort (e.g., nightclub, disco, folk, line dancing, Irish step dancing, polka, contra) / Flamenco dance"
+            "met_value": 3.4,
+            "examples": "Ballroom, slow, examples: waltz, foxtrot, slow dancing, samba tango, rumba, 19th century dance, mambo, cha cha / Contemporary dancing, general"
           }
         ],
         "Moderate": [
@@ -196,70 +154,64 @@
             "examples": "Afro-Cuban salsa (Cuban cha-cha-cha, mambo, Afro rumba, contratiempo son steps, orisha/santo movements) / Ballet, modern, or jazz general, rehearsal or class / Ballet exercises (plie, tendus, jetes, rond de Jambes, fondus, grand battement, grand adage, sautes, temp Leve's)"
           }
         ],
-        "Light": [
+        "Vigorous": [
           {
-            "met_value": 3.4,
-            "examples": "Ballroom, slow, examples: waltz, foxtrot, slow dancing, samba tango, rumba, 19th century dance, mambo, cha cha / Contemporary dancing, general"
+            "met_value": 8.8,
+            "examples": "Chinese square dance, aerobic dance / Nightclub or folk dancing, vigorous effort (e.g., nightclub, disco, folk, line dancing, Irish step dancing, polka, contra) / Ballroom dancing, competitive, general"
           }
         ]
       }
     },
     "Indoor Cardio": {
       "Elliptical Trainer": {
-        "Vigorous": [
-          {
-            "met_value": 9.0,
-            "examples": "Elliptical trainer, vigorous effort"
-          }
-        ],
         "Moderate": [
           {
             "met_value": 5.0,
             "examples": "Elliptical trainer, moderate effort"
           }
-        ]
-      },
-      "Rowing Machine": {
-        "Very Vigorous": [
-          {
-            "met_value": 12.5,
-            "examples": "Rowing, stationary, 150 to 199 watts, vigorous effort / Rowing, stationary, ≥ 200 watts, very vigorous effort"
-          }
         ],
         "Vigorous": [
           {
-            "met_value": 7.4,
-            "examples": "Rowing, stationary ergometer, general, vigorous effort / Rowing, stationary, 100 to 149 watts, vigorous effort"
+            "met_value": 9.0,
+            "examples": "Elliptical trainer, vigorous effort"
           }
-        ],
+        ]
+      },
+      "Rowing Machine": {
         "Moderate": [
           {
             "met_value": 5.0,
             "examples": "Rowing, stationary ergometer, general, <100 watts, moderate effort"
+          }
+        ],
+        "Vigorous": [
+          {
+            "met_value": 9.2,
+            "examples": "Rowing, stationary ergometer, general, vigorous effort / Rowing, stationary, 100 to 149 watts, vigorous effort / Rowing, stationary, 150 to 199 watts, vigorous effort"
           }
         ]
       }
     },
     "Mind-Body": {
       "Pilates": {
-        "Vigorous": [
-          {
-            "met_value": 8.5,
-            "examples": "Pound, combination of Pilates and body movements with drumming"
-          }
-        ],
         "Light": [
           {
             "met_value": 2.8,
             "examples": "Pilates, general"
           }
+        ],
+        "Vigorous": [
+          {
+            "met_value": 8.5,
+            "examples": "Pound, combination of Pilates and body movements with drumming"
+          }
         ]
       },
       "Yoga": {
-        "Vigorous": [
+        "Light": [
           {
-            "met_value": 8.0,
-            "examples": "Yoga, Hatha, high intensity"
+            "met_value": 2.5,
+            "examples": "Video, exercise workouts, TV conditioning programs (e.g., yoga, stretching, seated), light effort / Yoga, Hatha / Yoga, Hot"
           }
         ],
         "Moderate": [
@@ -268,74 +220,68 @@
             "examples": "Yoga, Power"
           }
         ],
-        "Light": [
+        "Vigorous": [
           {
-            "met_value": 2.5,
-            "examples": "Video, exercise workouts, TV conditioning programs (e.g., yoga, stretching, seated), light effort / Yoga, Hatha / Yoga, Hot"
+            "met_value": 8.0,
+            "examples": "Yoga, Hatha, high intensity"
           }
         ]
       }
     },
     "Strength & Conditioning": {
       "Aerobics & Cardio Classes": {
-        "Vigorous": [
-          {
-            "met_value": 7.8,
-            "examples": "Aerobic, general / Aerobic, step, with 6 – 20 cm step / Aerobic, step, with 10 – 30 cm step"
-          }
-        ],
         "Moderate": [
           {
             "met_value": 5.4,
             "examples": "Aerobic, step, with 10 cm step / Aerobic dance, low impact, moderate effort / Teaching exercise classes (e.g., aerobic, water)"
           }
+        ],
+        "Vigorous": [
+          {
+            "met_value": 7.8,
+            "examples": "Aerobic, general / Aerobic, step, with 6 \u2013 20 cm step / Aerobic, step, with 10 \u2013 30 cm step"
+          }
         ]
       },
       "Circuit Training": {
-        "Moderate": [
-          {
-            "met_value": 5.0,
-            "examples": "Circuit training, moderate effort"
-          }
-        ],
         "Light": [
           {
             "met_value": 3.5,
             "examples": "Circuit training, light effort"
           }
+        ],
+        "Moderate": [
+          {
+            "met_value": 5.0,
+            "examples": "Circuit training, moderate effort"
+          }
         ]
       },
       "General Conditioning": {
-        "Very Vigorous": [
-          {
-            "met_value": 11.0,
-            "examples": "Rope skipping exercise, general"
-          }
-        ],
-        "Vigorous": [
-          {
-            "met_value": 7.8,
-            "examples": "Calisthenics (e.g., pushups, sit ups, pull-ups, jumping jacks, burpees, battling ropes), vigorous effort / Health club exercise, conditioning classes / Jumping rope, Digi-Jump Maching, 120 jumps/minute"
-          }
-        ],
         "Light": [
           {
             "met_value": 3.5,
             "examples": "Calisthenics (e.g., pushups, sit ups, pull-ups, lunges), moderate effort / Calisthenics (e.g., curl ups, abdominal crunches, plank), light effort / Calisthenics, light or moderate effort, general (e.g., back exercises), going up & down from floor (Taylor Code 150)"
           }
+        ],
+        "Vigorous": [
+          {
+            "met_value": 8.4,
+            "examples": "Calisthenics (e.g., pushups, sit ups, pull-ups, jumping jacks, burpees, battling ropes), vigorous effort / Health club exercise, conditioning classes / Rope skipping exercise, general"
+          }
         ]
       },
       "Weight Training": {
-        "Moderate": [
-          {
-            "met_value": 5.8,
-            "examples": "Circuit training, body weight exercises / Resistance (weight) training, squats, deadlift, slow or explosive effort / Resistance Training, circuit, reciprocol supersets, peripheral hear action training"
-          }
-        ],
         "Light": [
           {
             "met_value": 3.2,
             "examples": "Resistance (weight) training, multiple exercises, 8-15 reps at varied resistance / Body weight resistance exercises (e.g., squat, lunge, push-up, crunch), general"
+          }
+        ],
+        "Moderate": [
+          {
+            "met_value": 5.8,
+            "examples": "Circuit training, body weight exercises / Resistance (weight) training, squats, deadlift, slow or explosive effort / Resistance Training, circuit, reciprocol supersets, peripheral hear action training"
           }
         ]
       }
@@ -344,112 +290,100 @@
   "Sports": {
     "Climbing": {
       "Climbing": {
-        "Vigorous": [
-          {
-            "met_value": 9.6,
-            "examples": "Rock or mountain climbing (Taylor Code 060), (formerly code 17120) / Rock climbing, free boulder / Rock climbing, ascending rock, high difficulty"
-          }
-        ],
         "Moderate": [
           {
             "met_value": 5.8,
             "examples": "Prusik climbing / Rock climbing, ascending or traversing rock, low-to-moderate difficulty / Rock climbing, rappelling,"
+          }
+        ],
+        "Vigorous": [
+          {
+            "met_value": 9.6,
+            "examples": "Rock or mountain climbing (Taylor Code 060), (formerly code 17120) / Rock climbing, free boulder / Rock climbing, ascending rock, high difficulty"
           }
         ]
       }
     },
     "Combat Sports": {
       "Boxing": {
-        "Very Vigorous": [
-          {
-            "met_value": 12.3,
-            "examples": "Boxing, in ring, general"
-          }
-        ],
-        "Vigorous": [
-          {
-            "met_value": 8.5,
-            "examples": "Boxing, punching bag, 60 b/min / Boxing, punching bag, 120 b/min / Boxing, punching bag, 180 b/min"
-          }
-        ],
         "Moderate": [
           {
             "met_value": 5.8,
             "examples": "Boxing, punching bag"
           }
+        ],
+        "Vigorous": [
+          {
+            "met_value": 8.9,
+            "examples": "Boxing, in ring, general / Boxing, punching bag, 60 b/min / Boxing, punching bag, 120 b/min"
+          }
         ]
       },
       "Martial Arts": {
-        "Very Vigorous": [
-          {
-            "met_value": 12.8,
-            "examples": "Taekwondo, combat simulation / Judo"
-          }
-        ],
         "Moderate": [
           {
             "met_value": 5.3,
             "examples": "Martial Arts, different types, slower pace, novice performers, practice"
+          }
+        ],
+        "Vigorous": [
+          {
+            "met_value": 12.8,
+            "examples": "Taekwondo, combat simulation / Judo"
           }
         ]
       }
     },
     "Racket Sports": {
       "Badminton": {
-        "Vigorous": [
-          {
-            "met_value": 8.0,
-            "examples": "Badminton, competitive (Taylor Code 450) / Badminton, competitive, match play"
-          }
-        ],
         "Moderate": [
           {
             "met_value": 5.5,
             "examples": "Badminton, social singles and doubles, general"
           }
-        ]
-      },
-      "Squash": {
-        "Very Vigorous": [
-          {
-            "met_value": 12.0,
-            "examples": "Squash (Taylor Code 530)"
-          }
         ],
         "Vigorous": [
           {
-            "met_value": 7.3,
-            "examples": "Squash, general"
+            "met_value": 8.0,
+            "examples": "Badminton, competitive (Taylor Code 450) / Badminton, competitive, match play"
+          }
+        ]
+      },
+      "Squash": {
+        "Vigorous": [
+          {
+            "met_value": 9.6,
+            "examples": "Squash (Taylor Code 530) / Squash, general"
           }
         ]
       },
       "Tennis": {
-        "Vigorous": [
-          {
-            "met_value": 8.0,
-            "examples": "Tennis, general, competitive / Tennis, singles (Taylor Code 420)"
-          }
-        ],
         "Moderate": [
           {
             "met_value": 5.5,
             "examples": "Tennis, general, moderate effort / Tennis, doubles (Taylor Code 430) / Tennis, doubles"
+          }
+        ],
+        "Vigorous": [
+          {
+            "met_value": 8.0,
+            "examples": "Tennis, general, competitive / Tennis, singles (Taylor Code 420)"
           }
         ]
       }
     },
     "Team Sports": {
       "Basketball": {
-        "Vigorous": [
-          {
-            "met_value": 7.8,
-            "examples": "Basketball, game (Taylor Code 490) / Basketball, general / Basketball, officiating (Taylor Code 500)"
-          }
-        ],
         "Moderate": [
           {
             "met_value": 5.4,
             "examples": "Basketball, non-game, general (Taylor Code 480) / Basketball, officiating / Basketball, shooting baskets"
+          }
+        ],
+        "Vigorous": [
+          {
+            "met_value": 7.8,
+            "examples": "Basketball, game (Taylor Code 490) / Basketball, general / Basketball, officiating (Taylor Code 500)"
           }
         ]
       },
@@ -478,10 +412,10 @@
         ]
       },
       "Soccer": {
-        "Vigorous": [
+        "Light": [
           {
-            "met_value": 8.0,
-            "examples": "Football, touch, flag, general (Taylor Code 510) / Soccer, competitive / Soccer, casual, general (Taylor Code 540)"
+            "met_value": 3.0,
+            "examples": "Football or baseball, playing catch / Walking football/soccer"
           }
         ],
         "Moderate": [
@@ -490,18 +424,18 @@
             "examples": "Football, touch, flag, light effort"
           }
         ],
-        "Light": [
+        "Vigorous": [
           {
-            "met_value": 3.5,
-            "examples": "Walking football/soccer"
+            "met_value": 8.0,
+            "examples": "Football, competitive / Football, touch, flag, general (Taylor Code 510) / Soccer, competitive"
           }
         ]
       },
       "Volleyball": {
-        "Vigorous": [
+        "Light": [
           {
-            "met_value": 8.0,
-            "examples": "Volleyball, beach, in sand"
+            "met_value": 3.0,
+            "examples": "Volleyball, non-competitive, 6 - 9 member team, general"
           }
         ],
         "Moderate": [
@@ -510,46 +444,34 @@
             "examples": "Volleyball (Taylor Code 400) / Volleyball, competitive, in gymnasium"
           }
         ],
-        "Light": [
+        "Vigorous": [
           {
-            "met_value": 3.0,
-            "examples": "Volleyball, non-competitive, 6 - 9 member team, general"
+            "met_value": 8.0,
+            "examples": "Volleyball, beach, in sand"
           }
         ]
       }
     },
     "Water Sports": {
       "Kayaking": {
-        "Very Vigorous": [
-          {
-            "met_value": 13.0,
-            "examples": "Canoeing, rowing, kayaking, competition, > 9.7 km/h, vigorous effort / Kayaking, competition"
-          }
-        ],
-        "Vigorous": [
-          {
-            "met_value": 9.0,
-            "examples": "Kayaking, slalom, flat water"
-          }
-        ],
         "Moderate": [
           {
             "met_value": 5.0,
             "examples": "Kayaking, moderate effort / Whitewater rafting, kayaking, or canoeing"
           }
-        ]
-      },
-      "Rowing": {
-        "Very Vigorous": [
-          {
-            "met_value": 15.5,
-            "examples": "Canoeing or rowing, in competition, crew or sculling (Taylor Code 260) / Rowing, simulated crew in a water tank, single oar, 33 strokes/min, / Rowing, single scull, ergometer, ergometer on slides, racing speed (32+ strokes/min, >16.1 km/h)"
-          }
         ],
         "Vigorous": [
           {
-            "met_value": 7.0,
-            "examples": "Canoeing, portaging"
+            "met_value": 12.5,
+            "examples": "Canoeing, rowing, kayaking, competition, > 9.7 km/h, vigorous effort / Kayaking, competition / Kayaking, slalom, flat water"
+          }
+        ]
+      },
+      "Rowing": {
+        "Light": [
+          {
+            "met_value": 3.3,
+            "examples": "Canoeing, harvesting wild rice, knocking rice off the stalks / Canoeing, rowing, 2.0-6.3 km/h, light effort / Canoeing, rowing, for pleasure, general (Taylor Code 250)"
           }
         ],
         "Moderate": [
@@ -558,24 +480,18 @@
             "examples": "Canoeing, on camping trip (Taylor Code 270) / Canoeing, rowing, 4.0-9.5 km/h, moderate effort"
           }
         ],
-        "Light": [
+        "Vigorous": [
           {
-            "met_value": 3.3,
-            "examples": "Canoeing, harvesting wild rice, knocking rice off the stalks / Canoeing, rowing, 2.0-6.3 km/h, light effort / Canoeing, rowing, for pleasure, general (Taylor Code 250)"
+            "met_value": 13.8,
+            "examples": "Canoeing, portaging / Canoeing or rowing, in competition, crew or sculling (Taylor Code 260) / Rowing, simulated crew in a water tank, single oar, 33 strokes/min,"
           }
         ]
       },
       "Swimming": {
-        "Very Vigorous": [
+        "Light": [
           {
-            "met_value": 14.2,
-            "examples": "Swimming, butterfly, general / Swimming, crawl, elite swimmers, competition, >82 meters/minute"
-          }
-        ],
-        "Vigorous": [
-          {
-            "met_value": 9.8,
-            "examples": "Swimming laps, freestyle, fast, vigorous effort / Swimming, backstroke, training or competition / Swimming, breaststroke, general, training or competition"
+            "met_value": 3.5,
+            "examples": "Swimming, treading water, moderate effort, general"
           }
         ],
         "Moderate": [
@@ -584,18 +500,18 @@
             "examples": "Swimming laps, freestyle, slow, recreational / Swimming, backstroke, recreational / Swimming breaststroke, recreational"
           }
         ],
-        "Light": [
+        "Vigorous": [
           {
-            "met_value": 3.5,
-            "examples": "Swimming, treading water, moderate effort, general"
+            "met_value": 9.8,
+            "examples": "Swimming laps, freestyle, fast, vigorous effort / Swimming, backstroke, training or competition / Swimming, breaststroke, general, training or competition"
           }
         ]
       },
       "Water Aerobics": {
-        "Vigorous": [
+        "Light": [
           {
-            "met_value": 7.5,
-            "examples": "Water aerobics, high intensity"
+            "met_value": 3.8,
+            "examples": "Water aerobics, resistance exercises"
           }
         ],
         "Moderate": [
@@ -604,10 +520,10 @@
             "examples": "Water aerobics, water calisthenics, general"
           }
         ],
-        "Light": [
+        "Vigorous": [
           {
-            "met_value": 3.8,
-            "examples": "Water aerobics, resistance exercises"
+            "met_value": 7.5,
+            "examples": "Water aerobics, high intensity"
           }
         ]
       }

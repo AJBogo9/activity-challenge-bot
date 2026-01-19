@@ -1,0 +1,267 @@
+# ============================================================================
+# ACTIVITY CATEGORIZATION CONFIGURATION
+# ============================================================================
+# This configuration file defines how activities from the Physical Activity
+# Compendium are categorized into a 4-level hierarchy.
+#
+# Hierarchy Structure:
+#   Level 1 (Main Category): Broad activity type (e.g., "Endurance Sports")
+#   Level 2 (Subcategory): More specific grouping (e.g., "Bicycling")
+#   Level 3 (Activity): Specific activity type (e.g., "Stationary Bike")
+#   Level 4 (Intensity): Calculated from MET values (Light/Moderate/Vigorous)
+#
+# Rule Matching:
+#   - Rules are evaluated in order (first match wins)
+#   - heading: Must match the PDF's "Major Heading" field exactly
+#   - keywords_all: ALL keywords must be in the description (AND logic)
+#   - keywords_any: AT LEAST ONE keyword must be in description (OR logic)
+#   - keywords_none: NONE of these keywords can be in description (NOT logic)
+#
+# Adding New Activities:
+#   1. Find the activity in the source PDF
+#   2. Note its "Major Heading" and description keywords
+#   3. Add a new rule to the appropriate section
+#   4. Run the pipeline to regenerate the JSON
+# ============================================================================
+
+rules:
+  # ==========================================================================
+  # ENDURANCE SPORTS
+  # ==========================================================================
+  
+  # Running
+  - level1_main: "Endurance Sports"
+    level2_subcategory: "Running"
+    level3_activity: "Running"
+    heading: "Running"
+  
+  # Bicycling - Stationary
+  - level1_main: "Endurance Sports"
+    level2_subcategory: "Bicycling"
+    level3_activity: "Stationary Bike"
+    heading: "Bicycling"
+    keywords_any: ["stationary"]
+  
+  # Bicycling - Regular
+  - level1_main: "Endurance Sports"
+    level2_subcategory: "Bicycling"
+    level3_activity: "Bicycling"
+    heading: "Bicycling"
+  
+  # Walking
+  - level1_main: "Endurance Sports"
+    level2_subcategory: "Walking"
+    level3_activity: "Walking"
+    heading: "Walking"
+  
+  # Winter Sports - Cross-Country Skiing
+  - level1_main: "Endurance Sports"
+    level2_subcategory: "Winter Sports"
+    level3_activity: "Cross-Country Skiing"
+    heading: "Winter Activities"
+    keywords_all: ["skiing", "cross"]
+  
+  # Winter Sports - Downhill Skiing
+  - level1_main: "Endurance Sports"
+    level2_subcategory: "Winter Sports"
+    level3_activity: "Downhill Skiing"
+    heading: "Winter Activities"
+    keywords_all: ["skiing", "downhill"]
+  
+  # Winter Sports - Snowboarding
+  - level1_main: "Endurance Sports"
+    level2_subcategory: "Winter Sports"
+    level3_activity: "Snowboarding"
+    heading: "Winter Activities"
+    keywords_any: ["snowboard"]
+  
+  # Winter Sports - Ice Skating
+  - level1_main: "Endurance Sports"
+    level2_subcategory: "Winter Sports"
+    level3_activity: "Ice Skating"
+    heading: "Winter Activities"
+    keywords_all: ["skating", "ice"]
+  
+  # ==========================================================================
+  # FITNESS & WELLNESS
+  # ==========================================================================
+  
+  # Dancing
+  - level1_main: "Fitness & Wellness"
+    level2_subcategory: "Dancing"
+    level3_activity: "Dancing"
+    heading: "Dancing"
+  
+  # Mind-Body - Yoga
+  - level1_main: "Fitness & Wellness"
+    level2_subcategory: "Mind-Body"
+    level3_activity: "Yoga"
+    heading: "Conditioning Exercise"
+    keywords_any: ["yoga"]
+  
+  # Mind-Body - Pilates
+  - level1_main: "Fitness & Wellness"
+    level2_subcategory: "Mind-Body"
+    level3_activity: "Pilates"
+    heading: "Conditioning Exercise"
+    keywords_any: ["pilates"]
+  
+  # Indoor Cardio - Rowing Machine
+  - level1_main: "Fitness & Wellness"
+    level2_subcategory: "Indoor Cardio"
+    level3_activity: "Rowing Machine"
+    heading: "Conditioning Exercise"
+    keywords_all: ["rowing", "stationary"]
+  
+  # Indoor Cardio - Elliptical
+  - level1_main: "Fitness & Wellness"
+    level2_subcategory: "Indoor Cardio"
+    level3_activity: "Elliptical Trainer"
+    heading: "Conditioning Exercise"
+    keywords_any: ["elliptical"]
+  
+  # Strength & Conditioning - Aerobics
+  - level1_main: "Fitness & Wellness"
+    level2_subcategory: "Strength & Conditioning"
+    level3_activity: "Aerobics & Cardio Classes"
+    heading: "Conditioning Exercise"
+    keywords_any: ["aerobic"]
+  
+  # Strength & Conditioning - Weight Training
+  - level1_main: "Fitness & Wellness"
+    level2_subcategory: "Strength & Conditioning"
+    level3_activity: "Weight Training"
+    heading: "Conditioning Exercise"
+    keywords_any: ["weight", "resistance"]
+  
+  # Strength & Conditioning - Circuit Training
+  - level1_main: "Fitness & Wellness"
+    level2_subcategory: "Strength & Conditioning"
+    level3_activity: "Circuit Training"
+    heading: "Conditioning Exercise"
+    keywords_any: ["circuit"]
+  
+  # Strength & Conditioning - General Conditioning
+  - level1_main: "Fitness & Wellness"
+    level2_subcategory: "Strength & Conditioning"
+    level3_activity: "General Conditioning"
+    heading: "Conditioning Exercise"
+    keywords_any: ["calisthenics", "rope", "conditioning"]
+  
+  # ==========================================================================
+  # SPORTS
+  # ==========================================================================
+  
+  # Team Sports - Basketball
+  - level1_main: "Sports"
+    level2_subcategory: "Team Sports"
+    level3_activity: "Basketball"
+    heading: "Sports"
+    keywords_any: ["basketball"]
+  
+  # Team Sports - Soccer
+  - level1_main: "Sports"
+    level2_subcategory: "Team Sports"
+    level3_activity: "Soccer"
+    heading: "Sports"
+    keywords_any: ["soccer", "football"]
+  
+  # Team Sports - Volleyball
+  - level1_main: "Sports"
+    level2_subcategory: "Team Sports"
+    level3_activity: "Volleyball"
+    heading: "Sports"
+    keywords_any: ["volleyball"]
+  
+  # Team Sports - Ice Hockey
+  - level1_main: "Sports"
+    level2_subcategory: "Team Sports"
+    level3_activity: "Ice Hockey"
+    heading: "Sports"
+    keywords_all: ["hockey", "ice"]
+  
+  # Team Sports - Field Hockey
+  - level1_main: "Sports"
+    level2_subcategory: "Team Sports"
+    level3_activity: "Field Hockey"
+    heading: "Sports"
+    keywords_all: ["hockey", "field"]
+  
+  # Team Sports - Floorball
+  - level1_main: "Sports"
+    level2_subcategory: "Team Sports"
+    level3_activity: "Floorball"
+    heading: "Sports"
+    keywords_any: ["floorball"]
+  
+  # Racket Sports - Tennis
+  - level1_main: "Sports"
+    level2_subcategory: "Racket Sports"
+    level3_activity: "Tennis"
+    heading: "Sports"
+    keywords_any: ["tennis"]
+    keywords_none: ["table"]
+  
+  # Racket Sports - Badminton
+  - level1_main: "Sports"
+    level2_subcategory: "Racket Sports"
+    level3_activity: "Badminton"
+    heading: "Sports"
+    keywords_any: ["badminton"]
+  
+  # Racket Sports - Squash
+  - level1_main: "Sports"
+    level2_subcategory: "Racket Sports"
+    level3_activity: "Squash"
+    heading: "Sports"
+    keywords_any: ["squash"]
+  
+  # Combat Sports - Boxing
+  - level1_main: "Sports"
+    level2_subcategory: "Combat Sports"
+    level3_activity: "Boxing"
+    heading: "Sports"
+    keywords_any: ["boxing"]
+  
+  # Combat Sports - Martial Arts
+  - level1_main: "Sports"
+    level2_subcategory: "Combat Sports"
+    level3_activity: "Martial Arts"
+    heading: "Sports"
+    keywords_any: ["martial", "karate", "judo", "taekwondo"]
+  
+  # Climbing
+  - level1_main: "Sports"
+    level2_subcategory: "Climbing"
+    level3_activity: "Climbing"
+    heading: "Sports"
+    keywords_any: ["climbing", "rock"]
+  
+  # Water Sports - Swimming
+  - level1_main: "Sports"
+    level2_subcategory: "Water Sports"
+    level3_activity: "Swimming"
+    heading: "Water Activities"
+    keywords_any: ["swimming"]
+  
+  # Water Sports - Kayaking
+  - level1_main: "Sports"
+    level2_subcategory: "Water Sports"
+    level3_activity: "Kayaking"
+    heading: "Water Activities"
+    keywords_any: ["kayak"]
+  
+  # Water Sports - Rowing
+  - level1_main: "Sports"
+    level2_subcategory: "Water Sports"
+    level3_activity: "Rowing"
+    heading: "Water Activities"
+    keywords_any: ["rowing", "canoe"]
+    keywords_none: ["stationary"]  # Exclude stationary rowing (that's in Fitness)
+  
+  # Water Sports - Water Aerobics
+  - level1_main: "Sports"
+    level2_subcategory: "Water Sports"
+    level3_activity: "Water Aerobics"
+    heading: "Water Activities"
+    keywords_any: ["water aerobic"]
