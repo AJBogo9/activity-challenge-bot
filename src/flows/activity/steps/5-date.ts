@@ -11,7 +11,7 @@ export async function showDateSelection(ctx: any): Promise<void> {
   const activity = ctx.wizard.state.activity
   const intensity = ctx.wizard.state.intensity
   const metValue = ctx.wizard.state.metValue
-
+  
   if (!activity || !intensity) {
     await TwoMessageManager.updateContent(
       ctx,
@@ -19,12 +19,24 @@ export async function showDateSelection(ctx: any): Promise<void> {
     )
     return
   }
-
-  const message = `🏃 *Log Activity \\- Step 5/7*\n\n*Activity:* ${escapeMarkdownV2(activity)}\n*Intensity:* ${escapeMarkdownV2(intensity)}\n*MET Value:* ${escapeMarkdownV2(String(metValue))}\n\n📅 When did you do this activity?`
   
+  // Add current date to the message
+  const today = new Date();
+  const todayFormatted = today.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+  
+  const message = `🏃 *Log Activity \\- Step 5/7*\n\n` +
+    `*Activity:* ${escapeMarkdownV2(activity)}\n` +
+    `*Intensity:* ${escapeMarkdownV2(intensity)}\n` +
+    `*MET Value:* ${escapeMarkdownV2(String(metValue))}\n\n` +
+    `📅 When did you do this activity?\n` +
+    `📍 Today is ${escapeMarkdownV2(todayFormatted)}`;
+
   // Get calendar keyboard and include it in the content message
   const calendarKeyboard = getActivityCalendarKeyboard(ctx)
-  
   await TwoMessageManager.updateContent(ctx, message, calendarKeyboard)
   
   // Initialize calendar tracking for this chat
@@ -35,12 +47,12 @@ export async function handleDateSelection(ctx: any): Promise<void> {
   if (!ctx.callbackQuery?.data) {
     return
   }
-
+  
   // Check if this is a calendar callback
   if (!isCalendarCallback(ctx)) {
     return
   }
-
+  
   const { selectedDate, isNavigation } = handleCalendarSelection(ctx)
   
   if (selectedDate) {
