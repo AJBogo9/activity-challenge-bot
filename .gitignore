@@ -8,6 +8,7 @@ node_modules/
 
 # Python
 venv/
+.venv/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -77,4 +78,3 @@ packer_cache/
 
 # Secrets (unencrypted)
 *.key
-*.pem
