@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: activity_challenge
+      POSTGRES_DB: activity_challenge_bot
     ports:
       - "127.0.0.1:5432:5432"  # Only expose to localhost
     volumes:
@@ -24,7 +24,7 @@ services:
     ports:
       - "3001:3001"
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/activity_challenge
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/activity_challenge_bot
       NODE_ENV: production
       BOT_TOKEN: ${BOT_TOKEN}
       API_PORT: 3001

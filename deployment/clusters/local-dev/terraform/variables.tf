@@ -19,7 +19,7 @@ variable "postgres_password" {
 variable "postgres_db" {
   description = "Postgres Database"
   type        = string
-  default     = "activity_challenge"
+  default     = "activity_challenge_bot"
 }
 
 variable "competition_start_date" {
