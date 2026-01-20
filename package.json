@@ -30,7 +30,7 @@
     "//9": "════════════════════════════════════════════════════════════",
     "//10": "🗄️  DATABASE",
     "//11": "════════════════════════════════════════════════════════════",
-    "pod:db:psql": "podman exec -it activity-bot-postgres psql -U ${POSTGRES_USER:-postgres} -d activity_challenge",
+    "pod:db:psql": "podman exec -it activity-bot-postgres psql -U ${POSTGRES_USER:-postgres} -d activity_challenge_bot",
     "//12": "════════════════════════════════════════════════════════════",
     "//13": "🧪 TESTING",
     "//14": "════════════════════════════════════════════════════════════",

@@ -171,9 +171,9 @@ bun run webapp:build
 bun run pod:db:psql
 
 # Now you're in the PostgreSQL shell
-activity_challenge=# \dt                    # List tables
-activity_challenge=# SELECT * FROM users;   # Query users
-activity_challenge=# \q                     # Quit
+activity_challenge_bot=# \dt                    # List tables
+activity_challenge_bot=# SELECT * FROM users;   # Query users
+activity_challenge_bot=# \q                     # Quit
 ```
 
 #### Using Local PostgreSQL

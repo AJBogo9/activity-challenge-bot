@@ -34,6 +34,18 @@ spec:
                 secretKeyRef:
                   name: bot-secrets
                   key: BOT_TOKEN
+            
+            # PostgreSQL Configuration using individual environment variables
+            # Using POSTGRES_* naming (matches your .env file convention)
+            - name: POSTGRES_HOST
+              value: postgres  # Service name from postgres/service.yaml
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: bot-secrets
+                  key: POSTGRES_DB
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -44,13 +56,8 @@ spec:
                 secretKeyRef:
                   name: bot-secrets
                   key: POSTGRES_PASSWORD
-            - name: POSTGRES_DB
-              valueFrom:
-                secretKeyRef:
-                  name: bot-secrets
-                  key: POSTGRES_DB
-            - name: DATABASE_URL
-              value: postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)
+            
+            # Competition dates
             - name: COMPETITION_START_DATE
               valueFrom:
                 secretKeyRef:
