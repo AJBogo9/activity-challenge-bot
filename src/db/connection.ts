@@ -5,7 +5,7 @@ import { dbConfig } from '../config';
  * Build connection options from individual environment variables or connection string
  * Supports both POSTGRES_* (custom) and PG* (standard PostgreSQL) variables
  */
-function getConnectionOptions(): Parameters<typeof postgres>[0] {
+function getConnectionOptions(): string | postgres.Options<Record<string, never>> {
   // Check if individual environment variables are set
   // Support both POSTGRES_* (custom) and PG* (standard) variable names
   const host = process.env.POSTGRES_HOST || process.env.PGHOST;
@@ -15,7 +15,6 @@ function getConnectionOptions(): Parameters<typeof postgres>[0] {
   const password = process.env.POSTGRES_PASSWORD || process.env.PGPASSWORD;
   
   const hasIndividualVars = Boolean(host || port || database || user || password);
-
   if (hasIndividualVars) {
     // Use individual environment variables
     // This supports Unix socket authentication when host is a socket path
@@ -43,8 +42,7 @@ async function createConnection(retries = dbConfig.maxRetries): Promise<ReturnTy
   try {
     const connectionOptions = getConnectionOptions();
     
-    // If connectionOptions is a string (connection URL), pass it directly
-    // Otherwise it's an object with connection params, merge with config
+    // Create connection based on whether we have a string or options object
     const connection = typeof connectionOptions === 'string'
       ? postgres(connectionOptions, {
           max: dbConfig.max,
@@ -56,7 +54,7 @@ async function createConnection(retries = dbConfig.maxRetries): Promise<ReturnTy
           max: dbConfig.max,
           idle_timeout: dbConfig.idle_timeout,
           connect_timeout: dbConfig.connect_timeout,
-        });
+        } as postgres.Options<Record<string, never>>);
     
     // Test the connection
     await connection`SELECT 1`;
@@ -64,7 +62,7 @@ async function createConnection(retries = dbConfig.maxRetries): Promise<ReturnTy
     return connection;
   } catch (error) {
     if (retries > 0) {
-      console.log`⏳ Database not ready, retrying in ${dbConfig.retryDelay/1000}s... (${dbConfig.maxRetries - retries + 1}/${dbConfig.maxRetries})`;
+      console.log(`⏳ Database not ready, retrying in ${dbConfig.retryDelay/1000}s... (${dbConfig.maxRetries - retries + 1}/${dbConfig.maxRetries})`);
       await new Promise(resolve => setTimeout(resolve, dbConfig.retryDelay));
       return createConnection(retries - 1);
     }
