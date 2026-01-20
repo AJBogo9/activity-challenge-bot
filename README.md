@@ -6,12 +6,12 @@ A Telegram bot for tracking physical activities and fostering healthy competitio
 
 ## Features
 
-- 🏆 **Guild Competition System** - Real-time leaderboards based on average points per member
-- 📊 **MET-Based Scoring** - Science-backed points using the 2024 Compendium of Physical Activities
-- 🎯 **10+ Activities** - Comprehensive 4-level hierarchy from casual walks to competitive sports
-- 📈 **Rich Statistics** - Personal rankings, guild standings, and activity history
-- ⚡ **High Performance** - Built with Bun runtime and optimized PostgreSQL queries
-- 🔒 **Privacy First** - Only stores necessary data, no location tracking
+- **Guild Competition System** - Real-time leaderboards based on average points per member
+- **MET-Based Scoring** - Science-backed points using the 2024 Compendium of Physical Activities
+- **10+ Activities** - Comprehensive 4-level hierarchy from casual walks to competitive sports
+- **Rich Statistics** - Personal rankings, guild standings, and activity history
+- **High Performance** - Built with Bun runtime and optimized PostgreSQL queries
+- **Privacy First** - Only stores necessary data, no location tracking
 
 ## Quick Start
 
