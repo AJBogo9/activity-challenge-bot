@@ -4,27 +4,26 @@ services:
     container_name: activity-bot-postgres
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: activity_challenge_bot
-    ports:
-      - "127.0.0.1:5432:5432"  # Only expose to localhost
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-activity_challenge_bot}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   app:
-    build: .
+    image: ghcr.io/ajbogo9/activity-challenge-bot:latest
     container_name: activity-challenge-bot
     restart: always
     ports:
       - "3001:3001"
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/activity_challenge_bot
+      # Connect to the internal postgres service
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-activity_challenge_bot}
       NODE_ENV: production
       BOT_TOKEN: ${BOT_TOKEN}
       API_PORT: 3001
@@ -36,7 +35,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./data:/app/data:z  # Only mount data directory, not entire source code
+      - ./data:/app/data:z
     command: bun index.ts
 
 volumes:
