@@ -6,38 +6,36 @@ This guide provides a step-by-step walkthrough for deploying the Activity Challe
 
 The project includes a `coolify-deployment` folder with OpenTofu (Terraform) configurations.
 
-1.  **Configure Secrets:** Ensure your `secrets.sops.yaml` contains your `hcloud_token`.
+1.  **Configure Secrets:** Ensure your `secrets.sops.yaml` contains:
+    *   `hcloud_token`: Your Hetzner API token.
+    *   `tailscale_auth_key`: A Tailscale Auth Key (generated in the Tailscale Admin Console under **Settings > Keys**).
 2.  **Initialize & Apply:**
     ```bash
     cd coolify-deployment
     tofu init
     tofu apply
     ```
-3.  **Hetzner Image:** The configuration uses the pre-built `coolify` image available on Hetzner. This image is optimized for running Coolify out of the box.
+3.  **Hetzner Image:** The configuration uses a standard **Ubuntu 24.04** image. Coolify and Tailscale are automatically installed during the first boot via a `user_data` script.
 
 ---
 
 ## 2. Server Initialization
 
-1.  **SSH into the server:**
+1.  **SSH into the server:** Since Tailscale is automated, you can even SSH using the server's Tailscale IP if your local machine is also on the network.
+2.  **Wait for Installation:** Check progress:
     ```bash
-    ssh root@<your_server_ip>
+    tail -f /var/log/cloud-init-output.log
     ```
-2.  **Auto-Setup:** On the first login, the Hetzner Coolify image will automatically trigger the setup script. Wait for the process to complete. It will provide you with the **Coolify UI login credentials** and the URL (usually `http://<your_server_ip>:8000`).
+    Once complete, it will provide the **Coolify UI login credentials**.
 
 ---
 
-## 3. Security: Install Tailscale
+## 3. Security: Tailscale (Automated)
 
-To secure your management dashboard, it is highly recommended to use Tailscale.
-
-1.  **Install Tailscale on the server:**
-    ```bash
-    curl -fsSL https://tailscale.com/install.sh | sh
-    tailscale up
-    ```
-2.  **Authenticate:** Follow the link provided in the terminal to add the server to your Tailscale network.
-3.  **Firewall:** Once Tailscale is working, you can restrict port `8000` (Coolify UI) to only be accessible via your Tailscale IP.
+Tailscale is now installed and authenticated automatically.
+*   The server will appear in your Tailscale dashboard immediately after boot.
+*   **Recommendation:** In Tailscale settings, disable **Key Expiry** for this server so it doesn't disconnect after 6 months.
+*   **Firewall:** You can now safely restrict port `8000` (Coolify UI) to only be accessible via the `tailscale0` interface or specific Tailscale IPs.
 
 ---
 
@@ -58,13 +56,14 @@ Instead of manual resource creation, we use a `Docker Compose` approach for the 
 
 ## 5. DNS Configuration (Cloudflare)
 
-Finally, point your domain to the server so users can access the Web App and the Bot can receive webhooks (if configured).
+Finally, point your domain to the server so users can access the Web App.
 
 1.  **Get Server IP:** Find your public IPv4 address in the Hetzner console or via `tofu output`.
 2.  **Configure Cloudflare:**
     *   **A Record:** Set `example.com` (or your subdomain) to your **Server IP**.
-    *   **Proxy Status:** Set to **DNS Only** (Grey Cloud) initially to allow Coolify's Let's Encrypt to issue SSL certificates.
-3.  **Coolify Domain:** In the Coolify UI, go to your Application settings and set the **Domain** to `https://example.com`.
+    *   **Proxy Status:** Set to **Proxied** (Orange Cloud).
+3.  **Hetzner Firewall:** The provided OpenTofu configuration automatically restricts incoming HTTP/HTTPS traffic to Cloudflare's official IP ranges. This means direct access to your server's IP will be blocked for anyone not using Cloudflare.
+4.  **Coolify Domain:** In the Coolify UI, go to your Application settings and set the **Domain** to `https://example.com`.
 
 ---
 
