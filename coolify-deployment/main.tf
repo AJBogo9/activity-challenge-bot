@@ -32,8 +32,53 @@ resource "hcloud_server" "coolify" {
   server_type = "cx23"
   location    = "hel1"
   ssh_keys    = [data.hcloud_ssh_key.admin.id]
+  firewall_ids = [hcloud_firewall.coolify_firewall.id]
   public_net {
     ipv4_enabled = true
     ipv6_enabled = true
+  }
+}
+
+resource "hcloud_firewall" "coolify_firewall" {
+  name = "coolify-firewall"
+  
+  # HTTP (Required for ACME/SSL)
+  rule {
+    direction = "in"
+    protocol  = "tcp"
+    port      = "80"
+    source_ips = ["0.0.0.0/0", "::/0"]
+  }
+
+  # HTTPS (Web App)
+  rule {
+    direction = "in"
+    protocol  = "tcp"
+    port      = "443"
+    source_ips = ["0.0.0.0/0", "::/0"]
+  }
+
+  # SSH (Keep open until VPN is verified!)
+  rule {
+    direction = "in"
+    protocol  = "tcp"
+    port      = "22"
+    source_ips = ["0.0.0.0/0", "::/0"]
+  }
+
+  # VPN: WireGuard
+  rule {
+    direction = "in"
+    protocol  = "udp"
+    port      = "51820"
+    source_ips = ["0.0.0.0/0", "::/0"]
+  }
+
+  # VPN: Tailscale
+  rule {
+    direction = "in"
+    protocol  = "udp"
+    port      = "41641"
+    source_ips = ["0.0.0.0/0", "::/0"]
   }
 }
