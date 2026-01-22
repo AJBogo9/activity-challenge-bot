@@ -34,8 +34,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - ./data:/app/data:z
     command: bun index.ts
 
 volumes:
