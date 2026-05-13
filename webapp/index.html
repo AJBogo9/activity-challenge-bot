@@ -4,17 +4,192 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#2481cc" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Activity Challenge Stats</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+      :root {
+        --tg-theme-bg-color: #ffffff;
+        --tg-theme-text-color: #000000;
+        --tg-theme-hint-color: #999999;
+        --tg-theme-link-color: #2481cc;
+        --tg-theme-button-color: #2481cc;
+        --tg-theme-button-text-color: #ffffff;
+        --tg-theme-secondary-bg-color: #f0f2f5;
+        --chart-color-1: #3390ec;
+        --chart-color-2: #00C49F;
+        --chart-color-3: #FFBB28;
+        --chart-color-4: #FF8042;
+        --chart-color-5: #8884d8;
+      }
+
+      html, body {
+        overscroll-behavior: none;
+      }
+      
       body {
-        background-color: var(--tg-theme-bg-color, #ffffff);
-        color: var(--tg-theme-text-color, #000000);
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--tg-theme-secondary-bg-color);
+        color: var(--tg-theme-text-color);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      #app {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 1rem;
+        padding-bottom: 120px;
+      }
+
+      /* Utility classes for layout */
+      .p-4 { padding: 1rem; }
+      .p-6 { padding: 1.5rem; }
+      .mb-2 { margin-bottom: 0.5rem; }
+      .mb-4 { margin-bottom: 1rem; }
+      .mb-6 { margin-bottom: 1.5rem; }
+      .mb-8 { margin-bottom: 2rem; }
+      .mt-4 { margin-top: 1rem; }
+      .mt-6 { margin-top: 1.5rem; }
+      .gap-2 { gap: 0.5rem; }
+      .gap-3 { gap: 0.75rem; }
+      .gap-4 { gap: 1rem; }
+      .flex { display: flex; }
+      .flex-1 { flex: 1; }
+      .flex-col { flex-direction: column; }
+      .items-center { align-items: center; }
+      .justify-between { justify-content: space-between; }
+      .justify-center { justify-content: center; }
+      .text-center { text-align: center; }
+      .text-right { text-align: right; }
+      .font-bold { font-weight: 700; }
+      .font-black { font-weight: 900; }
+      .text-xs { font-size: 0.75rem; }
+      .text-sm { font-size: 0.875rem; }
+      .text-lg { font-size: 1.125rem; }
+      .text-xl { font-size: 1.25rem; }
+      .uppercase { text-transform: uppercase; }
+      .tracking-widest { letter-spacing: 0.1em; }
+      .tracking-tight { letter-spacing: -0.025em; }
+      .w-full { width: 100%; }
+      .rounded { border-radius: 0.5rem; }
+      .rounded-xl { border-radius: 0.75rem; }
+      .rounded-full { border-radius: 9999px; }
+      .cursor-pointer { cursor: pointer; }
+      .overflow-hidden { overflow: hidden; }
+      .grid { display: grid; }
+      .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+      
+      .card {
+        background-color: var(--tg-theme-bg-color);
+        border-radius: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      }
+
+      .text-hint { color: var(--tg-theme-hint-color); }
+      .text-link { color: var(--tg-theme-link-color); } 
+      
+      /* Navigation */
+      nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--tg-theme-bg-color);
+        border-top: 1px solid var(--tg-theme-secondary-bg-color);
+        padding: 0.5rem;
+        z-index: 2000; /* Higher than modal */
+        display: flex;
+        justify-content: space-around;
+        padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+      }
+      
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.5rem;
+        color: var(--tg-theme-hint-color);
+        text-decoration: none;
+        font-size: 0.7rem;
+        border-radius: 0.5rem;
+        transition: color 0.2s;
+      }
+      
+      .nav-item.active {
+        color: var(--tg-theme-button-color);
+      }
+      
+      .nav-icon {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 2px;
+      }
+
+      /* Loader */
+      .loader {
+        border: 3px solid var(--tg-theme-secondary-bg-color);
+        border-radius: 50%;
+        border-top: 3px solid var(--tg-theme-link-color);
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+        margin: 2rem auto;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      .fab-refresh {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        width: 40px;
+        height: 40px;
+        background-color: var(--tg-theme-bg-color);
+        color: var(--tg-theme-link-color);
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 200;
+        cursor: pointer;
+      }
+      
+      .spinning {
+        animation: spin 1s linear infinite;
+      }
+
+      /* Modal & Animations */
+      .fixed { position: fixed; }
+      .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+      .z-\[1000\] { z-index: 1000; }
+      .bg-black { background-color: #000; }
+      .bg-opacity-50 { background-color: rgba(0,0,0,0.5); }
+      .backdrop-blur-sm { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+      
+      @keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+      @keyframes slide-down { from { transform: translateY(0); } to { transform: translateY(100%); } }
+      .animate-fade-in { animation: fade-in 0.2s ease-out; }
+      .animate-fade-out { animation: fade-out 0.2s ease-in forwards; }
+      .animate-slide-up { animation: slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+      .animate-slide-down { animation: slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+      .no-scroll {
+        overflow: hidden !important;
+        height: 100vh !important;
       }
     </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div id="refresh-btn" class="fab-refresh"></div>
+    <div id="app"></div>
+    <nav id="nav"></nav>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

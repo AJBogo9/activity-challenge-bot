@@ -61,11 +61,12 @@ export async function getUserSummary(telegramId: string) {
 /**
  * Overall top users
  */
-export async function getTopUsers(limit: number = 20): Promise<User[]> {
+export async function getTopUsers(limit: number = 20, offset: number = 0): Promise<User[]> {
   return await sql<User[]>`
     SELECT * FROM users
     ORDER BY points DESC
     LIMIT ${limit}
+    OFFSET ${offset}
   `
 }
 
@@ -101,7 +102,7 @@ export async function getNearbyUsers(telegramId: string) {
 export async function getNearbyGuildUsers(telegramId: string, guild: string) {
   return await sql<any[]>`
     WITH ranked_users AS (
-      SELECT 
+      SELECT
         telegram_id,
         username,
         first_name,
@@ -121,42 +122,105 @@ export async function getNearbyGuildUsers(telegramId: string, guild: string) {
 }
 
 /**
+ * Get global competition stats
+ */
+export async function getGlobalStats() {
+  const [stats] = await sql`
+    SELECT
+      COUNT(id)::INTEGER as total_players,
+      SUM(points)::FLOAT as total_points,
+      (SELECT COUNT(*) FROM activities)::INTEGER as total_activities,
+      (SELECT activity_type FROM activities GROUP BY activity_type ORDER BY COUNT(*) DESC LIMIT 1) as popular_activity
+    FROM users
+  `
+  return stats
+}
+
+/**
+ * Takes a snapshot of current user and guild rankings
+ */
+export async function takeDailySnapshot() {
+  const date = new Date().toISOString().split('T')[0]
+
+  console.log(`📸 Taking daily snapshot for ${date}...`)
+
+  await sql.begin(async (sql) => {
+    // 1. User Snapshots
+    await sql`
+      INSERT INTO user_daily_snapshots (date, telegram_id, points, rank)
+      SELECT
+        ${date}::DATE,
+        telegram_id,
+        points,
+        RANK() OVER (ORDER BY points DESC) as rank
+      FROM users
+      ON CONFLICT (date, telegram_id) DO UPDATE
+      SET points = EXCLUDED.points, rank = EXCLUDED.rank
+    `
+
+    // 2. Guild Snapshots
+    await sql`
+      INSERT INTO guild_daily_snapshots (date, guild_name, points, rank)
+      SELECT
+        ${date}::DATE,
+        g.name,
+        COALESCE(SUM(u.points), 0) / CAST(g.total_members AS DECIMAL) as points,
+        RANK() OVER (ORDER BY COALESCE(SUM(u.points), 0) / CAST(g.total_members AS DECIMAL) DESC) as rank
+      FROM guilds g
+      LEFT JOIN users u ON g.name = u.guild
+      WHERE g.is_active = TRUE
+      GROUP BY g.name, g.total_members
+      ON CONFLICT (date, guild_name) DO UPDATE
+      SET points = EXCLUDED.points, rank = EXCLUDED.rank
+    `
+  })
+
+  console.log('✅ Snapshots saved.')
+}
+
+/**
  * Get ranking history for the last N days
+ * Combines snapshots with live calculation for today
  */
 export async function getUserRankingHistory(telegramId: string, days: number = 30) {
   return await sql`
-    WITH RECURSIVE dates AS (
-      SELECT CURRENT_DATE - (${days} || ' days')::INTERVAL as date
+    WITH history AS (
+      -- 1. Get past snapshots
+      SELECT 
+        date::DATE as date,
+        rank::INTEGER as rank,
+        points::FLOAT as points
+      FROM user_daily_snapshots
+      WHERE telegram_id = ${telegramId}
+        AND date > CURRENT_DATE - (${days} || ' days')::INTERVAL
+        AND date < CURRENT_DATE
+
       UNION ALL
-      SELECT date + '1 day'::INTERVAL
-      FROM dates
-      WHERE date < CURRENT_DATE
-    ),
-    daily_points AS (
+
+      -- 2. Calculate fresh data for today
       SELECT 
-        u.telegram_id,
-        d.date::DATE,
-        SUM(COALESCE(a.points, 0)) as points
-      FROM users u
-      CROSS JOIN dates d
-      LEFT JOIN activities a ON u.id = a.user_id AND a.activity_date <= d.date
-      GROUP BY u.telegram_id, d.date
+        CURRENT_DATE as date,
+        rank::INTEGER as rank,
+        points::FLOAT as points
+      FROM (
+        SELECT 
+          telegram_id,
+          points,
+          RANK() OVER (ORDER BY points DESC) as rank
+        FROM users
+      ) today
+      WHERE telegram_id = ${telegramId}
     ),
-    daily_ranks AS (
-      SELECT 
-        telegram_id,
-        date,
-        points,
-        RANK() OVER (PARTITION BY date ORDER BY points DESC) as rank
-      FROM daily_points
+    recent_dates AS (
+      SELECT DISTINCT date FROM history ORDER BY date DESC LIMIT ${days}
     )
-  SELECT 
-    date::TEXT as date,
-    rank::INTEGER as rank,
-    points::FLOAT as points
-  FROM daily_ranks
-  WHERE telegram_id = ${telegramId}
-  ORDER BY date ASC
+    SELECT 
+      h.date::TEXT as date,
+      h.rank,
+      h.points
+    FROM history h
+    JOIN recent_dates rd ON h.date = rd.date
+    ORDER BY h.date ASC
   `
 }
 
@@ -250,43 +314,46 @@ export async function getGuildRankingHistory(days: number = 30) {
   const guildMembers = activeGuilds.map(g => g.totalMembers);
   
   return await sql`
-    WITH RECURSIVE dates AS (
-      SELECT (CURRENT_DATE - (${days} || ' days')::INTERVAL)::DATE as date
+    WITH history AS (
+      -- 1. Past snapshots
+      SELECT
+        guild_name as guild,
+        date::DATE as date,
+        rank::INTEGER as rank,
+        points::FLOAT as average_points
+      FROM guild_daily_snapshots
+      WHERE date > CURRENT_DATE - (${days} || ' days')::INTERVAL
+        AND date < CURRENT_DATE
+
       UNION ALL
-      SELECT (date + '1 day'::INTERVAL)::DATE
-      FROM dates
-      WHERE date < CURRENT_DATE
-    ),
-    guild_names AS (
-      SELECT unnest(${sql.array(guildNames)}::TEXT[]) as guild_name,
-             unnest(${sql.array(guildMembers)}::INTEGER[]) as total_members
-    ),
-    daily_guild_points AS (
-      SELECT 
-        gn.guild_name as guild,
-        d.date,
-        COALESCE(SUM(a.points), 0) / CAST(gn.total_members AS DECIMAL) as average_points
-      FROM guild_names gn
-      CROSS JOIN dates d
-      LEFT JOIN users u ON gn.guild_name = u.guild
-      LEFT JOIN activities a ON u.id = a.user_id AND a.activity_date <= d.date
-      GROUP BY gn.guild_name, d.date, gn.total_members
-    ),
-    daily_guild_ranks AS (
+
+      -- 2. Fresh today
       SELECT 
         guild,
-        date,
-        average_points,
-        RANK() OVER (PARTITION BY date ORDER BY average_points DESC) as rank
-      FROM daily_guild_points
+        CURRENT_DATE as date,
+        RANK() OVER (ORDER BY average_points DESC)::INTEGER as rank,
+        average_points
+      FROM (
+        SELECT 
+          g.name as guild,
+          COALESCE(SUM(u.points), 0) / NULLIF(CAST(g.total_members AS DECIMAL), 0) as average_points
+        FROM guilds g
+        LEFT JOIN users u ON g.name = u.guild
+        WHERE g.is_active = TRUE
+        GROUP BY g.name, g.total_members
+      ) today
+    ),
+    recent_dates AS (
+      SELECT DISTINCT date FROM history ORDER BY date DESC LIMIT ${days}
     )
     SELECT 
-      guild,
-      date::TEXT as date,
-      rank::INTEGER as rank,
-      average_points::FLOAT as average_points
-    FROM daily_guild_ranks
-    ORDER BY date ASC, rank ASC
+      h.guild,
+      h.date::TEXT as date,
+      h.rank,
+      h.average_points::FLOAT as average_points
+    FROM history h
+    JOIN recent_dates rd ON h.date = rd.date
+    ORDER BY h.date ASC, h.rank ASC
   `
 }
 

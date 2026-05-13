@@ -66,7 +66,7 @@ resource "kubernetes_service" "bot" {
       port        = 3001
       target_port = 3001
     }
-    type = "ClusterIP"
+    type = "LoadBalancer"
   }
 }
 
