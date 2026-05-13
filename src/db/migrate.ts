@@ -1,6 +1,7 @@
 import { sql } from './index'
 import { readFileSync } from 'fs'
 import { join } from 'path'
+import { GUILDS } from '../config/guilds'
 
 export async function runMigrations() {
   try {
@@ -19,6 +20,18 @@ export async function runMigrations() {
   } catch (error) {
     console.error('❌ Migration failed:', error)
     throw error
+  }
+}
+
+export async function seedGuilds() {
+  for (const guild of GUILDS) {
+    await sql`
+      INSERT INTO guilds (name, total_members, is_active)
+      VALUES (${guild.name}, ${guild.totalMembers}, ${guild.isActive})
+      ON CONFLICT (name) DO UPDATE
+      SET total_members = EXCLUDED.total_members,
+          is_active = EXCLUDED.is_active
+    `
   }
 }
 

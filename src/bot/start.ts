@@ -4,6 +4,7 @@ import { registerCommands } from './commands'
 import { registerGlobalHandlers } from './handlers/handlers'
 import { setupBotCommands } from './setup'
 import { initDb, runMigrations, takeDailySnapshot, sql } from '../db'
+import { seedGuilds } from '../db/migrate'
 
 const BUILD_TIME = new Date().toLocaleString('en-GB', { 
   timeZone: 'Europe/Helsinki',
@@ -52,6 +53,7 @@ export async function startBot(): Promise<void> {
   // Step 2: Run migrations
   console.log('📊 Running migrations...')
   await runMigrations()
+  await seedGuilds()
   console.log('✅ Migrations complete\n')
 
   // Step 2.5: Backfill snapshots if sparse, then schedule daily at midnight

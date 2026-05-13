@@ -34,6 +34,14 @@ CREATE TABLE IF NOT EXISTS feedback (
   reviewed BOOLEAN DEFAULT FALSE
 );
 
+-- Guilds table (seeded from src/config/guilds.ts on startup)
+CREATE TABLE IF NOT EXISTS guilds (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) UNIQUE NOT NULL,
+  total_members INTEGER NOT NULL DEFAULT 0,
+  is_active BOOLEAN DEFAULT TRUE
+);
+
 -- Historical Snapshots for Performance
 CREATE TABLE IF NOT EXISTS user_daily_snapshots (
   date DATE NOT NULL,
