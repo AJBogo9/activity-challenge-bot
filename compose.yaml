@@ -41,14 +41,5 @@ services:
       - ./data:/app/data:z  # Only mount data directory, not entire source code
     command: bun index.ts
 
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    restart: always
-    command: tunnel --no-autoupdate run
-    environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
-    depends_on:
-      - app
-
 volumes:
   postgres_data:
