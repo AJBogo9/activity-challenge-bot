@@ -83,7 +83,7 @@ async function executeRequest(dbUser: any, headers: any) {
     if (!res.ok && res.status !== 429) {
       console.log(`❌ Error ${res.status} on ${endpoint}`);
     }
-  } catch (e) { }
+  } catch { /* ignore fetch errors during simulation */ }
 }
 
 async function simulateUserSession(dbUser: any) {
