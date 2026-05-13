@@ -10,7 +10,7 @@ describe('SimpleCache', () => {
 
   test('set and get should work', () => {
     cache.set('key1', 'value1', 60);
-    expect(cache.get('key1')).toBe('value1');
+    expect(cache.get<string>('key1')).toBe('value1');
   });
 
   test('get should return null for non-existent key', () => {
@@ -36,8 +36,8 @@ describe('SimpleCache', () => {
 
     cache.deleteByPattern(/^delete_/);
 
-    expect(cache.get('keep_1')).toBe('val');
-    expect(cache.get('keep_2')).toBe('val');
+    expect(cache.get<string>('keep_1')).toBe('val');
+    expect(cache.get<string>('keep_2')).toBe('val');
     expect(cache.get('delete_1')).toBeNull();
     expect(cache.get('delete_2')).toBeNull();
   });
@@ -52,7 +52,7 @@ describe('SimpleCache', () => {
 
     expect(cache.get('user_123_stats')).toBeNull();
     expect(cache.get('user_456_stats')).toBeNull();
-    expect(cache.get('guild_123_stats')).toBe('val');
+    expect(cache.get<string>('guild_123_stats')).toBe('val');
   });
 
   test('getOrFetch should return cached value', async () => {
@@ -66,7 +66,7 @@ describe('SimpleCache', () => {
     const fetchFn = async () => 'fetched';
     const result = await cache.getOrFetch('new_key', fetchFn, 60);
     expect(result).toBe('fetched');
-    expect(cache.get('new_key')).toBe('fetched');
+    expect(cache.get<string>('new_key')).toBe('fetched');
   });
 
   test('getOrFetch should coalesce requests', async () => {

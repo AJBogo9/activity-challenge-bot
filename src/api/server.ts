@@ -3,6 +3,7 @@ import * as pointsDb from '../db/points';
 import * as activitiesDb from '../db/activities';
 import * as usersDb from '../db/users';
 import * as guildsDb from '../db/guilds';
+import { sql } from '../db';
 import { apiCache, authCache } from '../utils/cache';
 import { join } from 'path';
 
@@ -246,7 +247,7 @@ export function startApiServer(port: number = 3000) {
         }
 
         if (url.pathname === '/api/simulation/users') {
-            const users = await pointsDb.sql`SELECT telegram_id, first_name, username FROM users`;
+            const users = await sql`SELECT telegram_id, first_name, username FROM users`;
             return Response.json(users, { headers: { 'Access-Control-Allow-Origin': '*' } });
         }
 
