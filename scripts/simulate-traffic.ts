@@ -31,7 +31,7 @@ function signInitData(user: any): string {
 let globalReqCount = 0;
 
 async function executeRequest(dbUser: any, headers: any) {
-  const r = Math.random();
+  const r = crypto.randomInt(0, 10000) / 10000;
   let endpoint = '';
   let method = 'GET';
   let body = null;
