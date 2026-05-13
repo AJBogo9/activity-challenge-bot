@@ -1,14 +1,14 @@
 import { bot } from './instance'
 
 export async function setupBotCommands() {
-  // Show only the start command in Telegram's menu
   await bot.telegram.setMyCommands([
     { command: 'start', description: '🏠 Start or return to main menu' }
   ])
-  
+
+  const webAppUrl = process.env.WEBAPP_URL
   await bot.telegram.setChatMenuButton({
-    menuButton: {
-      type: 'default'
-    }
+    menuButton: webAppUrl
+      ? { type: 'web_app', text: 'Open Dashboard', web_app: { url: webAppUrl } }
+      : { type: 'default' }
   })
 }
