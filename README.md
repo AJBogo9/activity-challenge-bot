@@ -20,7 +20,7 @@ A Telegram bot for tracking physical activities and fostering healthy competitio
 - **Deployment**: Kubernetes (Talos Linux) on Hetzner Cloud
 - **GitOps**: Flux CD
 
-## Documentation
+## Documentation: https://ajbogo9.github.io/activity-challenge-bot/
 
 Comprehensive documentation is available in the `docs/` directory:
 
